@@ -146,11 +146,16 @@ export default function ProspectsPage() {
       <Toast message={error} type="error" onClose={() => setError("")} />
       <Toast message={success} type="success" onClose={() => setSuccess("")} />
 
-      <h1 className="text-3xl font-bold text-primary dark:text-white">
-        Prospects
-      </h1>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-primary dark:text-white">
+          Prospects
+        </h1>
+        <p className="text-white/80 mt-1">
+          Construisez les emails qui seront distribués automatiquement
+        </p>
+      </div>
 
-      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4 sm:p-6 shadow-sm">
+      <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-primary dark:text-white">
             Ajouter un prospect
@@ -248,7 +253,7 @@ export default function ProspectsPage() {
         </form>
       </div>
 
-      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2 sm:p-6 shadow-sm overflow-hidden flex flex-col">
+      <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
         <div className="w-full overflow-x-auto pb-4">
           <table className="w-full text-left min-w-225">
             <thead>
