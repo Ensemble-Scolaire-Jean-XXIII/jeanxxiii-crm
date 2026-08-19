@@ -39,6 +39,7 @@ services:
       - db-jeanxxiii-crm
     networks:
       - internal
+      - proxy-net
     deploy:
       resources:
         limits:
