@@ -47,11 +47,16 @@ export default function TemplatesPage() {
       <Toast message={error} type="error" onClose={() => setError("")} />
       <Toast message={success} type="success" onClose={() => setSuccess("")} />
 
-      <h1 className="text-3xl font-bold text-primary dark:text-white">
-        Templates Email
-      </h1>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight text-white drop-shadow-md">
+          Templates d&rsquo;email
+        </h1>
+        <p className="text-white/80 mt-1">
+          Rédigez les emails qui seront distribués automatiquement
+        </p>
+      </div>
 
-      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6">
+      <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-primary dark:text-white">
             Nouveau template
@@ -90,7 +95,7 @@ export default function TemplatesPage() {
           <div>
             <label className="label-text">Contenu de l&#39;email</label>
             <textarea
-              className="input-field min-h-[100px]"
+              className="input-field min-h-25"
               value={createForm.body}
               onChange={(e) =>
                 setCreateForm({ ...createForm, body: e.target.value })
@@ -106,7 +111,7 @@ export default function TemplatesPage() {
         </form>
       </div>
 
-      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6 overflow-x-auto">
+      <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
@@ -153,7 +158,7 @@ export default function TemplatesPage() {
                 <td className="p-3">
                   {editingId === t.id ? (
                     <textarea
-                      className="input-field py-1 px-2 min-h-[100px] text-sm"
+                      className="input-field py-1 px-2 min-h-25 text-sm"
                       value={editForm.body || ""}
                       onChange={(e) =>
                         setEditForm({ ...editForm, body: e.target.value })

@@ -210,9 +210,17 @@ export const fetchLatestLexpressSubmissions = async () => {
   }
 };
 
+let lastIncrementalSyncTime: string | null = null;
+
+export const getLastIncrementalSyncTime = () => {
+  return lastIncrementalSyncTime;
+};
+
 export const syncLatestLexpressSubmissionsToDb = async () => {
   const items = await fetchLatestLexpressSubmissions();
-  return await processSubmissionsInsertion(items);
+  const count = await processSubmissionsInsertion(items);
+  lastIncrementalSyncTime = new Date().toISOString();
+  return count;
 };
 
 export const processSubmissionsInsertion = async (items: any[]) => {

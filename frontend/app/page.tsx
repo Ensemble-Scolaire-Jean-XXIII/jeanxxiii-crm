@@ -5,6 +5,9 @@ import { useEffect, useState, useCallback } from "react";
 import { prospectService } from "./services/prospectService";
 import { userService } from "./services/userService";
 import { automationService } from "./services/automationService";
+import { lexpressService } from "./services/lexpressService";
+import Image from "next/image";
+import Toast from "./components/Toast";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -17,6 +20,26 @@ export default function DashboardPage() {
 
   const [isSyncingLatest, setIsSyncingLatest] = useState(false);
   const [isSyncingFull, setIsSyncingFull] = useState(false);
+  const [lastSyncText, setLastSyncText] = useState<string>("Jamais");
+
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const loadSyncStatus = async () => {
+    try {
+      const res = await lexpressService.getLastSync();
+      if (res && res.lastSync) {
+        const diffMinutes = Math.floor(
+          (Date.now() - new Date(res.lastSync).getTime()) / 60000,
+        );
+        if (diffMinutes < 1) setLastSyncText("À l'instant");
+        else if (diffMinutes < 60) setLastSyncText(`Il y a ${diffMinutes} min`);
+        else setLastSyncText(`Il y a ${Math.floor(diffMinutes / 60)}h`);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const loadData = useCallback(async () => {
     try {
@@ -34,8 +57,9 @@ export default function DashboardPage() {
         automations: Array.isArray(aData) ? aData.length : 0,
       });
       setIsAdmin(isUserAdmin);
-    } catch (error) {
-      console.error(error);
+      await loadSyncStatus();
+    } catch (err) {
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
@@ -50,24 +74,19 @@ export default function DashboardPage() {
 
   const handleSyncLatest = async () => {
     setIsSyncingLatest(true);
+    setError("");
+    setSuccess("");
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/lexpress/sync-latest`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      if (!response.ok) throw new Error("Erreur");
-      alert("Synchronisation rapide réussie !");
+      await lexpressService.syncLatest();
+      setSuccess("Synchronisation rapide réussie");
       await loadData();
-    } catch (error) {
-      console.error(error);
-      alert("Échec de la synchronisation rapide.");
+    } catch (err) {
+      console.error(err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Échec de la synchronisation rapide",
+      );
     } finally {
       setIsSyncingLatest(false);
     }
@@ -80,25 +99,21 @@ export default function DashboardPage() {
       )
     )
       return;
+
     setIsSyncingFull(true);
+    setError("");
+    setSuccess("");
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/lexpress/sync-full`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      if (!response.ok) throw new Error("Erreur");
-      alert("Synchronisation complète réussie !");
+      await lexpressService.syncFull();
+      setSuccess("Synchronisation complète réussie");
       await loadData();
-    } catch (error) {
-      console.error(error);
-      alert("Échec de la synchronisation complète.");
+    } catch (err) {
+      console.error(err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Échec de la synchronisation complète",
+      );
     } finally {
       setIsSyncingFull(false);
     }
@@ -106,14 +121,17 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <header className="mb-8">
+      <Toast message={error} type="error" onClose={() => setError("")} />
+      <Toast message={success} type="success" onClose={() => setSuccess("")} />
+
+      <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-white drop-shadow-md">
           Tableau de bord
         </h1>
         <p className="text-white/80 mt-1">
-          Bienvenue sur votre espace de gestion Jean XXIII
+          Bienvenue sur votre espace de gestion des prospects
         </p>
-      </header>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
@@ -134,16 +152,14 @@ export default function DashboardPage() {
         </div>
 
         {isAdmin && (
-          <>
-            <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
-              <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">
-                Utilisateurs
-              </h2>
-              <span className="text-4xl font-bold text-white">
-                {isLoading ? "-" : stats.users}
-              </span>
-            </div>
-          </>
+          <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
+            <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">
+              Utilisateurs
+            </h2>
+            <span className="text-4xl font-bold text-white">
+              {isLoading ? "-" : stats.users}
+            </span>
+          </div>
         )}
       </div>
 
@@ -160,6 +176,7 @@ export default function DashboardPage() {
               <span className="font-medium text-sm">Nouveau prospect</span>
               <span className="text-lg">+</span>
             </Link>
+
             <Link
               href="/templates"
               className="group flex items-center justify-between p-3 rounded-md bg-white/10 hover:bg-white/20 transition-all border border-white/10 text-white"
@@ -175,6 +192,7 @@ export default function DashboardPage() {
               <span className="font-medium text-sm">Gérer automatisations</span>
               <span className="text-lg">+</span>
             </Link>
+
             <button
               onClick={handleSyncLatest}
               disabled={isSyncingLatest}
@@ -183,26 +201,31 @@ export default function DashboardPage() {
               <span className="font-medium text-sm">
                 {isSyncingLatest
                   ? "Mise à jour en cours..."
-                  : "Actualiser les derniers prospects"}
+                  : `Actualiser les derniers prospects (${lastSyncText})`}
               </span>
               <span className="text-lg">↻</span>
             </button>
 
             {isAdmin && (
-              <>
-                <button
-                  onClick={handleSyncFull}
-                  disabled={isSyncingFull}
-                  className="cursor-pointer group flex items-center justify-between p-3 rounded-md bg-amber-500/20 hover:bg-amber-500/40 transition-all border border-amber-400/30 text-white text-left disabled:opacity-50"
-                >
-                  <span className="font-medium text-sm">
-                    {isSyncingFull
-                      ? "Synchro complète en cours..."
-                      : "Forcer la synchronisation complète (Admin)"}
-                  </span>
-                  <span className="text-lg">⚠️</span>
-                </button>
-              </>
+              <button
+                onClick={handleSyncFull}
+                disabled={isSyncingFull}
+                className="cursor-pointer group flex items-center justify-between p-3 rounded-md bg-amber-500/20 hover:bg-amber-500/40 transition-all border border-amber-400/30 text-white text-left disabled:opacity-50"
+              >
+                <span className="font-medium text-sm">
+                  {isSyncingFull
+                    ? "Synchro complète en cours..."
+                    : "Forcer la synchronisation complète (si une longue période de coupure est survenue)"}
+                </span>
+                <Image
+                  src="/icons/dangerSync.webp"
+                  alt="Sync"
+                  width={20}
+                  height={20}
+                  className="object-contain brightness-0 invert shrink-0"
+                  unoptimized
+                />
+              </button>
             )}
           </div>
         </div>

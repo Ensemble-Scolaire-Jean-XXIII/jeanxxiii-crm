@@ -45,11 +45,17 @@ export default function StatusesPage() {
       <Toast message={error} type="error" onClose={() => setError("")} />
       <Toast message={success} type="success" onClose={() => setSuccess("")} />
 
-      <h1 className="text-3xl font-bold text-primary dark:text-white">
-        Statuts
-      </h1>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-primary dark:text-white">
+          Statuts
+        </h1>
+        <p className="text-white/80 mt-1">
+          Ajoutez des status personnalisés pour avoir le suivi idéal de vos
+          prospects
+        </p>
+      </div>
 
-      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6">
+      <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-primary dark:text-white">
             Créer un statut
@@ -77,7 +83,7 @@ export default function StatusesPage() {
         </form>
       </div>
 
-      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6 overflow-x-auto">
+      <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">

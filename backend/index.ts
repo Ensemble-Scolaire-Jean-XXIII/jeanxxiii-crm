@@ -40,7 +40,7 @@ cron.schedule("* * * * *", async () => {
   await processAutomations();
 });
 
-cron.schedule("* * * * *", async () => {
+cron.schedule("*/15 * * * *", async () => {
   console.log(
     "CRON : Lancement de la synchronisation incrémentale L'Express...",
   );
