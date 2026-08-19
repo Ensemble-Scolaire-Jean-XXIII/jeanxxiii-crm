@@ -47,13 +47,19 @@ services:
 
   frontend-jeanxxiii-crm:
     container_name: frontend-jeanxxiii-crm-prod
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
     restart: unless-stopped
     depends_on:
       - backend-jeanxxiii-crm
     networks:
       - internal
       - proxy-net
+    deploy:
+      resources:
+        limits:
+          memory: 1536M
 
   nginx:
     container_name: nginx-proxy-prod
