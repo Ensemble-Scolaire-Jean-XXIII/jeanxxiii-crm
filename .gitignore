@@ -145,3 +145,5 @@ vite.config.ts.timestamp-*
 
 # Others
 dump.sql
+nginx/
+certbot/
