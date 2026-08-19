@@ -1,0 +1,44 @@
+services:
+  db-jeanxxiii-crm:
+    container_name: db-jeanxxiii-crm-prod
+    image: mariadb:10.11
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - db_data_prod:/var/lib/mysql
+
+  backend-jeanxxiii-crm:
+    container_name: backend-jeanxxiii-crm-prod
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      DB_HOST: db-jeanxxiii-crm-prod
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${MYSQL_DATABASE}
+      JWT_SECRET: ${JWT_SECRET}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      LEXPRESS_API_URL: ${LEXPRESS_API_URL}
+      LEXPRESS_USER: ${LEXPRESS_USER}
+      LEXPRESS_API_KEY: ${LEXPRESS_API_KEY}
+    depends_on:
+      - db-jeanxxiii-crm
+
+  frontend-jeanxxiii-crm:
+    container_name: frontend-jeanxxiii-crm-prod
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - "80:3000"
+    depends_on:
+      - backend-jeanxxiii-crm
+
+volumes:
+  db_data_prod:

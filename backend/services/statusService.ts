@@ -1,0 +1,60 @@
+import { pool } from "../config/db";
+import { Status } from "../models/types";
+
+export const getAllStatuses = async (): Promise<Status[]> => {
+  const [rows] = await pool.query("SELECT * FROM statuses");
+  return rows as Status[];
+};
+
+export const getStatusById = async (id: number): Promise<Status | null> => {
+  const [rows] = await pool.query("SELECT * FROM statuses WHERE id = ?", [id]);
+  return (rows as Status[])[0] || null;
+};
+
+export const createStatus = async (
+  data: Omit<Status, "id">,
+): Promise<number> => {
+  const [result] = await pool.query(
+    "INSERT INTO statuses (name, is_custom, created_by) VALUES (?, ?, ?)",
+    [data.name, data.is_custom, data.created_by],
+  );
+  return (result as any).insertId;
+};
+
+export const updateStatus = async (
+  id: number,
+  data: Partial<Status>,
+): Promise<void> => {
+  const allowedFields = ["name", "is_custom"];
+  const updateData: Record<string, any> = {};
+
+  for (const key of Object.keys(data)) {
+    if (allowedFields.includes(key)) {
+      updateData[key] = (data as any)[key];
+    }
+  }
+
+  if (Object.keys(updateData).length === 0) return;
+
+  const fields = Object.keys(updateData)
+    .map((key) => `${key} = ?`)
+    .join(", ");
+  const values = [...Object.values(updateData), id];
+
+  await pool.query(`UPDATE statuses SET ${fields} WHERE id = ?`, values);
+};
+
+export const deleteStatus = async (id: number) => {
+  const [prospects] = (await pool.query(
+    "SELECT 1 FROM prospects WHERE status_id = ? LIMIT 1",
+    [id],
+  )) as any[];
+
+  if (prospects.length > 0) {
+    throw new Error(
+      "Impossible de supprimer : ce statut est utilisé par des prospects.",
+    );
+  }
+
+  await pool.query("DELETE FROM statuses WHERE id = ?", [id]);
+};
