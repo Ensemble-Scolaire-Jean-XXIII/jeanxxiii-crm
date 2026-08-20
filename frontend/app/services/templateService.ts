@@ -1,9 +1,12 @@
 import { api } from "./api";
+import { EmailTemplate, CreateTemplateDTO } from "../types";
 
 export const templateService = {
-  getAll: () => api.get("/email-templates"),
-  create: (data: unknown) => api.post("/email-templates", data),
-  update: (id: string | number, data: unknown) =>
+  getAll: (): Promise<EmailTemplate[]> => api.get("/email-templates"),
+  create: (data: CreateTemplateDTO): Promise<{ id: string }> =>
+    api.post("/email-templates", data),
+  update: (id: string | number, data: Partial<EmailTemplate>): Promise<void> =>
     api.put(`/email-templates/${id}`, data),
-  delete: (id: string | number) => api.delete(`/email-templates/${id}`),
+  delete: (id: string | number): Promise<void> =>
+    api.delete(`/email-templates/${id}`),
 };

@@ -46,10 +46,8 @@ router.post("/", authenticate, async (req: any, res) => {
     await sendMail(
       req.body.email,
       "Création de votre compte CRM Jean XXIII",
-      `Votre compte a été créé. Mot de passe : ${req.body.password_hash}`,
-      `<p>Bonjour <strong>${req.body.first_name}</strong>,</p>
-       <p>Un administrateur vient de vous créer un compte sur le CRM Jean XXIII.</p>
-       <p>Voici votre mot de passe temporaire : <br><br><strong>${req.body.password_hash}</strong></p>`,
+      `Votre compte a été créé. Accédez au CRM ici : https://crm.jean23.com. Votre identifiant est ${req.body.email} et votre mot de passe : ${req.body.password_hash}`,
+      `<div style="font-family: sans-serif; color: #333; line-height: 1.4;">Bonjour <strong>${req.body.first_name} ${req.body.last_name}</strong>,<br><br>Un administrateur vient de vous créer un compte sur le CRM Jean XXIII.<br>Vous pouvez vous connecter dès maintenant en cliquant sur ce lien : <a href="https://crm.jean23.com">Accéder au CRM</a>.<br><br>Voici vos identifiants de connexion :<ul style="margin-top: 5px;"><li><strong>Email :</strong> ${req.body.email}</li><li><strong>Mot de passe temporaire :</strong> ${req.body.password_hash}</li></ul></div>`,
     );
 
     res.status(201).json({ id });
@@ -145,8 +143,7 @@ router.put("/me", authenticate, async (req: any, res) => {
 
 router.put("/:id", authenticate, async (req: any, res) => {
   try {
-    const currentUser = await userService.getUserById(req.user.id);
-    if (!currentUser || currentUser.role !== "admin") {
+    if (req.user.role !== "admin") {
       return res.status(403).json({ error: "Forbidden" });
     }
 

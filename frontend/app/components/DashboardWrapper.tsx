@@ -190,6 +190,7 @@ export default function DashboardWrapper({
             >
               Prospects
             </NavLink>
+
             <NavLink
               href="/automations"
               iconSrc="/icons/automations.webp"
@@ -198,6 +199,16 @@ export default function DashboardWrapper({
             >
               Automatisations
             </NavLink>
+
+            <NavLink
+              href="/formations"
+              iconSrc="/icons/formations.webp"
+              iconAlt="Formations"
+              isOpen={isSidebarOpen}
+            >
+              Formations
+            </NavLink>
+
             <NavLink
               href="/statuses"
               iconSrc="/icons/statuses.webp"
@@ -206,6 +217,7 @@ export default function DashboardWrapper({
             >
               Statuts
             </NavLink>
+
             <NavLink
               href="/templates"
               iconSrc="/icons/templates.webp"
@@ -214,6 +226,7 @@ export default function DashboardWrapper({
             >
               Templates
             </NavLink>
+
             <NavLink
               href="/profile"
               iconSrc="/icons/profile.webp"

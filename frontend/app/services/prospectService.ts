@@ -1,11 +1,16 @@
 import { api } from "./api";
+import { ProspectExtended, CreateProspectsDTO } from "../types";
 
 export const prospectService = {
-  getAll: () => api.get("/prospects"),
-  create: (data: unknown) => api.post("/prospects", data),
-  update: (id: string | number, data: unknown) =>
-    api.put(`/prospects/${id}`, data),
-  delete: (id: string | number) => api.delete(`/prospects/${id}`),
-  sendEmail: (id: string, template_id: string) =>
+  getAll: (): Promise<ProspectExtended[]> => api.get("/prospects"),
+  create: (data: CreateProspectsDTO): Promise<{ id: string }> =>
+    api.post("/prospects", data),
+  update: (
+    id: string | number,
+    data: Partial<ProspectExtended>,
+  ): Promise<void> => api.put(`/prospects/${id}`, data),
+  delete: (id: string | number): Promise<void> =>
+    api.delete(`/prospects/${id}`),
+  sendEmail: (id: string, template_id: string): Promise<void> =>
     api.post(`/prospects/${id}/send-email`, { template_id }),
 };

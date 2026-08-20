@@ -1,13 +1,13 @@
 "use client";
 
-import { statusService } from "../services/statusService";
-import { CreateStatusDTO, Status } from "../types";
+import { formationService } from "../services/formationService";
+import { Formation, CreateFormationDTO } from "../types";
 import Toast from "../components/Toast";
 import { useCrud } from "../hooks/useCrud";
 
-export default function StatusesPage() {
+export default function FormationsPage() {
   const {
-    data: statuses,
+    data: formations,
     editingId,
     setEditingId,
     editForm,
@@ -22,9 +22,8 @@ export default function StatusesPage() {
     handleDelete,
     startEdit,
     saveEdit,
-  } = useCrud<Status, CreateStatusDTO>(statusService, {
+  } = useCrud<Formation, CreateFormationDTO>(formationService, {
     name: "",
-    is_custom: true,
   });
 
   const onSaveEdit = (id: number) => {
@@ -42,18 +41,17 @@ export default function StatusesPage() {
 
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-primary dark:text-white">
-          Statuts
+          Formations
         </h1>
         <p className="text-white/80 mt-1">
-          Ajoutez des status personnalisés pour avoir le suivi idéal de vos
-          prospects
+          Gérez la liste des formations proposées par l&apos;établissement
         </p>
       </div>
 
       <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-primary dark:text-white">
-            Créer un statut
+            Ajouter une formation
           </h2>
           <span className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full text-xs font-medium">
             Nouveau
@@ -63,7 +61,7 @@ export default function StatusesPage() {
           <div className="flex-1">
             <input
               type="text"
-              placeholder="Nom du statut"
+              placeholder="Nom de la formation (ex: BTS SIO)"
               className="input-field"
               value={createForm.name}
               onChange={(e) =>
@@ -82,19 +80,18 @@ export default function StatusesPage() {
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
-              <th className="p-3 font-semibold">Nom du statut</th>
-              <th className="p-3 font-semibold">Type</th>
+              <th className="p-3 font-semibold">Nom de la formation</th>
               <th className="p-3 font-semibold text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {statuses.map((s) => (
+            {formations.map((f) => (
               <tr
-                key={s.id}
+                key={f.id}
                 className="group border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
               >
                 <td className="p-3">
-                  {editingId === s.id ? (
+                  {editingId === f.id ? (
                     <input
                       className="input-field py-1 px-2 max-w-sm"
                       value={editForm.name || ""}
@@ -103,22 +100,17 @@ export default function StatusesPage() {
                       }
                     />
                   ) : (
-                    <span className="font-medium">{s.name}</span>
+                    <span className="font-medium text-slate-800 dark:text-white">
+                      {f.name}
+                    </span>
                   )}
                 </td>
-                <td className="p-3">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${s.is_custom ? "bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300" : "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-hover"}`}
-                  >
-                    {s.is_custom ? "Personnalisé" : "Système"}
-                  </span>
-                </td>
                 <td className="p-3 text-right">
-                  {editingId === s.id ? (
+                  {editingId === f.id ? (
                     <div className="flex justify-end gap-2">
                       <button
-                        onClick={() => onSaveEdit(s.id)}
-                        className="btn btn-ghost text-green-600 px-2 py-1 text-sm"
+                        onClick={() => onSaveEdit(f.id)}
+                        className="btn btn-ghost text-green-600 px-2 py-1 text-sm font-bold"
                       >
                         Valider
                       </button>
@@ -132,24 +124,29 @@ export default function StatusesPage() {
                   ) : (
                     <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                       <button
-                        onClick={() => startEdit(s)}
+                        onClick={() => startEdit(f)}
                         className="btn btn-ghost text-accent px-2 py-1 text-sm"
                       >
-                        Corriger
+                        Modifier
                       </button>
-                      {!!s.is_custom && (
-                        <button
-                          onClick={() => handleDelete(s.id)}
-                          className="btn btn-ghost text-danger px-2 py-1 text-sm"
-                        >
-                          Supprimer
-                        </button>
-                      )}
+                      <button
+                        onClick={() => handleDelete(f.id)}
+                        className="btn btn-ghost text-danger px-2 py-1 text-sm"
+                      >
+                        Supprimer
+                      </button>
                     </div>
                   )}
                 </td>
               </tr>
             ))}
+            {formations.length === 0 && (
+              <tr>
+                <td colSpan={2} className="p-6 text-center text-slate-500">
+                  Aucune formation enregistrée.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

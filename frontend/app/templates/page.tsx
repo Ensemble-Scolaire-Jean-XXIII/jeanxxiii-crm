@@ -1,15 +1,9 @@
 "use client";
 
 import { templateService } from "../services/templateService";
-import { EmailTemplate } from "../types/index";
+import { CreateTemplateDTO, EmailTemplate } from "../types/index";
 import Toast from "../components/Toast";
 import { useCrud } from "../hooks/useCrud";
-
-interface CreateTemplateDTO {
-  name: string;
-  subject: string;
-  body: string;
-}
 
 export default function TemplatesPage() {
   const {

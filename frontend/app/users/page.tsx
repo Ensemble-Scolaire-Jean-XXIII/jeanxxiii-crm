@@ -1,17 +1,9 @@
 "use client";
 
 import { userService } from "../services/userService";
-import { User } from "../types/index";
+import { CreateUsersDTO, User } from "../types/index";
 import Toast from "../components/Toast";
 import { useCrud } from "../hooks/useCrud";
-
-interface CreateUsersDTO {
-  email: string;
-  password_hash: string;
-  first_name: string;
-  last_name: string;
-  role: string;
-}
 
 export default function UsersPage() {
   const {

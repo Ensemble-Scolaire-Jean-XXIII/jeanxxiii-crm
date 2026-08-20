@@ -1,5 +1,6 @@
 import { api } from "./api";
+import { Country } from "../types";
 
 export const countryService = {
-  getAll: () => api.get("/countries"),
+  getAll: (): Promise<Country[]> => api.get("/countries"),
 };

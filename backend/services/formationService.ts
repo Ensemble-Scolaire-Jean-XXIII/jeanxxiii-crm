@@ -28,3 +28,25 @@ export const getAllFormations = async (): Promise<Formation[]> => {
   const [rows] = await pool.query("SELECT * FROM formations ORDER BY name ASC");
   return rows as Formation[];
 };
+
+export const createFormation = async (name: string): Promise<number> => {
+  const [result] = await pool.query(
+    "INSERT INTO formations (name) VALUES (?)",
+    [name.trim()],
+  );
+  return (result as any).insertId;
+};
+
+export const updateFormation = async (
+  id: number,
+  name: string,
+): Promise<void> => {
+  await pool.query("UPDATE formations SET name = ? WHERE id = ?", [
+    name.trim(),
+    id,
+  ]);
+};
+
+export const deleteFormation = async (id: number): Promise<void> => {
+  await pool.query("DELETE FROM formations WHERE id = ?", [id]);
+};

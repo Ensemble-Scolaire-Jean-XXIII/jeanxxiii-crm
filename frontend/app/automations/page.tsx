@@ -4,27 +4,16 @@ import { useEffect, useState } from "react";
 import { automationService } from "../services/automationService";
 import { statusService } from "../services/statusService";
 import { templateService } from "../services/templateService";
-import { Status, EmailTemplate, Formation } from "../types";
+import {
+  Status,
+  EmailTemplate,
+  Formation,
+  CreateAutomationDTO,
+  EmailAutomationRule,
+} from "../types";
 import Toast from "../components/Toast";
 import { useCrud } from "../hooks/useCrud";
 import { formationService } from "../services/formationService";
-
-interface AutomationRule {
-  id: number;
-  status_id: number | null;
-  formation_id: number | null;
-  email_template_id: string;
-  trigger_type: string;
-  scheduled_date: string | null;
-}
-
-interface CreateAutomationDTO {
-  status_id: number | "" | null;
-  formation_id: number | null;
-  email_template_id: string;
-  trigger_type: string;
-  scheduled_date: string | null;
-}
 
 export default function AutomationsPage() {
   const {
@@ -37,7 +26,7 @@ export default function AutomationsPage() {
     setCreateForm,
     handleCreate,
     handleDelete,
-  } = useCrud<AutomationRule, CreateAutomationDTO>(automationService, {
+  } = useCrud<EmailAutomationRule, CreateAutomationDTO>(automationService, {
     status_id: "",
     formation_id: null,
     email_template_id: "",

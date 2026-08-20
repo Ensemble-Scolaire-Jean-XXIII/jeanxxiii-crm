@@ -56,9 +56,11 @@ export interface Country {
 
 export interface EmailAutomationRule {
   id: number;
-  status_id: number;
-  formation: string | null;
+  status_id: number | null;
+  formation_id: number | null;
   email_template_id: string;
+  trigger_type: string;
+  scheduled_date: string | null;
 }
 
 export interface EmailLog {
@@ -73,4 +75,64 @@ export interface Formation {
   id: number;
   name: string;
   created_at?: string;
+}
+
+// --- DTOs (Data Transfer Objects) ---
+
+export interface CreateFormationDTO {
+  name: string;
+}
+
+export interface CreateUsersDTO {
+  email: string;
+  password_hash: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+}
+
+export interface CreateProspectsDTO {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  gender: string;
+  country_id: number;
+  status_id: number;
+  formation_id: number | null;
+}
+
+export interface CreateStatusDTO {
+  name: string;
+  is_custom?: boolean;
+}
+
+export interface CreateTemplateDTO {
+  name: string;
+  subject: string;
+  body: string;
+}
+
+export interface CreateAutomationDTO {
+  status_id: number | "" | null;
+  formation_id: number | null;
+  email_template_id: string;
+  trigger_type: string;
+  scheduled_date: string | null;
+}
+
+export interface CreateUserDTO {
+  email: string;
+  password_hash: string;
+  first_name: string;
+  last_name: string;
+  role?: string;
+}
+
+export interface SortHeaderProps {
+  field: string;
+  label: string;
+  sortField: string;
+  sortDirection: "asc" | "desc";
+  onSort: (field: string) => void;
 }

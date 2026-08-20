@@ -5,20 +5,16 @@ import { prospectService } from "../services/prospectService";
 import { statusService } from "../services/statusService";
 import { countryService } from "../services/countryService";
 import { formationService } from "../services/formationService";
-import { ProspectExtended, Status, Country, Formation } from "../types";
+import {
+  ProspectExtended,
+  Status,
+  Country,
+  Formation,
+  CreateProspectsDTO,
+  SortHeaderProps,
+} from "../types";
 import Toast from "../components/Toast";
 import { useCrud } from "../hooks/useCrud";
-
-interface CreateProspectsDTO {
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  gender: string;
-  country_id: number;
-  status_id: number;
-  formation_id: number | null;
-}
 
 const formInputs: {
   name: keyof CreateProspectsDTO;
@@ -31,6 +27,26 @@ const formInputs: {
   { name: "email", type: "email", placeholder: "Email", required: true },
   { name: "phone", type: "tel", placeholder: "Téléphone", required: false },
 ];
+
+const SortHeader = ({
+  field,
+  label,
+  sortField,
+  sortDirection,
+  onSort,
+}: SortHeaderProps) => (
+  <th
+    className="p-3 font-semibold whitespace-nowrap cursor-pointer hover:text-primary dark:hover:text-white transition-colors group select-none"
+    onClick={() => onSort(field)}
+  >
+    <div className="flex items-center gap-2">
+      {label}
+      <span className="text-[10px] text-slate-400 opacity-50 group-hover:opacity-100 transition-opacity">
+        {sortField === field ? (sortDirection === "asc" ? "▲" : "▼") : "↕"}
+      </span>
+    </div>
+  </th>
+);
 
 export default function ProspectsPage() {
   const {
@@ -64,7 +80,9 @@ export default function ProspectsPage() {
   const [statuses, setStatuses] = useState<Status[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
   const [formations, setFormations] = useState<Formation[]>([]);
-  const [sortOption, setSortOption] = useState("date_desc");
+
+  const [sortField, setSortField] = useState<string>("date");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   useEffect(() => {
     const fetchSecondaryData = async () => {
@@ -112,33 +130,47 @@ export default function ProspectsPage() {
     }));
   };
 
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
   const sortedProspects = [...prospects].sort((a, b) => {
-    switch (sortOption) {
-      case "alpha_asc":
-        return (a.last_name || "").localeCompare(b.last_name || "");
-      case "alpha_desc":
-        return (b.last_name || "").localeCompare(a.last_name || "");
-      case "date_desc":
-        return (
-          new Date(b.last_action_date || 0).getTime() -
-          new Date(a.last_action_date || 0).getTime()
-        );
-      case "date_asc":
-        return (
-          new Date(a.last_action_date || 0).getTime() -
-          new Date(b.last_action_date || 0).getTime()
-        );
-      case "status_asc":
-        return (a.status_name || "").localeCompare(b.status_name || "");
-      case "formation_asc":
+    let compareResult = 0;
+    switch (sortField) {
+      case "name":
+        compareResult = (a.last_name || "").localeCompare(b.last_name || "");
+        break;
+      case "contact":
+        compareResult = (a.email || "").localeCompare(b.email || "");
+        break;
+      case "formation":
         const fA = formations.find((f) => f.id === a.formation_id)?.name || "";
         const fB = formations.find((f) => f.id === b.formation_id)?.name || "";
-        return fA.localeCompare(fB);
-      case "pays_asc":
-        return (a.country_name || "").localeCompare(b.country_name || "");
+        compareResult = fA.localeCompare(fB);
+        break;
+      case "country":
+        compareResult = (a.country_name || "").localeCompare(
+          b.country_name || "",
+        );
+        break;
+      case "status":
+        compareResult = (a.status_name || "").localeCompare(
+          b.status_name || "",
+        );
+        break;
+      case "date":
       default:
-        return 0;
+        compareResult =
+          new Date(a.last_action_date || 0).getTime() -
+          new Date(b.last_action_date || 0).getTime();
+        break;
     }
+    return sortDirection === "asc" ? compareResult : -compareResult;
   });
 
   return (
@@ -253,33 +285,55 @@ export default function ProspectsPage() {
         </form>
       </div>
 
-      <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
-        <div className="w-full overflow-x-auto pb-4">
-          <table className="w-full text-left min-w-225">
+      <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-0 sm:p-6 rounded-lg border border-white/20 shadow-lg">
+        <div className="w-full overflow-x-auto">
+          <table className="w-full text-left min-w-237.5">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
-                <th className="p-3 font-semibold whitespace-nowrap">Nom</th>
-                <th className="p-3 font-semibold whitespace-nowrap">Contact</th>
-                <th className="p-3 font-semibold whitespace-nowrap">
-                  Formation
-                </th>
-                <th className="p-3 font-semibold whitespace-nowrap">Pays</th>
-                <th className="p-3 font-semibold whitespace-nowrap">Statut</th>
-                <th className="p-3 font-semibold whitespace-nowrap">Action</th>
+              <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-800/50 sm:bg-transparent">
+                <SortHeader
+                  field="name"
+                  label="Nom"
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
+                <SortHeader
+                  field="contact"
+                  label="Contact"
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
+                <SortHeader
+                  field="formation"
+                  label="Formation"
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
+                <SortHeader
+                  field="country"
+                  label="Pays"
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
+                <SortHeader
+                  field="status"
+                  label="Statut"
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
+                <SortHeader
+                  field="date"
+                  label="Action"
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
                 <th className="p-3 font-semibold text-right whitespace-nowrap">
-                  <select
-                    className="bg-transparent border border-transparent hover:border-slate-300 dark:hover:border-slate-600 focus:border-primary rounded px-1 py-0.5 text-xs font-normal cursor-pointer outline-none transition-colors"
-                    value={sortOption}
-                    onChange={(e) => setSortOption(e.target.value)}
-                  >
-                    <option value="date_desc">Trier: Récent</option>
-                    <option value="date_asc">Trier: Ancien</option>
-                    <option value="alpha_asc">Trier: A-Z</option>
-                    <option value="alpha_desc">Trier: Z-A</option>
-                    <option value="status_asc">Trier: Statut</option>
-                    <option value="formation_asc">Trier: Formation</option>
-                    <option value="pays_asc">Trier: Pays</option>
-                  </select>
+                  Paramètres
                 </th>
               </tr>
             </thead>
@@ -289,7 +343,7 @@ export default function ProspectsPage() {
                   key={p.id}
                   className="group border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
                 >
-                  <td className="p-3 min-w-37.5">
+                  <td className="p-3 min-w-45">
                     {editingId === p.id ? (
                       <div className="flex flex-col sm:flex-row gap-1">
                         <input
@@ -323,7 +377,7 @@ export default function ProspectsPage() {
                     )}
                   </td>
 
-                  <td className="p-3 min-w-50">
+                  <td className="p-3 min-w-55">
                     {editingId === p.id ? (
                       <div className="flex flex-col gap-1">
                         <input
@@ -345,19 +399,19 @@ export default function ProspectsPage() {
                     ) : (
                       <div>
                         <span
-                          className="block truncate max-w-62.5"
+                          className="block truncate max-w-55"
                           title={p.email}
                         >
                           {p.email}
                         </span>
-                        <span className="text-xs text-slate-500 font-medium block truncate">
+                        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium block truncate">
                           {p.phone ? p.phone : "Aucun téléphone"}
                         </span>
                       </div>
                     )}
                   </td>
 
-                  <td className="p-3 min-w-45">
+                  <td className="p-3 min-w-37.5">
                     <select
                       className="bg-transparent border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 focus:border-primary rounded px-2 py-1 text-xs sm:text-sm cursor-pointer outline-none transition-colors w-full"
                       value={p.formation_id ?? ""}
@@ -424,12 +478,12 @@ export default function ProspectsPage() {
                       : "Jamais"}
                   </td>
 
-                  <td className="p-3 text-right min-w-30">
+                  <td className="p-3 text-right min-w-37.5">
                     {editingId === p.id ? (
                       <div className="flex justify-end gap-1">
                         <button
                           onClick={() => onSaveEdit(p.id)}
-                          className="btn btn-ghost text-green-600 px-2 py-1 text-xs"
+                          className="btn btn-ghost text-green-600 px-2 py-1 text-xs font-bold"
                         >
                           Valider
                         </button>
@@ -459,6 +513,13 @@ export default function ProspectsPage() {
                   </td>
                 </tr>
               ))}
+              {sortedProspects.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="p-6 text-center text-slate-500">
+                    Aucun prospect trouvé.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
