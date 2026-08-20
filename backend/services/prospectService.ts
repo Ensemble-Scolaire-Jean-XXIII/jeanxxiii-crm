@@ -39,7 +39,7 @@ export const createProspect = async (
 
   const id = uuidv4();
   await pool.query(
-    `INSERT INTO prospects (id, email, first_name, last_name, phone, gender, country_id, status_id, last_action_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO prospects (id, email, first_name, last_name, phone, gender, country_id, status_id, formation_id, last_action_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       id,
       data.email,
@@ -49,6 +49,7 @@ export const createProspect = async (
       data.gender,
       data.country_id,
       data.status_id,
+      data.formation_id,
       new Date(),
     ],
   );

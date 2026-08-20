@@ -118,11 +118,7 @@ Voici mon projet
 ├── docker-compose.prod.yml
 └── docker-compose.yml
 
-Si tu as besoin de consulter un fichier spécifique pour faire des changements demande le moi par la suite et ne l'imagine pas, ne l'hallucine pas. Je t'envoie directement une partie du backend.
-
-faire en sorte que pour un nouveau prospect (fetch par l'apiEXPRESS ou en ajout manuel) la date Dernière action soit aussi modifié automatiquement quand le mail part ou dès qu'il entre en base
-
-supprimer code_postal, niveau, commentaire et situation de la base et de tous les modeles de données et de toutes les requetes en front et back
+Si tu as besoin de consulter un fichier spécifique pour faire des changements demande le moi par la suite et ne l'imagine pas, ne l'hallucine pas.
 
 add more sorting options on prospects
 
