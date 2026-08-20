@@ -413,7 +413,7 @@ export default function ProspectsPage() {
 
                   <td className="p-3 min-w-37.5">
                     <select
-                      className="bg-transparent border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 focus:border-primary rounded px-2 py-1 text-xs sm:text-sm cursor-pointer outline-none transition-colors w-full"
+                      className="input-field !py-1 !px-2 text-xs sm:text-sm cursor-pointer w-full"
                       value={p.formation_id ?? ""}
                       onChange={(e) =>
                         handleUpdateField(
@@ -434,7 +434,7 @@ export default function ProspectsPage() {
 
                   <td className="p-3 min-w-30">
                     <select
-                      className="bg-transparent border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 focus:border-primary rounded px-2 py-1 text-xs sm:text-sm cursor-pointer outline-none transition-colors w-full"
+                      className="input-field !py-1 !px-2 text-xs sm:text-sm cursor-pointer w-full"
                       value={p.country_id ?? ""}
                       onChange={(e) =>
                         handleUpdateField(
@@ -454,7 +454,7 @@ export default function ProspectsPage() {
 
                   <td className="p-3 min-w-37.5">
                     <select
-                      className="bg-transparent border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 focus:border-primary rounded px-2 py-1 text-xs sm:text-sm cursor-pointer outline-none transition-colors w-full"
+                      className="input-field !py-1 !px-2 text-xs sm:text-sm cursor-pointer w-full"
                       value={p.status_id ?? ""}
                       onChange={(e) =>
                         handleUpdateField(

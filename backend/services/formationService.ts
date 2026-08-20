@@ -48,5 +48,12 @@ export const updateFormation = async (
 };
 
 export const deleteFormation = async (id: number): Promise<void> => {
+  const [rows] = await pool.query(
+    "SELECT COUNT(*) as count FROM prospects WHERE formation_id = ?",
+    [id],
+  );
+  if ((rows as any[])[0].count > 0) {
+    throw new Error("IN_USE");
+  }
   await pool.query("DELETE FROM formations WHERE id = ?", [id]);
 };
