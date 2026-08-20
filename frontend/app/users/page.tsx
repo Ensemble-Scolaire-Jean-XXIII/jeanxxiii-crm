@@ -200,7 +200,7 @@ export default function UsersPage() {
                 </td>
                 <td className="p-3">
                   <select
-                    className="bg-transparent border border-transparent hover:border-slate-300 dark:hover:border-slate-600 focus:border-primary rounded px-2 py-1 text-sm font-medium cursor-pointer outline-none transition-colors"
+                    className="input-field !py-1 !px-2 text-sm cursor-pointer w-full sm:w-auto"
                     value={u.role}
                     onChange={(e) =>
                       handleUpdateField(u.id, "role", e.target.value)
@@ -215,7 +215,7 @@ export default function UsersPage() {
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => onSaveEdit(u.id)}
-                        className="btn btn-ghost text-green-600 px-2 py-1 text-sm"
+                        className="btn btn-ghost text-green-600 px-2 py-1 text-sm font-bold"
                       >
                         Valider
                       </button>
