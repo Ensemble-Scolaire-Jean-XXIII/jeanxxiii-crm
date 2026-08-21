@@ -193,6 +193,16 @@ export default function DashboardPage() {
               <span className="text-lg">+</span>
             </Link>
 
+            <Link
+              href="/salons"
+              className="group flex items-center justify-between p-3 rounded-md bg-blue-500/20 hover:bg-blue-500/40 transition-all border border-blue-400/30 text-white"
+            >
+              <span className="font-medium text-sm">
+                Lancer le mode &#34;Salons&#34; (Kiosque)
+              </span>
+              <span className="text-lg">📱</span>
+            </Link>
+
             <button
               onClick={handleSyncLatest}
               disabled={isSyncingLatest}

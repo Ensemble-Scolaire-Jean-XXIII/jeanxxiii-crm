@@ -26,31 +26,45 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex h-screen items-center justify-center bg-background">
+    <div className="flex flex-col h-screen overflow-hidden bg-transparent relative items-center justify-center p-4">
       <Toast message={error} type="error" onClose={() => setError("")} />
 
-      <div className="w-full max-w-md rounded-xl bg-white dark:bg-secondary p-8 shadow-md border-t-4 border-t-accent">
-        <h1 className="mb-6 text-2xl font-bold text-primary">Connexion CRM</h1>
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
-          <input
-            type="email"
-            placeholder="Email"
-            className="rounded-lg border border-primary bg-transparent p-3 text-foreground focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Mot de passe"
-            className="rounded-lg border border-primary bg-transparent p-3 text-foreground focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
-            value={passwordHash}
-            onChange={(e) => setPasswordHash(e.target.value)}
-            required
-          />
+      <div className="w-full max-w-md bg-white/25 dark:bg-slate-900/70 backdrop-blur-xl p-8 sm:p-10 rounded-3xl border border-white/20 shadow-2xl z-10">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-white drop-shadow-md mb-1">
+            CRM Jean XXIII
+          </h1>
+          <p className="text-white/80 text-sm">
+            Connexion à l&apos;espace sécurisé
+          </p>
+        </div>
+
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div>
+            <input
+              type="email"
+              placeholder="Adresse email"
+              className="w-full bg-white/70 dark:bg-slate-800/70 border-0 focus:ring-2 focus:ring-primary rounded-xl px-4 py-4 text-slate-800 dark:text-white placeholder-slate-500 text-base shadow-inner transition-all"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <input
+              type="password"
+              placeholder="Mot de passe"
+              className="w-full bg-white/70 dark:bg-slate-800/70 border-0 focus:ring-2 focus:ring-primary rounded-xl px-4 py-4 text-slate-800 dark:text-white placeholder-slate-500 text-base shadow-inner transition-all"
+              value={passwordHash}
+              onChange={(e) => setPasswordHash(e.target.value)}
+              required
+            />
+          </div>
+
           <button
             type="submit"
-            className="rounded-lg bg-accent p-3 text-white font-bold hover:opacity-90 transition-opacity"
+            className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-lg transition-transform transform hover:scale-[1.02] text-lg mt-2"
           >
             Se connecter
           </button>

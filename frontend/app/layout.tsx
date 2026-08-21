@@ -12,8 +12,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" suppressHydrationWarning>
-      <body className="bg-slideshow text-foreground font-sans antialiased">
-        <div className="content-overlay">
+      <body className="text-foreground font-sans antialiased relative">
+        <div className="slideshow-container">
+          <div className="slide bg-1"></div>
+          <div className="slide bg-2"></div>
+          <div className="slide bg-3"></div>
+          <div className="slide bg-4"></div>
+          <div className="slide bg-5"></div>
+        </div>
+
+        <div className="content-overlay flex flex-col min-h-screen">
           <DashboardWrapper>{children}</DashboardWrapper>
         </div>
       </body>
