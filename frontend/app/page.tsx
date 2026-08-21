@@ -174,7 +174,14 @@ export default function DashboardPage() {
               className="group flex items-center justify-between p-3 rounded-md bg-white/10 hover:bg-white/20 transition-all border border-white/10 text-white"
             >
               <span className="font-medium text-sm">Nouveau prospect</span>
-              <span className="text-lg">+</span>
+              <Image
+                src="/icons/add.webp"
+                alt="Ajouter"
+                width={18}
+                height={18}
+                className="object-contain brightness-0 invert shrink-0"
+                unoptimized
+              />
             </Link>
 
             <Link
@@ -182,7 +189,14 @@ export default function DashboardPage() {
               className="group flex items-center justify-between p-3 rounded-md bg-white/10 hover:bg-white/20 transition-all border border-white/10 text-white"
             >
               <span className="font-medium text-sm">Nouveau template</span>
-              <span className="text-lg">+</span>
+              <Image
+                src="/icons/add.webp"
+                alt="Ajouter"
+                width={18}
+                height={18}
+                className="object-contain brightness-0 invert shrink-0"
+                unoptimized
+              />
             </Link>
 
             <Link
@@ -190,7 +204,14 @@ export default function DashboardPage() {
               className="group flex items-center justify-between p-3 rounded-md bg-white/10 hover:bg-white/20 transition-all border border-white/10 text-white"
             >
               <span className="font-medium text-sm">Gérer automatisations</span>
-              <span className="text-lg">+</span>
+              <Image
+                src="/icons/add.webp"
+                alt="Ajouter"
+                width={18}
+                height={18}
+                className="object-contain brightness-0 invert shrink-0"
+                unoptimized
+              />
             </Link>
 
             <Link
@@ -200,7 +221,14 @@ export default function DashboardPage() {
               <span className="font-medium text-sm">
                 Lancer le mode &#34;Salons&#34; (Kiosque)
               </span>
-              <span className="text-lg">📱</span>
+              <Image
+                src="/icons/salons.webp"
+                alt="Mode Salon"
+                width={20}
+                height={20}
+                className="object-contain brightness-0 invert shrink-0"
+                unoptimized
+              />
             </Link>
 
             <button
@@ -213,7 +241,14 @@ export default function DashboardPage() {
                   ? "Mise à jour en cours..."
                   : `Actualiser les derniers prospects (${lastSyncText})`}
               </span>
-              <span className="text-lg">↻</span>
+              <Image
+                src="/icons/refresh.webp"
+                alt="Actualiser"
+                width={20}
+                height={20}
+                className="object-contain brightness-0 invert shrink-0"
+                unoptimized
+              />
             </button>
 
             {isAdmin && (

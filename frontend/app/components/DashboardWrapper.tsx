@@ -138,7 +138,6 @@ export default function DashboardWrapper({
     <div className="flex flex-col h-screen overflow-hidden p-4 gap-4 bg-transparent relative">
       <header className="h-16 bg-slate-900/60 backdrop-blur-xl text-white flex items-center justify-between px-6 rounded-2xl border border-white/20 shadow-2xl shrink-0 z-20">
         <div className="flex items-center gap-4">
-          {/* Logo prenant toute la hauteur parente sans conteneur carré */}
           <div className="h-9 w-auto relative flex items-center">
             <Image
               src="/j23.webp"
@@ -167,19 +166,14 @@ export default function DashboardWrapper({
                 className="group relative inline-flex items-center justify-center p-0.5 overflow-hidden text-xs font-semibold rounded-xl bg-linear-to-br from-accent to-orange-600 hover:from-accent hover:to-orange-500 text-white shadow-lg shadow-accent/20 transition-all hover:scale-[1.02]"
               >
                 <span className="relative px-4 py-2 transition-all ease-in duration-75 bg-slate-900/40 rounded-[10px] group-hover:bg-transparent flex items-center gap-2">
-                  <svg
-                    className="w-4 h-4 text-accent group-hover:text-white transition-colors"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
-                    />
-                  </svg>
+                  <Image
+                    src="/icons/salons.webp"
+                    alt="Salons"
+                    width={16}
+                    height={16}
+                    className="object-contain brightness-0 invert shrink-0"
+                    unoptimized
+                  />
                   Mode Salon
                 </span>
               </Link>
@@ -188,19 +182,14 @@ export default function DashboardWrapper({
                 onClick={handleLogout}
                 className="flex items-center gap-2 bg-white/10 hover:bg-danger/80 text-white px-4 py-2 rounded-xl text-xs font-semibold backdrop-blur-md border border-white/10 transition-all duration-300 hover:shadow-lg hover:shadow-danger/20 cursor-pointer"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                  />
-                </svg>
+                <Image
+                  src="/icons/logout.webp"
+                  alt="Déconnexion"
+                  width={16}
+                  height={16}
+                  className="object-contain brightness-0 invert shrink-0"
+                  unoptimized
+                />
                 Déconnexion
               </button>
             </>
@@ -209,19 +198,14 @@ export default function DashboardWrapper({
               onClick={() => setShowExitModal(true)}
               className="flex items-center gap-2 bg-white/10 hover:bg-danger/80 text-white px-4 py-2 rounded-xl text-xs font-semibold backdrop-blur-md border border-white/10 transition-all duration-300 hover:shadow-lg hover:shadow-danger/20 cursor-pointer"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
-                />
-              </svg>
+              <Image
+                src="/icons/back.webp"
+                alt="Retour"
+                width={16}
+                height={16}
+                className="object-contain brightness-0 invert shrink-0"
+                unoptimized
+              />
               Retour au CRM
             </button>
           )}
@@ -248,7 +232,18 @@ export default function DashboardWrapper({
                 className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all text-xs mx-auto flex items-center justify-center cursor-pointer"
                 title={isSidebarOpen ? "Réduire" : "Déplier"}
               >
-                {isSidebarOpen ? "◀" : "▶"}
+                <Image
+                  src={
+                    isSidebarOpen
+                      ? "/icons/chevronLeft.webp"
+                      : "/icons/chevronRight.webp"
+                  }
+                  alt={isSidebarOpen ? "Réduire" : "Déplier"}
+                  width={14}
+                  height={14}
+                  className="object-contain brightness-0 invert shrink-0"
+                  unoptimized
+                />
               </button>
             </div>
 
