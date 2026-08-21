@@ -1,9 +1,10 @@
-name: Auto Pull Request
+name: Auto Create PR
 
 on:
   push:
     branches-ignore:
       - main
+      - master
 
 jobs:
   create-pr:
@@ -12,30 +13,21 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Extract commit message and body
-        id: commit_info
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          COMMIT_MSG=$(git log -1 --pretty=format:%s)
+          CURRENT_BRANCH="${{ github.ref_name }}"
+
+          COMMIT_TITLE=$(git log -1 --pretty=format:%s)
           COMMIT_BODY=$(git log -1 --pretty=format:%b)
-          echo "title=$COMMIT_MSG" >> $GITHUB_OUTPUT
-          echo "body<<EOF" >> $GITHUB_OUTPUT
-          echo "$COMMIT_BODY" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Create or Update Pull Request
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref_name }}
-          base: main
-          title: ${{ steps.commit_info.outputs.title }}
-          body: |
-            ${{ steps.commit_info.outputs.body }}
+          BODY_CONTENT="${COMMIT_BODY:-Automated PR from $CURRENT_BRANCH to main.}"
 
-            ---
-            *PR automatically generated from push on branch `${{ github.ref_name }}`.*
-          assignees: ${{ github.actor }}
-          draft: false
+          gh pr create \
+            --base main \
+            --head "$CURRENT_BRANCH" \
+            --title "$COMMIT_TITLE" \
+            --body "$BODY_CONTENT" || true
