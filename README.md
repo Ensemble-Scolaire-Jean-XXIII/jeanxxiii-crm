@@ -39,25 +39,25 @@ You need to set up environment variables for the containers to run correctly.
 Create a `.env` file for development and a `.env.prod` file for production at the root of the repository. Include the following necessary keys in both files, adjusting values appropriately for the target environment:
 
 ```env
-# Database
+# Dev only
+FRONTEND_PORT=3000
+BACKEND_PORT=5000
+DB_PORT=3306
+NEXT_PUBLIC_API_URL=
+
+# Prod + Dev
 MYSQL_ROOT_PASSWORD=
 MYSQL_DATABASE=
 MYSQL_USER=
 MYSQL_PASSWORD=
 
-# Ports (Used in dev environment)
-DB_PORT=3306
-BACKEND_PORT=5000
-FRONTEND_PORT=3000
-
-# Backend Services
 JWT_SECRET=
+
 SMTP_HOST=
 SMTP_PORT=
 SMTP_USER=
 SMTP_PASS=
 
-# External API Synchronization
 LEXPRESS_API_URL=
 LEXPRESS_USER=
 LEXPRESS_API_KEY=
@@ -103,6 +103,21 @@ To safely expose the CRM to the internet without opening router ports or exposin
 
 5. If your frontend requires direct external API calls from the client browser, route an API subdomain to the backend container (requires exposing the backend port in `docker-compose.prod.yml` or routing the tunnel into the Docker network).
 6. Apply Zero Trust policies (e.g., Email OTP, Access Groups) in the Cloudflare Dashboard to restrict access to the CRM interface.
+
+## Maintenance & Best Practices
+
+To keep the repository clean and avoid breaking production, follow these maintenance guidelines:
+
+### 1. Managing Dependencies & Dependabot
+
+- **Major Updates Caution:** Be extremely careful with major version updates (e.g., updating TypeScript or core libraries). Tools like `ts-node` used in the backend can break with major TypeScript version jumps.
+- **Test Before Merge:** Always test builds locally (`npm run build` for frontend, checking execution for backend) before merging Dependabot PRs.
+- **Isolate Deployments:** When merging grouped dependency PRs, merge them one by one and verify that the CI/CD pipeline and production containers remain healthy before proceeding with the next.
+
+### 2. Hotfix Workflow (`hotfix/prod`)
+
+- **No Sync Pushes:** Do **not** push simple synchronization commits (such as `git merge main` followed by a `git push`) directly to the remote `hotfix/prod` branch if you use automated GitHub Actions to open hotfix PRs. Doing so will unnecessarily trigger and recreate redundant/ghost pull requests.
+- **Pushes Reserved for Code:** The `hotfix/prod` remote branch should only receive pushes when you are actively writing and submitting a genuine code correctif (hotfix). Use local merges only if you need to synchronize your local working branch.
 
 ## Customization and Adoption
 

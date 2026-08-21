@@ -84,6 +84,31 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.post("/reauthenticate", authenticate, async (req: any, res) => {
+  try {
+    const user = await userService.getUserById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: "Utilisateur introuvable" });
+    }
+
+    const isMatch = await bcrypt.compare(req.body.password, user.password_hash);
+    if (!isMatch) {
+      return res.status(401).json({ error: "Mot de passe incorrect" });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_SECRET as string,
+      { expiresIn: "12h" },
+    );
+
+    res.json({ token });
+  } catch (error) {
+    console.error("ERREUR REAUTHENTICATE:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 router.get("/me", authenticate, async (req: any, res) => {
   try {
     const user = await userService.getUserById(req.user.id);

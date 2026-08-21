@@ -1,0 +1,41 @@
+name: Auto Pull Request
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract commit message and body
+        id: commit_info
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=format:%s)
+          COMMIT_BODY=$(git log -1 --pretty=format:%b)
+          echo "title=$COMMIT_MSG" >> $GITHUB_OUTPUT
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMIT_BODY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create or Update Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref_name }}
+          base: main
+          title: ${{ steps.commit_info.outputs.title }}
+          body: |
+            ${{ steps.commit_info.outputs.body }}
+
+            ---
+            *PR automatically generated from push on branch `${{ github.ref_name }}`.*
+          assignees: ${{ github.actor }}
+          draft: false

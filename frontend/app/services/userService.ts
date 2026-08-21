@@ -25,4 +25,19 @@ export const userService = {
     api.put(`/users/${id}`, data),
   updateMe: (data: Partial<User>): Promise<void> => api.put("/users/me", data),
   delete: (id: string | number): Promise<void> => api.delete(`/users/${id}`),
+  reauthenticate: async (password: string): Promise<{ token: string }> => {
+    const res = await fetch(`${BASE_URL}/users/reauthenticate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({ password }),
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Mot de passe incorrect");
+    }
+    return res.json();
+  },
 };
