@@ -8,6 +8,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: Europe/Paris
     volumes:
       - db_data_prod:/var/lib/mysql
       - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
@@ -35,6 +36,7 @@ services:
       LEXPRESS_API_URL: ${LEXPRESS_API_URL}
       LEXPRESS_USER: ${LEXPRESS_USER}
       LEXPRESS_API_KEY: ${LEXPRESS_API_KEY}
+      TZ: Europe/Paris
     depends_on:
       - db-jeanxxiii-crm
     networks:

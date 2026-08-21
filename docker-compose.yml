@@ -7,6 +7,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: Europe/Paris
     ports:
       - "${DB_PORT}:3306"
     healthcheck:
@@ -39,6 +40,7 @@ services:
       LEXPRESS_API_URL: ${LEXPRESS_API_URL}
       LEXPRESS_USER: ${LEXPRESS_USER}
       LEXPRESS_API_KEY: ${LEXPRESS_API_KEY}
+      TZ: Europe/Paris
     volumes:
       - ./backend:/app
       - /app/node_modules

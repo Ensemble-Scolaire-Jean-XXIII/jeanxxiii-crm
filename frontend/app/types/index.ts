@@ -77,6 +77,24 @@ export interface Formation {
   created_at?: string;
 }
 
+export interface AuditLog {
+  id: number;
+  user_id: string;
+  action: string;
+  resource: string;
+  details: Record<string, unknown> | null;
+  created_at: string;
+  user_email?: string;
+  user_name?: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
 // --- DTOs (Data Transfer Objects) ---
 
 export interface CreateFormationDTO {

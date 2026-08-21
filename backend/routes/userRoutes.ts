@@ -41,7 +41,7 @@ router.post("/", authenticate, async (req: any, res) => {
       return res.status(400).json({ error: "Email déjà utilisé" });
     }
 
-    const id = await userService.createUser(req.body);
+    const id = await userService.createUser(req.body, req.user.id);
 
     await sendMail(
       req.body.email,
@@ -132,7 +132,7 @@ router.put("/me", authenticate, async (req: any, res) => {
     const updateData: any = { first_name, last_name, email };
     if (password_hash) updateData.password_hash = password_hash;
 
-    await userService.updateUser(req.user.id, updateData);
+    await userService.updateUser(req.user.id, updateData, req.user.id);
 
     res.status(204).send();
   } catch (error) {
@@ -164,7 +164,7 @@ router.put("/:id", authenticate, async (req: any, res) => {
       }
     }
 
-    await userService.updateUser(req.params.id, req.body);
+    await userService.updateUser(req.params.id, req.body, req.user.id);
     res.status(204).send();
   } catch (error) {
     console.error("ERREUR PUT USER ID:", error);
@@ -177,7 +177,7 @@ router.delete("/:id", authenticate, async (req: any, res) => {
     if (req.user.role !== "admin") {
       return res.status(403).json({ error: "Forbidden" });
     }
-    await userService.deleteUser(req.params.id);
+    await userService.deleteUser(req.params.id, req.user.id);
     res.status(204).send();
   } catch (error) {
     console.error("ERREUR DELETE USER:", error);

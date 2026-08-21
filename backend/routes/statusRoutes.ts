@@ -1,9 +1,10 @@
 import { Router } from "express";
 import * as statusService from "../services/statusService";
+import { authenticate } from "../middleware/auth";
 
 const router = Router();
 
-router.get("/", async (req, res) => {
+router.get("/", authenticate, async (req, res) => {
   try {
     const statuses = await statusService.getAllStatuses();
     res.json(statuses);
@@ -12,7 +13,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", authenticate, async (req, res) => {
   try {
     const status = await statusService.getStatusById(Number(req.params.id));
     if (!status) return res.status(404).json({ error: "Not found" });
@@ -22,9 +23,9 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", authenticate, async (req: any, res) => {
   try {
-    const id = await statusService.createStatus(req.body);
+    const id = await statusService.createStatus(req.body, req.user.id);
     res.status(201).json({ id });
   } catch (error: any) {
     if (error.code === "ER_DUP_ENTRY") {
@@ -36,9 +37,13 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", authenticate, async (req: any, res) => {
   try {
-    await statusService.updateStatus(Number(req.params.id), req.body);
+    await statusService.updateStatus(
+      Number(req.params.id),
+      req.body,
+      req.user.id,
+    );
     res.status(204).send();
   } catch (error: any) {
     if (error.code === "ER_DUP_ENTRY") {
@@ -50,7 +55,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticate, async (req: any, res) => {
   try {
     const id = Number(req.params.id);
     const status = await statusService.getStatusById(id);
@@ -65,7 +70,7 @@ router.delete("/:id", async (req, res) => {
         .json({ error: "Vous ne pouvez pas supprimer un statut système" });
     }
 
-    await statusService.deleteStatus(id);
+    await statusService.deleteStatus(id, req.user.id);
     res.status(204).send();
   } catch (error: any) {
     if (error.message && error.message.includes("Impossible de supprimer")) {

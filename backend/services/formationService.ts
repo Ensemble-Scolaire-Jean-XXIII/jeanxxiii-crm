@@ -1,5 +1,6 @@
 import { pool } from "../config/db";
 import { Formation } from "../models/types";
+import { logAction } from "./auditLogService";
 
 export const getOrCreateFormationByName = async (
   name: string | null,
@@ -29,25 +30,40 @@ export const getAllFormations = async (): Promise<Formation[]> => {
   return rows as Formation[];
 };
 
-export const createFormation = async (name: string): Promise<number> => {
+export const createFormation = async (
+  name: string,
+  actorId?: string,
+): Promise<number> => {
   const [result] = await pool.query(
     "INSERT INTO formations (name) VALUES (?)",
     [name.trim()],
   );
-  return (result as any).insertId;
+  const insertId = (result as any).insertId;
+  if (actorId)
+    await logAction(actorId, "CREATE", "FORMATION", { id: insertId, name });
+  return insertId;
 };
 
 export const updateFormation = async (
   id: number,
   name: string,
+  actorId?: string,
 ): Promise<void> => {
   await pool.query("UPDATE formations SET name = ? WHERE id = ?", [
     name.trim(),
     id,
   ]);
+  if (actorId)
+    await logAction(actorId, "UPDATE", "FORMATION", {
+      target_id: id,
+      changes: { name },
+    });
 };
 
-export const deleteFormation = async (id: number): Promise<void> => {
+export const deleteFormation = async (
+  id: number,
+  actorId?: string,
+): Promise<void> => {
   const [rows] = await pool.query(
     "SELECT COUNT(*) as count FROM prospects WHERE formation_id = ?",
     [id],
@@ -56,4 +72,6 @@ export const deleteFormation = async (id: number): Promise<void> => {
     throw new Error("IN_USE");
   }
   await pool.query("DELETE FROM formations WHERE id = ?", [id]);
+  if (actorId)
+    await logAction(actorId, "DELETE", "FORMATION", { target_id: id });
 };
