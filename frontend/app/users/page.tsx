@@ -39,7 +39,6 @@ export default function UsersPage() {
       delete (payload as { id?: string | number }).id;
       return payload;
     });
-    // On rafraîchit les logs après un délai pour laisser le temps au backend d'insérer
     setTimeout(() => fetchLogs(), 500);
   };
 
@@ -308,7 +307,6 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {/* === SECTION : HISTORIQUE D'AUDIT === */}
       <div>
         <div className="mb-6 flex justify-between items-center">
           <div>
@@ -378,7 +376,6 @@ export default function UsersPage() {
             </table>
           </div>
 
-          {/* Pagination */}
           {logTotalPages > 1 && (
             <div className="flex justify-between items-center mt-6">
               <button

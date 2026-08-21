@@ -81,6 +81,13 @@ export default function AutomationsPage() {
   ]);
 
   const onHandleCreate = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    let formattedDate = createForm.scheduled_date;
+    if (formattedDate && formattedDate.includes("T")) {
+      formattedDate = formattedDate.replace("T", " ") + ":00";
+    }
+
     handleCreate(e, {
       ...createForm,
       status_id:
@@ -88,9 +95,7 @@ export default function AutomationsPage() {
           ? createForm.status_id
           : null,
       scheduled_date:
-        createForm.trigger_type === "SCHEDULED_DATE"
-          ? createForm.scheduled_date
-          : null,
+        createForm.trigger_type === "SCHEDULED_DATE" ? formattedDate : null,
     });
   };
 
@@ -252,7 +257,6 @@ export default function AutomationsPage() {
                 key={rule.id}
                 className="group border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
               >
-                {/* Colonne Déclencheur direct en dropdown/input */}
                 <td className="p-3">
                   {rule.trigger_type === "STATUS_CHANGE" ? (
                     <select
@@ -279,22 +283,24 @@ export default function AutomationsPage() {
                       value={
                         rule.scheduled_date
                           ? new Date(rule.scheduled_date)
-                              .toISOString()
+                              .toLocaleString("sv")
                               .slice(0, 16)
+                              .replace(" ", "T")
                           : ""
                       }
                       onChange={(e) =>
                         handleUpdateField(
                           rule.id,
                           "scheduled_date",
-                          e.target.value || null,
+                          e.target.value
+                            ? e.target.value.replace("T", " ") + ":00"
+                            : null,
                         )
                       }
                     />
                   )}
                 </td>
 
-                {/* Colonne Formation directe en dropdown */}
                 <td className="p-3">
                   <select
                     className="input-field py-1 px-2 text-xs sm:text-sm cursor-pointer w-full"
@@ -316,7 +322,6 @@ export default function AutomationsPage() {
                   </select>
                 </td>
 
-                {/* Colonne Template directe en dropdown */}
                 <td className="p-3">
                   <select
                     className="input-field py-1 px-2 text-xs sm:text-sm cursor-pointer w-full"
@@ -337,7 +342,6 @@ export default function AutomationsPage() {
                   </select>
                 </td>
 
-                {/* Colonne Actions (Suppression uniquement) */}
                 <td className="p-3 text-right">
                   <button
                     onClick={() => handleDelete(rule.id)}
