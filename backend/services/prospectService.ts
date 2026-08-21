@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { sendMail } from "./mailService";
 import { parseTemplateVariables } from "../utils/templateParser";
 import { getEmailTemplateById } from "./emailTemplateService";
+import { logAction } from "./auditLogService";
 
 export const getAllProspects = async (): Promise<any> => {
   const [rows] = await pool.query(`
@@ -33,6 +34,7 @@ export const getProspectByEmail = async (
 
 export const createProspect = async (
   data: Omit<Prospect, "id" | "created_at">,
+  actorId?: string,
 ): Promise<string> => {
   const existing = await getProspectByEmail(data.email);
   if (existing) throw new Error("EMAIL_EXISTS");
@@ -53,12 +55,16 @@ export const createProspect = async (
       new Date(),
     ],
   );
+
+  if (actorId)
+    await logAction(actorId, "CREATE", "PROSPECT", { id, email: data.email });
   return id;
 };
 
 export const updateProspect = async (
   id: string,
   data: Partial<Prospect>,
+  actorId?: string,
 ): Promise<void> => {
   const allowedFields = [
     "email",
@@ -95,10 +101,21 @@ export const updateProspect = async (
   const values = [...Object.values(updateData), id];
 
   await pool.query(`UPDATE prospects SET ${fields} WHERE id = ?`, values);
+
+  if (actorId)
+    await logAction(actorId, "UPDATE", "PROSPECT", {
+      target_id: id,
+      changes: updateData,
+    });
 };
 
-export const deleteProspect = async (id: string): Promise<void> => {
+export const deleteProspect = async (
+  id: string,
+  actorId?: string,
+): Promise<void> => {
   await pool.query("DELETE FROM prospects WHERE id = ?", [id]);
+  if (actorId)
+    await logAction(actorId, "DELETE", "PROSPECT", { target_id: id });
 };
 
 export const sendEmailToProspect = async (

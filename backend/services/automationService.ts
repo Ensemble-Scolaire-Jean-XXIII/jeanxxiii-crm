@@ -1,13 +1,14 @@
 import { pool } from "../config/db";
 import { sendMail } from "./mailService";
 import { parseTemplateVariables } from "../utils/templateParser";
+import { logAction } from "./auditLogService";
 
 export const getAutomationRules = async () => {
   const [rows] = await pool.query("SELECT * FROM email_automation_rules");
   return rows;
 };
 
-export const createAutomationRule = async (data: any) => {
+export const createAutomationRule = async (data: any, actorId?: string) => {
   const [result] = await pool.query(
     "INSERT INTO email_automation_rules (status_id, formation_id, email_template_id, trigger_type, scheduled_date) VALUES (?, ?, ?, ?, ?)",
     [
@@ -18,11 +19,63 @@ export const createAutomationRule = async (data: any) => {
       data.scheduled_date || null,
     ],
   );
-  return (result as any).insertId;
+  const insertId = (result as any).insertId;
+
+  if (actorId) {
+    await logAction(actorId, "CREATE", "AUTOMATION", {
+      id: insertId,
+      template_id: data.email_template_id,
+    });
+  }
+
+  return insertId;
 };
 
-export const deleteAutomationRule = async (id: number) => {
+export const updateAutomationRule = async (
+  id: number,
+  data: any,
+  actorId?: string,
+): Promise<void> => {
+  const allowedFields = [
+    "status_id",
+    "formation_id",
+    "email_template_id",
+    "trigger_type",
+    "scheduled_date",
+  ];
+  const updateData: Record<string, any> = {};
+
+  for (const key of Object.keys(data)) {
+    if (allowedFields.includes(key)) {
+      updateData[key] = data[key];
+    }
+  }
+
+  if (Object.keys(updateData).length === 0) return;
+
+  const fields = Object.keys(updateData)
+    .map((key) => `${key} = ?`)
+    .join(", ");
+  const values = [...Object.values(updateData), id];
+
+  await pool.query(
+    `UPDATE email_automation_rules SET ${fields} WHERE id = ?`,
+    values,
+  );
+
+  if (actorId) {
+    await logAction(actorId, "UPDATE", "AUTOMATION", {
+      target_id: id,
+      changes: updateData,
+    });
+  }
+};
+
+export const deleteAutomationRule = async (id: number, actorId?: string) => {
   await pool.query("DELETE FROM email_automation_rules WHERE id = ?", [id]);
+  if (actorId) {
+    await logAction(actorId, "DELETE", "AUTOMATION", { target_id: id });
+  }
 };
 
 export const processAutomations = async () => {

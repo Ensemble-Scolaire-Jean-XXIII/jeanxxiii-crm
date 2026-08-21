@@ -5,7 +5,7 @@ import { authenticate } from "../middleware/auth";
 
 const router = Router();
 
-router.get("/", async (req, res) => {
+router.get("/", authenticate, async (req, res) => {
   try {
     const prospects = await prospectService.getAllProspects();
     res.json(prospects);
@@ -14,9 +14,11 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", authenticate, async (req, res) => {
   try {
-    const prospect = await prospectService.getProspectById(req.params.id);
+    const prospect = await prospectService.getProspectById(
+      req.params.id as string,
+    );
     if (!prospect) return res.status(404).json({ error: "Not found" });
     res.json(prospect);
   } catch (error) {
@@ -24,12 +26,12 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", authenticate, async (req: any, res) => {
   try {
     if (!emailRegex.test(req.body.email)) {
       return res.status(400).json({ error: "Format d'email invalide" });
     }
-    const id = await prospectService.createProspect(req.body);
+    const id = await prospectService.createProspect(req.body, req.user.id);
     res.status(201).json({ id });
   } catch (error: any) {
     if (error.message === "EMAIL_EXISTS") {
@@ -39,14 +41,17 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.post("/:id/send-email", async (req, res) => {
+router.post("/:id/send-email", authenticate, async (req, res) => {
   try {
     const { template_id } = req.body;
     if (!template_id) {
       return res.status(400).json({ error: "template_id est requis" });
     }
 
-    await prospectService.sendEmailToProspect(req.params.id, template_id);
+    await prospectService.sendEmailToProspect(
+      req.params.id as string,
+      template_id,
+    );
     res.status(200).json({ message: "Email envoyé avec succès" });
   } catch (error: any) {
     console.error("Erreur d'envoi de mail:", error);
@@ -56,12 +61,16 @@ router.post("/:id/send-email", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", authenticate, async (req: any, res) => {
   try {
     if (req.body.email && !emailRegex.test(req.body.email)) {
       return res.status(400).json({ error: "Format d'email invalide" });
     }
-    await prospectService.updateProspect(req.params.id, req.body);
+    await prospectService.updateProspect(
+      req.params.id as string,
+      req.body,
+      req.user.id,
+    );
     res.status(204).send();
   } catch (error: any) {
     if (error.message === "EMAIL_EXISTS") {
@@ -71,9 +80,9 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticate, async (req: any, res) => {
   try {
-    await prospectService.deleteProspect(req.params.id);
+    await prospectService.deleteProspect(req.params.id as string, req.user.id);
     res.status(204).send();
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });

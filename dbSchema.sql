@@ -133,3 +133,17 @@ CREATE TABLE `email_automation_logs` (
   CONSTRAINT `fk_log_prospect` FOREIGN KEY (`prospect_id`) REFERENCES `prospects` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_log_rule` FOREIGN KEY (`rule_id`) REFERENCES `email_automation_rules` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- audit_logs definition
+
+CREATE TABLE `audit_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` uuid NOT NULL,
+  `action` varchar(50) NOT NULL,
+  `resource` varchar(50) NOT NULL,
+  `details` json DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `fk_log_user` (`user_id`),
+  CONSTRAINT `fk_log_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

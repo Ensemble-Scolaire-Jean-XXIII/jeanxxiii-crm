@@ -26,6 +26,7 @@ export default function AutomationsPage() {
     setCreateForm,
     handleCreate,
     handleDelete,
+    handleUpdateField,
   } = useCrud<EmailAutomationRule, CreateAutomationDTO>(automationService, {
     status_id: "",
     formation_id: null,
@@ -93,20 +94,6 @@ export default function AutomationsPage() {
     });
   };
 
-  const getStatusName = (id: number | null) => {
-    if (!id) return "-";
-    return statuses.find((s) => s.id === id)?.name || "Inconnu";
-  };
-
-  const getTemplateName = (id: string) => {
-    return templates.find((t) => t.id === id)?.name || "Inconnu";
-  };
-
-  const getFormationName = (id: number | null) => {
-    if (!id) return null;
-    return formations.find((f) => f.id === id)?.name || "Inconnue";
-  };
-
   return (
     <div className="space-y-8">
       <Toast message={error} type="error" onClose={() => setError("")} />
@@ -119,6 +106,7 @@ export default function AutomationsPage() {
           Gérez les règles d&rsquo;envoies automatique d&rsquo;emails
         </p>
       </div>
+
       <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-primary dark:text-white">
@@ -252,9 +240,9 @@ export default function AutomationsPage() {
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
-              <th className="p-3 font-semibold">Type / Déclencheur</th>
-              <th className="p-3 font-semibold">Formation</th>
-              <th className="p-3 font-semibold">Template</th>
+              <th className="p-3 font-semibold">Déclencheur (Statut / Date)</th>
+              <th className="p-3 font-semibold">Formation Cible</th>
+              <th className="p-3 font-semibold">Template d&apos;email</th>
               <th className="p-3 font-semibold text-right">Actions</th>
             </tr>
           </thead>
@@ -264,37 +252,92 @@ export default function AutomationsPage() {
                 key={rule.id}
                 className="group border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
               >
-                <td className="p-3 font-medium">
-                  {rule.trigger_type === "STATUS_CHANGE" ? (
-                    <span className="flex flex-col">
-                      <span className="text-xs text-slate-500">Statut</span>
-                      {getStatusName(rule.status_id)}
-                    </span>
-                  ) : (
-                    <span className="flex flex-col">
-                      <span className="text-xs text-blue-500">
-                        Campagne (Prévue)
-                      </span>
-                      {rule.scheduled_date
-                        ? new Date(rule.scheduled_date).toLocaleString("fr-FR")
-                        : "-"}
-                    </span>
-                  )}
-                </td>
+                {/* Colonne Déclencheur direct en dropdown/input */}
                 <td className="p-3">
-                  {rule.formation_id ? (
-                    <span className="bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300 px-2 py-1 rounded text-sm">
-                      {getFormationName(rule.formation_id)}
-                    </span>
+                  {rule.trigger_type === "STATUS_CHANGE" ? (
+                    <select
+                      className="input-field py-1 px-2 text-xs sm:text-sm cursor-pointer w-full"
+                      value={rule.status_id ?? ""}
+                      onChange={(e) =>
+                        handleUpdateField(
+                          rule.id,
+                          "status_id",
+                          e.target.value ? Number(e.target.value) : null,
+                        )
+                      }
+                    >
+                      {statuses.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </select>
                   ) : (
-                    <span className="text-slate-400 italic text-sm">
-                      Toutes
-                    </span>
+                    <input
+                      type="datetime-local"
+                      className="input-field py-1 px-2 text-xs sm:text-sm w-full"
+                      value={
+                        rule.scheduled_date
+                          ? new Date(rule.scheduled_date)
+                              .toISOString()
+                              .slice(0, 16)
+                          : ""
+                      }
+                      onChange={(e) =>
+                        handleUpdateField(
+                          rule.id,
+                          "scheduled_date",
+                          e.target.value || null,
+                        )
+                      }
+                    />
                   )}
                 </td>
-                <td className="p-3 text-primary dark:text-white">
-                  {getTemplateName(rule.email_template_id)}
+
+                {/* Colonne Formation directe en dropdown */}
+                <td className="p-3">
+                  <select
+                    className="input-field py-1 px-2 text-xs sm:text-sm cursor-pointer w-full"
+                    value={rule.formation_id ?? ""}
+                    onChange={(e) =>
+                      handleUpdateField(
+                        rule.id,
+                        "formation_id",
+                        e.target.value ? Number(e.target.value) : null,
+                      )
+                    }
+                  >
+                    <option value="">-- Toutes les formations --</option>
+                    {formations.map((f) => (
+                      <option key={f.id} value={f.id}>
+                        {f.name}
+                      </option>
+                    ))}
+                  </select>
                 </td>
+
+                {/* Colonne Template directe en dropdown */}
+                <td className="p-3">
+                  <select
+                    className="input-field py-1 px-2 text-xs sm:text-sm cursor-pointer w-full"
+                    value={rule.email_template_id}
+                    onChange={(e) =>
+                      handleUpdateField(
+                        rule.id,
+                        "email_template_id",
+                        e.target.value,
+                      )
+                    }
+                  >
+                    {templates.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+
+                {/* Colonne Actions (Suppression uniquement) */}
                 <td className="p-3 text-right">
                   <button
                     onClick={() => handleDelete(rule.id)}
@@ -305,6 +348,13 @@ export default function AutomationsPage() {
                 </td>
               </tr>
             ))}
+            {automations.length === 0 && (
+              <tr>
+                <td colSpan={4} className="p-6 text-center text-slate-500">
+                  Aucune règle d&apos;automatisation trouvée.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

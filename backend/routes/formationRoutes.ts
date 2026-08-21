@@ -13,31 +13,35 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", authenticate, async (req, res) => {
+router.post("/", authenticate, async (req: any, res) => {
   try {
     const { name } = req.body;
     if (!name) return res.status(400).json({ error: "Le nom est requis" });
-    const id = await formationService.createFormation(name);
+    const id = await formationService.createFormation(name, req.user.id);
     res.status(201).json({ id });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-router.put("/:id", authenticate, async (req, res) => {
+router.put("/:id", authenticate, async (req: any, res) => {
   try {
     const { name } = req.body;
     if (!name) return res.status(400).json({ error: "Le nom est requis" });
-    await formationService.updateFormation(Number(req.params.id), name);
+    await formationService.updateFormation(
+      Number(req.params.id),
+      name,
+      req.user.id,
+    );
     res.status(204).send();
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-router.delete("/:id", authenticate, async (req, res) => {
+router.delete("/:id", authenticate, async (req: any, res) => {
   try {
-    await formationService.deleteFormation(Number(req.params.id));
+    await formationService.deleteFormation(Number(req.params.id), req.user.id);
     res.status(204).send();
   } catch (error: any) {
     if (error.message === "IN_USE") {

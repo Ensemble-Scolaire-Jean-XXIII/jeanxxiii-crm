@@ -2,6 +2,7 @@ import { pool } from "../config/db";
 import { User } from "../models/types";
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcryptjs";
+import { logAction } from "./auditLogService"; // <-- Import
 
 export const getAllUsers = async (): Promise<User[]> => {
   const [rows] = await pool.query(
@@ -26,6 +27,7 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
 
 export const createUser = async (
   data: Omit<User, "id" | "created_at">,
+  actorId?: string,
 ): Promise<string> => {
   const id = uuidv4();
   const salt = await bcrypt.genSalt(10);
@@ -42,12 +44,22 @@ export const createUser = async (
       data.role,
     ],
   );
+
+  if (actorId) {
+    await logAction(actorId, "CREATE", "USER", {
+      id,
+      email: data.email,
+      role: data.role,
+    });
+  }
+
   return id;
 };
 
 export const updateUser = async (
   id: string,
   data: Partial<User>,
+  actorId?: string,
 ): Promise<void> => {
   const updateData: Record<string, any> = {};
 
@@ -75,8 +87,23 @@ export const updateUser = async (
   values.push(id);
 
   await pool.query(`UPDATE users SET ${fields} WHERE id = ?`, values);
+
+  if (actorId) {
+    const safeData = { ...updateData };
+    delete safeData.password_hash;
+    await logAction(actorId, "UPDATE", "USER", {
+      target_id: id,
+      changes: safeData,
+    });
+  }
 };
 
-export const deleteUser = async (id: string): Promise<void> => {
+export const deleteUser = async (
+  id: string,
+  actorId?: string,
+): Promise<void> => {
   await pool.query("DELETE FROM users WHERE id = ?", [id]);
+  if (actorId) {
+    await logAction(actorId, "DELETE", "USER", { target_id: id });
+  }
 };

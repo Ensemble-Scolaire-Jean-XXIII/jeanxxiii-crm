@@ -1,5 +1,6 @@
 import { pool } from "../config/db";
 import { Status } from "../models/types";
+import { logAction } from "./auditLogService";
 
 export const getAllStatuses = async (): Promise<Status[]> => {
   const [rows] = await pool.query("SELECT * FROM statuses");
@@ -13,17 +14,26 @@ export const getStatusById = async (id: number): Promise<Status | null> => {
 
 export const createStatus = async (
   data: Omit<Status, "id">,
+  actorId?: string,
 ): Promise<number> => {
   const [result] = await pool.query(
     "INSERT INTO statuses (name, is_custom, created_by) VALUES (?, ?, ?)",
     [data.name, data.is_custom, data.created_by],
   );
-  return (result as any).insertId;
+  const insertId = (result as any).insertId;
+
+  if (actorId)
+    await logAction(actorId, "CREATE", "STATUS", {
+      id: insertId,
+      name: data.name,
+    });
+  return insertId;
 };
 
 export const updateStatus = async (
   id: number,
   data: Partial<Status>,
+  actorId?: string,
 ): Promise<void> => {
   const allowedFields = ["name", "is_custom"];
   const updateData: Record<string, any> = {};
@@ -42,9 +52,15 @@ export const updateStatus = async (
   const values = [...Object.values(updateData), id];
 
   await pool.query(`UPDATE statuses SET ${fields} WHERE id = ?`, values);
+
+  if (actorId)
+    await logAction(actorId, "UPDATE", "STATUS", {
+      target_id: id,
+      changes: updateData,
+    });
 };
 
-export const deleteStatus = async (id: number) => {
+export const deleteStatus = async (id: number, actorId?: string) => {
   const [prospects] = (await pool.query(
     "SELECT 1 FROM prospects WHERE status_id = ? LIMIT 1",
     [id],
@@ -57,4 +73,5 @@ export const deleteStatus = async (id: number) => {
   }
 
   await pool.query("DELETE FROM statuses WHERE id = ?", [id]);
+  if (actorId) await logAction(actorId, "DELETE", "STATUS", { target_id: id });
 };

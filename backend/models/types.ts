@@ -64,3 +64,14 @@ export interface Formation {
   name: string;
   created_at?: Date | string;
 }
+
+export interface AuditLog {
+  id: number;
+  user_id: string;
+  action: string;
+  resource: string;
+  details: any;
+  created_at: Date;
+  user_email?: string;
+  user_name?: string;
+}
