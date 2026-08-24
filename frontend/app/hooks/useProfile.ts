@@ -1,13 +1,6 @@
 import { useEffect, useState } from "react";
 import { userService } from "../services/userService";
-import { User } from "../types/index";
-
-interface UpdateProfileDTO {
-  first_name: string;
-  last_name: string;
-  email: string;
-  password_hash?: string;
-}
+import { UpdateProfileDTO, User } from "../types/index";
 
 export function useProfile() {
   const [user, setUser] = useState<User | null>(null);

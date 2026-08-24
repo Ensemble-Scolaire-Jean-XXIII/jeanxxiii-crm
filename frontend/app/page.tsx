@@ -8,6 +8,7 @@ import { automationService } from "./services/automationService";
 import { lexpressService } from "./services/lexpressService";
 import Image from "next/image";
 import Toast from "./components/Toast";
+import Skeleton from "./components/Skeleton";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -138,17 +139,17 @@ export default function DashboardPage() {
           <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">
             Prospects totaux
           </h2>
-          <span className="text-4xl font-bold text-white">
-            {isLoading ? "-" : stats.prospects}
-          </span>
+          <div className="text-4xl font-bold text-white">
+            {isLoading ? <Skeleton className="h-10 w-24" /> : stats.prospects}
+          </div>
         </div>
         <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
           <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">
             Règles auto
           </h2>
-          <span className="text-4xl font-bold text-white">
-            {isLoading ? "-" : stats.automations}
-          </span>
+          <div className="text-4xl font-bold text-white">
+            {isLoading ? <Skeleton className="h-10 w-24" /> : stats.automations}
+          </div>
         </div>
 
         {isAdmin && (
@@ -156,9 +157,9 @@ export default function DashboardPage() {
             <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">
               Utilisateurs
             </h2>
-            <span className="text-4xl font-bold text-white">
-              {isLoading ? "-" : stats.users}
-            </span>
+            <div className="text-4xl font-bold text-white">
+              {isLoading ? <Skeleton className="h-10 w-24" /> : stats.users}
+            </div>
           </div>
         )}
       </div>

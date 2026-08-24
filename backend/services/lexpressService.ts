@@ -248,12 +248,12 @@ export const processSubmissionsInsertion = async (items: any[]) => {
         ) 
         VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NOW())
         ON DUPLICATE KEY UPDATE 
-          email = VALUES(email),
-          first_name = VALUES(first_name),
-          last_name = VALUES(last_name),
-          phone = VALUES(phone),
-          gender = VALUES(gender),
-          formation_id = COALESCE(VALUES(formation_id), formation_id)
+          email = COALESCE(prospects.email, VALUES(email)),
+          first_name = COALESCE(prospects.first_name, VALUES(first_name)),
+          last_name = COALESCE(prospects.last_name, VALUES(last_name)),
+          phone = COALESCE(prospects.phone, VALUES(phone)),
+          gender = COALESCE(prospects.gender, VALUES(gender)),
+          formation_id = COALESCE(prospects.formation_id, VALUES(formation_id))
       `;
 
       await pool.execute(query, [
