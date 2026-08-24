@@ -5,26 +5,29 @@ import { userService } from "../services/userService";
 import { auditLogService } from "../services/auditLogService";
 import { CreateUsersDTO, User, AuditLog } from "../types/index";
 import Toast from "../components/Toast";
+import Skeleton from "../components/Skeleton";
 import { useCrud } from "../hooks/useCrud";
 
 export default function UsersPage() {
   const {
     data: users,
+    isLoading,
     editingId,
     setEditingId,
     editForm,
     setEditForm,
     createForm,
     setCreateForm,
+    undoAction,
     error,
     setError,
     success,
     setSuccess,
-    handleCreate,
-    handleDelete,
-    handleUpdateField,
+    setUndoAction,
     startEdit,
-    saveEdit,
+    create,
+    updateWithUndo,
+    deleteWithUndo,
   } = useCrud<User, CreateUsersDTO>(userService, {
     email: "",
     password_hash: "",
@@ -32,34 +35,6 @@ export default function UsersPage() {
     last_name: "",
     role: "user",
   });
-
-  const onSaveEdit = (id: string) => {
-    saveEdit(id, (form) => {
-      const payload = { ...form };
-      delete (payload as { id?: string | number }).id;
-      return payload;
-    });
-    setTimeout(() => fetchLogs(), 500);
-  };
-
-  const onHandleCreate = async (e: React.FormEvent) => {
-    await handleCreate(e);
-    setTimeout(() => fetchLogs(), 500);
-  };
-
-  const onHandleDelete = async (id: string) => {
-    await handleDelete(id);
-    setTimeout(() => fetchLogs(), 500);
-  };
-
-  const onHandleUpdateField = async (
-    id: string,
-    field: string,
-    value: unknown,
-  ) => {
-    await handleUpdateField(id, field, value);
-    setTimeout(() => fetchLogs(), 500);
-  };
 
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [logPage, setLogPage] = useState(1);
@@ -82,11 +57,11 @@ export default function UsersPage() {
   const formatAction = (action: string) => {
     switch (action) {
       case "CREATE":
-        return <span className="text-green-500 font-bold">CRÉATION</span>;
+        return <span className="text-emerald-400 font-bold">CRÉATION</span>;
       case "UPDATE":
-        return <span className="text-blue-500 font-bold">MODIFICATION</span>;
+        return <span className="text-blue-400 font-bold">MODIFICATION</span>;
       case "DELETE":
-        return <span className="text-red-500 font-bold">SUPPRESSION</span>;
+        return <span className="text-red-400 font-bold">SUPPRESSION</span>;
       default:
         return <span>{action}</span>;
     }
@@ -96,6 +71,15 @@ export default function UsersPage() {
     <div className="space-y-12">
       <Toast message={error} type="error" onClose={() => setError("")} />
       <Toast message={success} type="success" onClose={() => setSuccess("")} />
+      {undoAction && (
+        <Toast
+          message={undoAction.message}
+          type="undo"
+          duration={undoAction.duration}
+          onClose={() => setUndoAction(null)}
+          onUndo={undoAction.onUndo}
+        />
+      )}
 
       <div>
         <div className="mb-8">
@@ -119,7 +103,7 @@ export default function UsersPage() {
           </div>
 
           <form
-            onSubmit={onHandleCreate}
+            onSubmit={(e) => create(e, createForm)}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4"
           >
             <div>
@@ -205,103 +189,132 @@ export default function UsersPage() {
               </tr>
             </thead>
             <tbody>
-              {users.map((u) => (
-                <tr
-                  key={u.id}
-                  className="group border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
-                >
-                  <td className="p-3">
-                    {editingId === u.id ? (
-                      <div className="flex gap-2">
-                        <input
-                          className="input-field py-1 px-2 w-28"
-                          value={editForm.first_name || ""}
-                          onChange={(e) =>
-                            setEditForm({
-                              ...editForm,
-                              first_name: e.target.value,
-                            })
-                          }
-                        />
-                        <input
-                          className="input-field py-1 px-2 w-28"
-                          value={editForm.last_name || ""}
-                          onChange={(e) =>
-                            setEditForm({
-                              ...editForm,
-                              last_name: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                    ) : (
-                      <span className="font-medium">
-                        {u.first_name} {u.last_name}
-                      </span>
-                    )}
-                  </td>
-                  <td className="p-3">
-                    {editingId === u.id ? (
-                      <input
-                        className="input-field py-1 px-2"
-                        value={editForm.email || ""}
-                        onChange={(e) =>
-                          setEditForm({ ...editForm, email: e.target.value })
-                        }
-                      />
-                    ) : (
-                      <span className="text-slate-600 dark:text-slate-400">
-                        {u.email}
-                      </span>
-                    )}
-                  </td>
-                  <td className="p-3">
-                    <select
-                      className="input-field py-1! px-2! text-sm cursor-pointer w-full sm:w-auto"
-                      value={u.role}
-                      onChange={(e) =>
-                        onHandleUpdateField(u.id, "role", e.target.value)
-                      }
-                    >
-                      <option value="user">Utilisateur</option>
-                      <option value="admin">Administrateur</option>
-                    </select>
-                  </td>
-                  <td className="p-3 text-right">
-                    {editingId === u.id ? (
-                      <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => onSaveEdit(u.id)}
-                          className="btn btn-ghost text-green-600 px-2 py-1 text-sm font-bold"
-                        >
-                          Valider
-                        </button>
-                        <button
-                          onClick={() => setEditingId(null)}
-                          className="btn btn-ghost text-slate-500 px-2 py-1 text-sm"
-                        >
-                          Annuler
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <button
-                          onClick={() => startEdit(u)}
-                          className="btn btn-ghost text-accent px-2 py-1 text-sm"
-                        >
-                          Corriger
-                        </button>
-                        <button
-                          onClick={() => onHandleDelete(u.id)}
-                          className="btn btn-ghost text-danger px-2 py-1 text-sm"
-                        >
-                          Supprimer
-                        </button>
-                      </div>
-                    )}
+              {isLoading ? (
+                Array.from({ length: 4 }).map((_, idx) => (
+                  <tr key={idx} className="border-b border-white/5">
+                    <td className="p-3">
+                      <Skeleton className="h-8 w-40" />
+                    </td>
+                    <td className="p-3">
+                      <Skeleton className="h-8 w-48" />
+                    </td>
+                    <td className="p-3">
+                      <Skeleton className="h-8 w-24" />
+                    </td>
+                    <td className="p-3 text-right">
+                      <Skeleton className="h-8 w-24 inline-block" />
+                    </td>
+                  </tr>
+                ))
+              ) : users.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="p-6 text-center text-slate-400">
+                    Aucun utilisateur trouvé.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                users.map((u) => (
+                  <tr
+                    key={u.id}
+                    className="group border-b border-white/5 hover:bg-white/5 transition-colors"
+                  >
+                    <td className="p-3">
+                      {editingId === u.id ? (
+                        <div className="flex gap-2">
+                          <input
+                            className="input-field py-1 px-2 w-28"
+                            value={editForm.first_name || ""}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                first_name: e.target.value,
+                              })
+                            }
+                          />
+                          <input
+                            className="input-field py-1 px-2 w-28"
+                            value={editForm.last_name || ""}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                last_name: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      ) : (
+                        <span className="font-medium text-white">
+                          {u.first_name} {u.last_name}
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-3">
+                      {editingId === u.id ? (
+                        <input
+                          className="input-field py-1 px-2"
+                          value={editForm.email || ""}
+                          onChange={(e) =>
+                            setEditForm({ ...editForm, email: e.target.value })
+                          }
+                        />
+                      ) : (
+                        <span className="text-slate-300">{u.email}</span>
+                      )}
+                    </td>
+                    <td className="p-3">
+                      <select
+                        className="input-field py-1! px-2! text-sm cursor-pointer w-full sm:w-auto"
+                        value={u.role}
+                        onChange={(e) =>
+                          updateWithUndo(u.id, { role: e.target.value })
+                        }
+                      >
+                        <option value="user">Utilisateur</option>
+                        <option value="admin">Administrateur</option>
+                      </select>
+                    </td>
+                    <td className="p-3 text-right">
+                      {editingId === u.id ? (
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() =>
+                              updateWithUndo(u.id, {
+                                first_name: editForm.first_name,
+                                last_name: editForm.last_name,
+                                email: editForm.email,
+                              })
+                            }
+                            className="btn btn-ghost text-green-400 px-2 py-1 text-sm font-bold"
+                          >
+                            Valider
+                          </button>
+                          <button
+                            onClick={() => setEditingId(null)}
+                            className="btn btn-ghost text-slate-400 px-2 py-1 text-sm"
+                          >
+                            Annuler
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <button
+                            onClick={() => startEdit(u)}
+                            className="btn btn-ghost text-accent px-2 py-1 text-sm"
+                          >
+                            Corriger
+                          </button>
+                          <button
+                            onClick={() => deleteWithUndo(u.id)}
+                            className="btn btn-ghost text-red-400 px-2 py-1 text-sm"
+                          >
+                            Supprimer
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -341,23 +354,23 @@ export default function UsersPage() {
                 {logs.map((log) => (
                   <tr
                     key={log.id}
-                    className="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
+                    className="border-b border-white/5 hover:bg-white/5 transition-colors"
                   >
-                    <td className="p-3 whitespace-nowrap text-slate-500">
+                    <td className="p-3 whitespace-nowrap text-slate-400">
                       {new Date(log.created_at).toLocaleString()}
                     </td>
-                    <td className="p-3 font-medium">
+                    <td className="p-3 font-medium text-white">
                       {log.user_name} <br />
-                      <span className="text-xs text-slate-500 font-normal">
+                      <span className="text-xs text-slate-400 font-normal">
                         {log.user_email}
                       </span>
                     </td>
                     <td className="p-3">{formatAction(log.action)}</td>
-                    <td className="p-3 font-semibold text-slate-700 dark:text-slate-300">
+                    <td className="p-3 font-semibold text-slate-300">
                       {log.resource}
                     </td>
                     <td className="p-3">
-                      <pre className="text-[10px] bg-slate-100 dark:bg-slate-900 p-2 rounded max-w-xs overflow-x-auto text-slate-700 dark:text-slate-300">
+                      <pre className="text-[10px] bg-slate-950 p-2 rounded border border-white/10 max-w-xs overflow-x-auto text-slate-300">
                         {log.details
                           ? JSON.stringify(log.details, null, 2)
                           : "Aucun détail"}
@@ -367,7 +380,7 @@ export default function UsersPage() {
                 ))}
                 {logs.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="p-6 text-center text-slate-500">
+                    <td colSpan={5} className="p-6 text-center text-slate-400">
                       Aucun log enregistré pour le moment.
                     </td>
                   </tr>
@@ -385,7 +398,7 @@ export default function UsersPage() {
               >
                 &larr; Précédent
               </button>
-              <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+              <span className="text-sm font-medium text-slate-300">
                 Page {logPage} sur {logTotalPages}
               </span>
               <button

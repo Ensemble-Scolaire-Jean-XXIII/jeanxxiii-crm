@@ -14,6 +14,7 @@ import {
   SortHeaderProps,
 } from "../types";
 import Toast from "../components/Toast";
+import Skeleton from "../components/Skeleton";
 import { useCrud } from "../hooks/useCrud";
 
 const formInputs: {
@@ -51,21 +52,23 @@ const SortHeader = ({
 export default function ProspectsPage() {
   const {
     data: prospects,
+    isLoading,
     error,
     success,
     editingId,
     editForm,
     createForm,
+    undoAction,
     setError,
     setSuccess,
     setEditingId,
     setEditForm,
     setCreateForm,
-    handleCreate,
-    handleDelete,
-    handleUpdateField,
+    setUndoAction,
     startEdit,
-    saveEdit,
+    create,
+    updateWithUndo,
+    deleteWithUndo,
   } = useCrud<ProspectExtended, CreateProspectsDTO>(prospectService, {
     first_name: "",
     last_name: "",
@@ -80,7 +83,6 @@ export default function ProspectsPage() {
   const [statuses, setStatuses] = useState<Status[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
   const [formations, setFormations] = useState<Formation[]>([]);
-
   const [sortField, setSortField] = useState<string>("date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
@@ -117,19 +119,6 @@ export default function ProspectsPage() {
     }));
   };
 
-  const onHandleCreate = (e: React.FormEvent) => {
-    handleCreate(e, createForm);
-  };
-
-  const onSaveEdit = (id: string) => {
-    saveEdit(id, (form) => ({
-      first_name: form.first_name,
-      last_name: form.last_name,
-      email: form.email,
-      phone: form.phone,
-    }));
-  };
-
   const handleSort = (field: string) => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -155,12 +144,12 @@ export default function ProspectsPage() {
         break;
       case "country":
         compareResult = (a.country_name || "").localeCompare(
-          b.country_name || "",
+          a.country_name || "",
         );
         break;
       case "status":
         compareResult = (a.status_name || "").localeCompare(
-          b.status_name || "",
+          a.status_name || "",
         );
         break;
       case "date":
@@ -174,9 +163,18 @@ export default function ProspectsPage() {
   });
 
   return (
-    <div className="w-full max-w-full space-y-8 overflow-x-hidden px-2 sm:px-4">
+    <div className="space-y-8">
       <Toast message={error} type="error" onClose={() => setError("")} />
       <Toast message={success} type="success" onClose={() => setSuccess("")} />
+      {undoAction && (
+        <Toast
+          message={undoAction.message}
+          type="undo"
+          duration={undoAction.duration}
+          onClose={() => setUndoAction(null)}
+          onUndo={undoAction.onUndo}
+        />
+      )}
 
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-primary dark:text-white">
@@ -198,7 +196,7 @@ export default function ProspectsPage() {
         </div>
 
         <form
-          onSubmit={onHandleCreate}
+          onSubmit={(e) => create(e, createForm)}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
         >
           {formInputs.map((input) => (
@@ -338,187 +336,223 @@ export default function ProspectsPage() {
               </tr>
             </thead>
             <tbody>
-              {sortedProspects.map((p) => (
-                <tr
-                  key={p.id}
-                  className="group border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
-                >
-                  <td className="p-3 min-w-45">
-                    {editingId === p.id ? (
-                      <div className="flex flex-col sm:flex-row gap-1">
-                        <input
-                          className="input-field py-1 px-2 w-full text-xs"
-                          value={editForm.first_name || ""}
-                          onChange={(e) =>
-                            setEditForm({
-                              ...editForm,
-                              first_name: e.target.value,
-                            })
-                          }
-                        />
-                        <input
-                          className="input-field py-1 px-2 w-full text-xs"
-                          value={editForm.last_name || ""}
-                          onChange={(e) =>
-                            setEditForm({
-                              ...editForm,
-                              last_name: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                    ) : (
-                      <span
-                        className="block truncate max-w-50"
-                        title={`${p.first_name || ""} ${p.last_name || ""}`}
-                      >
-                        {p.first_name} {p.last_name}
-                      </span>
-                    )}
-                  </td>
-
-                  <td className="p-3 min-w-55">
-                    {editingId === p.id ? (
-                      <div className="flex flex-col gap-1">
-                        <input
-                          className="input-field py-1 px-2 text-xs w-full"
-                          value={editForm.email || ""}
-                          onChange={(e) =>
-                            setEditForm({ ...editForm, email: e.target.value })
-                          }
-                        />
-                        <input
-                          className="input-field py-1 px-2 text-xs w-full"
-                          value={editForm.phone || ""}
-                          placeholder="Téléphone"
-                          onChange={(e) =>
-                            setEditForm({ ...editForm, phone: e.target.value })
-                          }
-                        />
-                      </div>
-                    ) : (
-                      <div>
-                        <span
-                          className="block truncate max-w-55"
-                          title={p.email}
-                        >
-                          {p.email}
-                        </span>
-                        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium block truncate">
-                          {p.phone ? p.phone : "Aucun téléphone"}
-                        </span>
-                      </div>
-                    )}
-                  </td>
-
-                  <td className="p-3 min-w-37.5">
-                    <select
-                      className="input-field !py-1 !px-2 text-xs sm:text-sm cursor-pointer w-full"
-                      value={p.formation_id ?? ""}
-                      onChange={(e) =>
-                        handleUpdateField(
-                          p.id,
-                          "formation_id",
-                          e.target.value ? Number(e.target.value) : null,
-                        )
-                      }
-                    >
-                      <option value="">-- Aucune --</option>
-                      {formations.map((f) => (
-                        <option key={f.id} value={f.id}>
-                          {f.name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-
-                  <td className="p-3 min-w-30">
-                    <select
-                      className="input-field !py-1 !px-2 text-xs sm:text-sm cursor-pointer w-full"
-                      value={p.country_id ?? ""}
-                      onChange={(e) =>
-                        handleUpdateField(
-                          p.id,
-                          "country_id",
-                          Number(e.target.value),
-                        )
-                      }
-                    >
-                      {countries.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-
-                  <td className="p-3 min-w-37.5">
-                    <select
-                      className="input-field !py-1 !px-2 text-xs sm:text-sm cursor-pointer w-full"
-                      value={p.status_id ?? ""}
-                      onChange={(e) =>
-                        handleUpdateField(
-                          p.id,
-                          "status_id",
-                          Number(e.target.value),
-                        )
-                      }
-                    >
-                      {statuses.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-
-                  <td className="p-3 text-xs sm:text-sm whitespace-nowrap min-w-25">
-                    {p.last_action_date
-                      ? new Date(p.last_action_date).toLocaleDateString()
-                      : "Jamais"}
-                  </td>
-
-                  <td className="p-3 text-right min-w-37.5">
-                    {editingId === p.id ? (
-                      <div className="flex justify-end gap-1">
-                        <button
-                          onClick={() => onSaveEdit(p.id)}
-                          className="btn btn-ghost text-green-600 px-2 py-1 text-xs font-bold"
-                        >
-                          Valider
-                        </button>
-                        <button
-                          onClick={() => setEditingId(null)}
-                          className="btn btn-ghost text-slate-500 px-2 py-1 text-xs"
-                        >
-                          Annuler
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex justify-end gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <button
-                          onClick={() => startEdit(p)}
-                          className="btn btn-ghost text-accent px-2 py-1 text-xs"
-                        >
-                          Modifier
-                        </button>
-                        <button
-                          onClick={() => handleDelete(p.id)}
-                          className="btn btn-ghost text-danger px-2 py-1 text-xs"
-                        >
-                          Suppr.
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {sortedProspects.length === 0 && (
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, idx) => (
+                  <tr key={idx} className="border-b border-white/5">
+                    <td className="p-3">
+                      <Skeleton className="h-8 w-32" />
+                    </td>
+                    <td className="p-3">
+                      <Skeleton className="h-8 w-40" />
+                    </td>
+                    <td className="p-3">
+                      <Skeleton className="h-8 w-32" />
+                    </td>
+                    <td className="p-3">
+                      <Skeleton className="h-8 w-24" />
+                    </td>
+                    <td className="p-3">
+                      <Skeleton className="h-8 w-24" />
+                    </td>
+                    <td className="p-3">
+                      <Skeleton className="h-8 w-24" />
+                    </td>
+                    <td className="p-3 text-right">
+                      <Skeleton className="h-8 w-24 inline-block" />
+                    </td>
+                  </tr>
+                ))
+              ) : sortedProspects.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-6 text-center text-slate-500">
+                  <td colSpan={7} className="p-6 text-center text-slate-400">
                     Aucun prospect trouvé.
                   </td>
                 </tr>
+              ) : (
+                sortedProspects.map((p) => (
+                  <tr
+                    key={p.id}
+                    className="group border-b border-white/5 hover:bg-white/5 transition-colors"
+                  >
+                    <td className="p-3 min-w-45">
+                      {editingId === p.id ? (
+                        <div className="flex flex-col sm:flex-row gap-1">
+                          <input
+                            className="input-field py-1 px-2 w-full text-xs"
+                            value={editForm.first_name || ""}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                first_name: e.target.value,
+                              })
+                            }
+                          />
+                          <input
+                            className="input-field py-1 px-2 w-full text-xs"
+                            value={editForm.last_name || ""}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                last_name: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      ) : (
+                        <span
+                          className="block truncate max-w-50 text-white"
+                          title={`${p.first_name || ""} ${p.last_name || ""}`}
+                        >
+                          {p.first_name} {p.last_name}
+                        </span>
+                      )}
+                    </td>
+
+                    <td className="p-3 min-w-55">
+                      {editingId === p.id ? (
+                        <div className="flex flex-col gap-1">
+                          <input
+                            className="input-field py-1 px-2 text-xs w-full"
+                            value={editForm.email || ""}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                email: e.target.value,
+                              })
+                            }
+                          />
+                          <input
+                            className="input-field py-1 px-2 text-xs w-full"
+                            value={editForm.phone || ""}
+                            placeholder="Téléphone"
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                phone: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      ) : (
+                        <div>
+                          <span
+                            className="block truncate max-w-55 text-slate-300"
+                            title={p.email}
+                          >
+                            {p.email}
+                          </span>
+                          <span className="text-xs text-slate-400 font-medium block truncate">
+                            {p.phone ? p.phone : "Aucun téléphone"}
+                          </span>
+                        </div>
+                      )}
+                    </td>
+
+                    <td className="p-3 min-w-37.5">
+                      <select
+                        className="input-field py-1! px-2! text-xs sm:text-sm cursor-pointer w-full"
+                        value={p.formation_id ?? ""}
+                        onChange={(e) =>
+                          updateWithUndo(p.id, {
+                            formation_id: e.target.value
+                              ? Number(e.target.value)
+                              : null,
+                          })
+                        }
+                      >
+                        <option value="">-- Aucune --</option>
+                        {formations.map((f) => (
+                          <option key={f.id} value={f.id}>
+                            {f.name}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+
+                    <td className="p-3 min-w-30">
+                      <select
+                        className="input-field py-1! px-2! text-xs sm:text-sm cursor-pointer w-full"
+                        value={p.country_id ?? ""}
+                        onChange={(e) =>
+                          updateWithUndo(p.id, {
+                            country_id: Number(e.target.value),
+                          })
+                        }
+                      >
+                        {countries.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+
+                    <td className="p-3 min-w-37.5">
+                      <select
+                        className="input-field py-1! px-2! text-xs sm:text-sm cursor-pointer w-full"
+                        value={p.status_id ?? ""}
+                        onChange={(e) =>
+                          updateWithUndo(p.id, {
+                            status_id: Number(e.target.value),
+                          })
+                        }
+                      >
+                        {statuses.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.name}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+
+                    <td className="p-3 text-xs sm:text-sm whitespace-nowrap min-w-25 text-slate-300">
+                      {p.last_action_date
+                        ? new Date(p.last_action_date).toLocaleDateString()
+                        : "Jamais"}
+                    </td>
+
+                    <td className="p-3 text-right min-w-37.5">
+                      {editingId === p.id ? (
+                        <div className="flex justify-end gap-1">
+                          <button
+                            onClick={() =>
+                              updateWithUndo(p.id, {
+                                first_name: editForm.first_name,
+                                last_name: editForm.last_name,
+                                email: editForm.email,
+                                phone: editForm.phone,
+                              })
+                            }
+                            className="btn btn-ghost text-green-400 px-2 py-1 text-xs font-bold"
+                          >
+                            Valider
+                          </button>
+                          <button
+                            onClick={() => setEditingId(null)}
+                            className="btn btn-ghost text-slate-400 px-2 py-1 text-xs"
+                          >
+                            Annuler
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex justify-end gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <button
+                            onClick={() => startEdit(p)}
+                            className="btn btn-ghost text-accent px-2 py-1 text-xs"
+                          >
+                            Modifier
+                          </button>
+                          <button
+                            onClick={() => deleteWithUndo(p.id)}
+                            className="btn btn-ghost text-red-400 px-2 py-1 text-xs"
+                          >
+                            Suppr.
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>

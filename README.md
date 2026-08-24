@@ -118,6 +118,7 @@ To keep the repository clean and avoid breaking production, follow these mainten
 
 - **No Sync Pushes:** Do **not** push simple synchronization commits (such as `git merge main` followed by a `git push`) directly to the remote `hotfix/prod` branch if you use automated GitHub Actions to open hotfix PRs. Doing so will unnecessarily trigger and recreate redundant/ghost pull requests.
 - **Pushes Reserved for Code:** The `hotfix/prod` remote branch should only receive pushes when you are actively writing and submitting a genuine code correctif (hotfix). Use local merges only if you need to synchronize your local working branch.
+- **Clean branches after a new feature got deployed**: `git branch | grep -vE "main|hotfix/prod" | xargs git branch -D && git fetch --prune`
 
 ## Customization and Adoption
 

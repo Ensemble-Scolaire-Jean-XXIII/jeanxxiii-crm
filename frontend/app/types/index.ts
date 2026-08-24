@@ -1,3 +1,5 @@
+// Data types
+
 export interface User {
   id: string;
   email: string;
@@ -153,4 +155,38 @@ export interface SortHeaderProps {
   sortField: string;
   sortDirection: "asc" | "desc";
   onSort: (field: string) => void;
+}
+
+// Frontend data types & DTOs
+
+export interface ToastProps {
+  message: string;
+  type: "success" | "error" | "undo";
+  duration?: number;
+  onClose: () => void;
+  onUndo?: () => void;
+}
+
+export interface CrudService<T, CreateDTO, UpdateDTO = Partial<T>> {
+  getAll: () => Promise<T[]>;
+  create: (data: CreateDTO) => Promise<unknown>;
+  update: (
+    id: string | number,
+    data: UpdateDTO | Record<string, unknown>,
+  ) => Promise<unknown>;
+  delete: (id: string | number) => Promise<unknown>;
+}
+
+export interface UndoAction {
+  message: string;
+  duration: number;
+  timerId: NodeJS.Timeout;
+  onUndo: () => void;
+}
+
+export interface UpdateProfileDTO {
+  first_name: string;
+  last_name: string;
+  email: string;
+  password_hash?: string;
 }
