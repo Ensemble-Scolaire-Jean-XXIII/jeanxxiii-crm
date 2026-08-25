@@ -32,7 +32,7 @@ app.use("/api/automations", authenticate, automationRoutes);
 app.use("/api/lexpress", authenticate, lexpressRoutes);
 app.use("/api/formations", authenticate, formationRoutes);
 app.use("/api/audit-logs", authenticate, auditLogRoutes);
-app.use("/webhooks", webhookRoutes);
+app.use("/api/webhooks", webhookRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   res
