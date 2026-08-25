@@ -1,6 +1,7 @@
 import { Router } from "express";
 import * as prospectService from "../services/prospectService";
 import { getOrCreateFormationByName } from "../services/formationService";
+import { getCountryIdByName } from "../services/countryService";
 
 const router = Router();
 
@@ -29,6 +30,8 @@ router.post("/wordpress", async (req, res) => {
       formationId = await getOrCreateFormationByName(formation);
     }
 
+    const defaultCountryId = await getCountryIdByName("France");
+
     const mappedGender = gender || "Non précisé";
 
     try {
@@ -38,7 +41,7 @@ router.post("/wordpress", async (req, res) => {
         email,
         phone: phone || "",
         gender: mappedGender,
-        country_id: 1,
+        country_id: defaultCountryId || 1,
         status_id: 1,
         formation_id: formationId,
         last_action_date: new Date(),
