@@ -1,0 +1,72 @@
+import { Router } from "express";
+import * as prospectService from "../services/prospectService";
+import { getOrCreateFormationByName } from "../services/formationService";
+
+const router = Router();
+
+router.post("/wordpress", async (req, res) => {
+  const webhookSecret = req.headers["x-webhook-secret"];
+  if (!webhookSecret || webhookSecret !== process.env.WEBHOOK_SECRET) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const {
+      "first-name": firstName,
+      "last-name": lastName,
+      email,
+      phone,
+      formation,
+      gender,
+    } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email requis" });
+    }
+
+    let formationId = null;
+    if (formation) {
+      formationId = await getOrCreateFormationByName(formation);
+    }
+
+    const mappedGender = gender || "Non précisé";
+
+    try {
+      await prospectService.createProspect({
+        first_name: firstName || "",
+        last_name: lastName || "",
+        email,
+        phone: phone || "",
+        gender: mappedGender,
+        country_id: 1,
+        status_id: 1,
+        formation_id: formationId,
+        last_action_date: new Date(),
+      });
+    } catch (err) {
+      if (err instanceof Error && err.message === "EMAIL_EXISTS") {
+        const existing = await prospectService.getProspectByEmail(email);
+        if (existing) {
+          await prospectService.updateProspect(existing.id, {
+            first_name: firstName || existing.first_name,
+            last_name: lastName || existing.last_name,
+            phone: phone || existing.phone,
+            formation_id: formationId || existing.formation_id,
+            gender: mappedGender,
+          });
+        }
+      } else {
+        throw err;
+      }
+    }
+
+    res
+      .status(200)
+      .json({ success: true, message: "Prospect traité avec succès" });
+  } catch (error) {
+    console.error("Erreur Webhook WP:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+export default router;
