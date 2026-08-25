@@ -46,7 +46,7 @@ export default function StatusesPage() {
       )}
 
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-primary dark:text-white">
+        <h1 className="text-3xl font-bold tracking-tight text-white drop-shadow-md">
           Statuts
         </h1>
         <p className="text-white/80 mt-1">
@@ -55,11 +55,9 @@ export default function StatusesPage() {
         </p>
       </div>
 
-      <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
+      <div className="glass-card p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-primary dark:text-white">
-            Créer un statut
-          </h2>
+          <h2 className="text-xl font-semibold text-white">Créer un statut</h2>
           <span className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full text-xs font-medium">
             Nouveau
           </span>
@@ -83,13 +81,17 @@ export default function StatusesPage() {
         </form>
       </div>
 
-      <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
+      <div className="glass-card p-6">
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
-              <th className="p-3 font-semibold">Nom du statut</th>
-              <th className="p-3 font-semibold">Type</th>
-              <th className="p-3 font-semibold text-right">Actions</th>
+              <th className="p-3 font-semibold text-slate-200">
+                Nom du statut
+              </th>
+              <th className="p-3 font-semibold text-slate-200">Type</th>
+              <th className="p-3 font-semibold text-slate-200 text-right">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>

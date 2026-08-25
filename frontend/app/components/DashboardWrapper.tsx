@@ -27,7 +27,7 @@ function NavLink({
     <Link
       href={href}
       title={!isOpen ? String(children) : undefined}
-      className={`group relative px-3 py-2.5 rounded-xl transition-all duration-200 flex items-center gap-3 font-medium overflow-hidden whitespace-nowrap ${
+      className={`group relative px-3 py-2.5 rounded-xl transition-all duration-200 flex items-center gap-3 font-medium overflow-hidden whitespace-nowrap shrink-0 ${
         isActive
           ? "bg-accent/20 text-white border border-accent/30 shadow-lg shadow-accent/10"
           : "text-slate-300 hover:text-white hover:bg-white/10"
@@ -135,10 +135,11 @@ export default function DashboardWrapper({
     );
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden p-4 gap-4 bg-transparent relative">
-      <header className="h-16 bg-slate-900/60 backdrop-blur-xl text-white flex items-center justify-between px-6 rounded-2xl border border-white/20 shadow-2xl shrink-0 z-20">
-        <div className="flex items-center gap-4">
-          <div className="h-9 w-auto relative flex items-center">
+    <div className="flex flex-col h-screen overflow-hidden p-2 md:p-4 gap-2 md:gap-4 bg-transparent relative">
+      {/* HEADER ADAPTATIF */}
+      <header className="h-16 bg-slate-900/60 backdrop-blur-xl text-white flex items-center justify-between px-3 md:px-6 rounded-2xl border border-white/20 shadow-2xl shrink-0 z-20">
+        <div className="flex items-center gap-2 md:gap-4">
+          <div className="h-8 md:h-9 w-auto relative flex items-center shrink-0">
             <Image
               src="/j23.webp"
               alt="Logo"
@@ -149,23 +150,26 @@ export default function DashboardWrapper({
             />
           </div>
           <div className="flex items-center gap-2">
-            <span className="font-black text-lg tracking-wider text-white">
+            <span className="font-black text-lg tracking-wider text-white hidden sm:block">
               ENSEMBLE SCOLAIRE JEAN XXIII
             </span>
-            <span className="bg-accent/20 text-accent text-[10px] font-bold px-2 py-0.5 rounded-md border border-accent/30 uppercase tracking-widest">
-              {isSalonsPage ? "MODE SALON" : "CRM"}
+            <span className="font-black text-sm tracking-wider text-white sm:hidden">
+              JEAN XXIII
+            </span>
+            <span className="bg-accent/20 text-accent text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 rounded-md border border-accent/30 uppercase tracking-widest shrink-0">
+              {isSalonsPage ? "SALON" : "CRM"}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           {!isSalonsPage ? (
             <>
               <Link
                 href="/salons"
                 className="group relative inline-flex items-center justify-center p-0.5 overflow-hidden text-xs font-semibold rounded-xl bg-linear-to-br from-accent to-orange-600 hover:from-accent hover:to-orange-500 text-white shadow-lg shadow-accent/20 transition-all hover:scale-[1.02]"
               >
-                <span className="relative px-4 py-2 transition-all ease-in duration-75 bg-slate-900/40 rounded-[10px] group-hover:bg-transparent flex items-center gap-2">
+                <span className="relative px-3 py-2 transition-all ease-in duration-75 bg-slate-900/40 rounded-[10px] group-hover:bg-transparent flex items-center gap-2">
                   <Image
                     src="/icons/salons.webp"
                     alt="Salons"
@@ -174,13 +178,13 @@ export default function DashboardWrapper({
                     className="object-contain brightness-0 invert shrink-0"
                     unoptimized
                   />
-                  Mode Salon
+                  <span className="hidden md:inline-block">Mode Salon</span>
                 </span>
               </Link>
 
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 bg-white/10 hover:bg-danger/80 text-white px-4 py-2 rounded-xl text-xs font-semibold backdrop-blur-md border border-white/10 transition-all duration-300 hover:shadow-lg hover:shadow-danger/20 cursor-pointer"
+                className="flex items-center gap-2 bg-white/10 hover:bg-danger/80 text-white px-3 py-2 rounded-xl text-xs font-semibold backdrop-blur-md border border-white/10 transition-all duration-300 hover:shadow-lg hover:shadow-danger/20 cursor-pointer"
               >
                 <Image
                   src="/icons/logout.webp"
@@ -190,13 +194,13 @@ export default function DashboardWrapper({
                   className="object-contain brightness-0 invert shrink-0"
                   unoptimized
                 />
-                Déconnexion
+                <span className="hidden md:inline-block">Déconnexion</span>
               </button>
             </>
           ) : (
             <button
               onClick={() => setShowExitModal(true)}
-              className="flex items-center gap-2 bg-white/10 hover:bg-danger/80 text-white px-4 py-2 rounded-xl text-xs font-semibold backdrop-blur-md border border-white/10 transition-all duration-300 hover:shadow-lg hover:shadow-danger/20 cursor-pointer"
+              className="flex items-center gap-2 bg-white/10 hover:bg-danger/80 text-white px-3 py-2 rounded-xl text-xs font-semibold backdrop-blur-md border border-white/10 transition-all duration-300 hover:shadow-lg hover:shadow-danger/20 cursor-pointer"
             >
               <Image
                 src="/icons/back.webp"
@@ -206,7 +210,7 @@ export default function DashboardWrapper({
                 className="object-contain brightness-0 invert shrink-0"
                 unoptimized
               />
-              Retour au CRM
+              <span className="hidden md:inline-block">Retour au CRM</span>
             </button>
           )}
         </div>
@@ -215,7 +219,7 @@ export default function DashboardWrapper({
       <div className="flex flex-1 overflow-hidden gap-4">
         {!isSalonsPage && (
           <aside
-            className={`bg-slate-900/60 backdrop-blur-xl text-white rounded-2xl border border-white/20 shadow-2xl flex flex-col shrink-0 overflow-y-auto transition-all duration-300 ease-in-out ${
+            className={`hidden lg:flex bg-slate-900/60 backdrop-blur-xl text-white rounded-2xl border border-white/20 shadow-2xl flex-col shrink-0 overflow-y-auto transition-all duration-300 ease-in-out ${
               isSidebarOpen ? "w-64" : "w-20"
             }`}
           >
@@ -321,7 +325,7 @@ export default function DashboardWrapper({
         <main
           className={`flex-1 overflow-y-auto ${
             !isSalonsPage
-              ? "p-8 bg-slate-900/40 backdrop-blur-lg rounded-2xl border border-white/15 shadow-2xl"
+              ? "p-4 pb-24 lg:p-8 lg:pb-8 bg-slate-900/40 backdrop-blur-lg rounded-2xl border border-white/15 shadow-2xl"
               : "p-4 flex flex-col justify-center"
           }`}
         >
@@ -329,8 +333,88 @@ export default function DashboardWrapper({
         </main>
       </div>
 
+      {/* BOTTOM NAV MOBILE/TABLETTE PORTRAIT (Scrolable horizontalement si besoin) */}
+      {!isSalonsPage && (
+        <nav
+          className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-slate-900/90 backdrop-blur-2xl border-t border-white/20 z-40 flex items-center justify-start sm:justify-center gap-1 overflow-x-auto px-2 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] touch-pan-x"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `nav::-webkit-scrollbar { display: none; }`,
+            }}
+          />
+          <NavLink
+            href="/"
+            iconSrc="/icons/dashboard.webp"
+            iconAlt="Dashboard"
+            isOpen={false}
+          >
+            Tableau de bord
+          </NavLink>
+          {isAdmin && (
+            <NavLink
+              href="/users"
+              iconSrc="/icons/users.webp"
+              iconAlt="Users"
+              isOpen={false}
+            >
+              Utilisateurs
+            </NavLink>
+          )}
+          <NavLink
+            href="/prospects"
+            iconSrc="/icons/prospects.webp"
+            iconAlt="Prospects"
+            isOpen={false}
+          >
+            Prospects
+          </NavLink>
+          <NavLink
+            href="/automations"
+            iconSrc="/icons/automations.webp"
+            iconAlt="Automations"
+            isOpen={false}
+          >
+            Automatisations
+          </NavLink>
+          <NavLink
+            href="/formations"
+            iconSrc="/icons/formations.webp"
+            iconAlt="Formations"
+            isOpen={false}
+          >
+            Formations
+          </NavLink>
+          <NavLink
+            href="/statuses"
+            iconSrc="/icons/statuses.webp"
+            iconAlt="Statuses"
+            isOpen={false}
+          >
+            Statuts
+          </NavLink>
+          <NavLink
+            href="/templates"
+            iconSrc="/icons/templates.webp"
+            iconAlt="Templates"
+            isOpen={false}
+          >
+            Templates
+          </NavLink>
+          <NavLink
+            href="/profile"
+            iconSrc="/icons/profile.webp"
+            iconAlt="Profile"
+            isOpen={false}
+          >
+            Mon profil
+          </NavLink>
+        </nav>
+      )}
+
       {showExitModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-100 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <form
             onSubmit={(e) => handleExitKiosk(e, exitPassword)}
             className="bg-slate-900/90 border border-white/20 p-8 rounded-2xl w-full max-w-md shadow-2xl relative text-white"
