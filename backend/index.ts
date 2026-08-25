@@ -11,6 +11,8 @@ import automationRoutes from "./routes/automationRoutes";
 import lexpressRoutes from "./routes/lexpressRoutes";
 import formationRoutes from "./routes/formationRoutes";
 import auditLogRoutes from "./routes/auditLogRoutes";
+import webhookRoutes from "./routes/webhookRoutes";
+
 import { authenticate } from "./middleware/auth";
 import { processAutomations } from "./services/automationService";
 import { syncLatestLexpressSubmissionsToDb } from "./services/lexpressService";
@@ -30,6 +32,7 @@ app.use("/api/automations", authenticate, automationRoutes);
 app.use("/api/lexpress", authenticate, lexpressRoutes);
 app.use("/api/formations", authenticate, formationRoutes);
 app.use("/api/audit-logs", authenticate, auditLogRoutes);
+app.use("/webhooks", webhookRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   res
