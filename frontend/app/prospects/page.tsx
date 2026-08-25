@@ -37,7 +37,7 @@ const SortHeader = ({
   onSort,
 }: SortHeaderProps) => (
   <th
-    className="p-3 font-semibold whitespace-nowrap cursor-pointer hover:text-primary dark:hover:text-white transition-colors group select-none"
+    className="p-3 font-semibold text-slate-200 whitespace-nowrap cursor-pointer hover:text-primary dark:hover:text-white transition-colors group select-none"
     onClick={() => onSort(field)}
   >
     <div className="flex items-center gap-2">
@@ -143,14 +143,26 @@ export default function ProspectsPage() {
         compareResult = fA.localeCompare(fB);
         break;
       case "country":
-        compareResult = (a.country_name || "").localeCompare(
-          a.country_name || "",
-        );
+        const cA =
+          countries.find((c) => c.id === a.country_id)?.name ||
+          a.country_name ||
+          "";
+        const cB =
+          countries.find((c) => c.id === b.country_id)?.name ||
+          b.country_name ||
+          "";
+        compareResult = cA.localeCompare(cB);
         break;
       case "status":
-        compareResult = (a.status_name || "").localeCompare(
-          a.status_name || "",
-        );
+        const sA =
+          statuses.find((s) => s.id === a.status_id)?.name ||
+          a.status_name ||
+          "";
+        const sB =
+          statuses.find((s) => s.id === b.status_id)?.name ||
+          b.status_name ||
+          "";
+        compareResult = sA.localeCompare(sB);
         break;
       case "date":
       default:
@@ -177,7 +189,7 @@ export default function ProspectsPage() {
       )}
 
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-primary dark:text-white">
+        <h1 className="text-3xl font-bold tracking-tight text-white drop-shadow-md">
           Prospects
         </h1>
         <p className="text-white/80 mt-1">
@@ -185,9 +197,9 @@ export default function ProspectsPage() {
         </p>
       </div>
 
-      <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
+      <div className="glass-card p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-primary dark:text-white">
+          <h2 className="text-xl font-semibold text-white">
             Ajouter un prospect
           </h2>
           <span className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full text-xs font-medium">
@@ -283,11 +295,11 @@ export default function ProspectsPage() {
         </form>
       </div>
 
-      <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-0 sm:p-6 rounded-lg border border-white/20 shadow-lg">
+      <div className="glass-card p-6">
         <div className="w-full overflow-x-auto">
           <table className="w-full text-left min-w-237.5">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-800/50 sm:bg-transparent">
+              <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
                 <SortHeader
                   field="name"
                   label="Nom"
@@ -330,7 +342,7 @@ export default function ProspectsPage() {
                   sortDirection={sortDirection}
                   onSort={handleSort}
                 />
-                <th className="p-3 font-semibold text-right whitespace-nowrap">
+                <th className="p-3 font-semibold text-slate-200 text-right whitespace-nowrap">
                   Paramètres
                 </th>
               </tr>

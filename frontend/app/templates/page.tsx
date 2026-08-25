@@ -55,11 +55,9 @@ export default function TemplatesPage() {
         </p>
       </div>
 
-      <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
+      <div className="glass-card p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-primary dark:text-white">
-            Nouveau template
-          </h2>
+          <h2 className="text-xl font-semibold text-white">Nouveau template</h2>
           <span className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full text-xs font-medium">
             Nouveau
           </span>
@@ -113,13 +111,19 @@ export default function TemplatesPage() {
         </form>
       </div>
 
-      <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
+      <div className="glass-card p-6">
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
-              <th className="p-3 font-semibold w-1/4">Template & Sujet</th>
-              <th className="p-3 font-semibold w-2/4">Contenu</th>
-              <th className="p-3 font-semibold text-right w-1/4">Actions</th>
+              <th className="p-3 font-semibold text-slate-200 w-1/4">
+                Template & Sujet
+              </th>
+              <th className="p-3 font-semibold text-slate-200 w-2/4">
+                Contenu
+              </th>
+              <th className="p-3 font-semibold text-slate-200 text-right w-1/4">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>

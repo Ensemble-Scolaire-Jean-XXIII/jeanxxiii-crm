@@ -135,7 +135,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
+        <div className="glass-card p-6">
           <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">
             Prospects totaux
           </h2>
@@ -143,7 +143,7 @@ export default function DashboardPage() {
             {isLoading ? <Skeleton className="h-10 w-24" /> : stats.prospects}
           </div>
         </div>
-        <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
+        <div className="glass-card p-6">
           <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">
             Règles auto
           </h2>
@@ -153,7 +153,7 @@ export default function DashboardPage() {
         </div>
 
         {isAdmin && (
-          <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
+          <div className="glass-card p-6">
             <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">
               Utilisateurs
             </h2>
@@ -165,11 +165,11 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm rounded-lg border border-white/20 shadow-lg overflow-hidden flex flex-col">
-          <div className="bg-black/10 px-6 py-4 border-b border-white/10">
+        <div className="glass-card p-6">
+          <div className="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
             <h2 className="font-semibold text-white">Actions rapides</h2>
           </div>
-          <div className="p-6 flex flex-col gap-3">
+          <div className="pt-6 flex flex-col gap-3">
             <Link
               href="/prospects"
               className="group flex items-center justify-between p-3 rounded-md bg-white/10 hover:bg-white/20 transition-all border border-white/10 text-white"

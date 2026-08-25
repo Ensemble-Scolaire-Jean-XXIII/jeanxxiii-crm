@@ -92,9 +92,9 @@ export default function UsersPage() {
           </p>
         </div>
 
-        <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg mb-8">
+        <div className="glass-card p-6 mb-8">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-primary dark:text-white">
+            <h2 className="text-xl font-semibold text-white">
               Ajouter un utilisateur
             </h2>
             <span className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full text-xs font-medium">
@@ -178,14 +178,18 @@ export default function UsersPage() {
           </form>
         </div>
 
-        <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
+        <div className="glass-card p-6">
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
-                <th className="p-3 font-semibold">Nom complet</th>
-                <th className="p-3 font-semibold">Email</th>
-                <th className="p-3 font-semibold">Rôle</th>
-                <th className="p-3 font-semibold text-right">Actions</th>
+                <th className="p-3 font-semibold text-slate-200">
+                  Nom complet
+                </th>
+                <th className="p-3 font-semibold text-slate-200">Email</th>
+                <th className="p-3 font-semibold text-slate-200">Rôle</th>
+                <th className="p-3 font-semibold text-slate-200 text-right">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -338,16 +342,20 @@ export default function UsersPage() {
           </button>
         </div>
 
-        <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
+        <div className="glass-card p-6">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
-                  <th className="p-3 font-semibold">Date</th>
-                  <th className="p-3 font-semibold">Utilisateur</th>
-                  <th className="p-3 font-semibold">Action</th>
-                  <th className="p-3 font-semibold">Ressource</th>
-                  <th className="p-3 font-semibold">Détails</th>
+                  <th className="p-3 font-semibold text-slate-200">Date</th>
+                  <th className="p-3 font-semibold text-slate-200">
+                    Utilisateur
+                  </th>
+                  <th className="p-3 font-semibold text-slate-200">Action</th>
+                  <th className="p-3 font-semibold text-slate-200">
+                    Ressource
+                  </th>
+                  <th className="p-3 font-semibold text-slate-200">Détails</th>
                 </tr>
               </thead>
               <tbody>
@@ -366,7 +374,7 @@ export default function UsersPage() {
                       </span>
                     </td>
                     <td className="p-3">{formatAction(log.action)}</td>
-                    <td className="p-3 font-semibold text-slate-300">
+                    <td className="p-3 font-semibold text-slate-200">
                       {log.resource}
                     </td>
                     <td className="p-3">

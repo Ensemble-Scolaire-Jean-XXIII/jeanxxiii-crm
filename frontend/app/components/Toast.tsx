@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { ToastProps } from "../types";
 
 export default function Toast({
@@ -11,6 +12,12 @@ export default function Toast({
   onUndo,
 }: ToastProps) {
   const [progress, setProgress] = useState(100);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   useEffect(() => {
     if (!message) return;
@@ -30,18 +37,25 @@ export default function Toast({
     return () => clearInterval(interval);
   }, [message, type, duration]);
 
-  if (!message) return null;
+  if (!message || !mounted) return null;
 
   const isUndo = type === "undo";
   const isError = type === "error";
+  const isSuccess = type === "success";
 
-  return (
-    <div className="fixed bottom-6 right-6 z-50 bg-slate-900/60 backdrop-blur-xl border border-white/20 text-white rounded-2xl shadow-2xl overflow-hidden min-w-85 animate-in fade-in slide-in-from-bottom-4 duration-300">
+  const toastContent = (
+    <div className="fixed bottom-6 right-6 z-[9999] bg-slate-900/60 backdrop-blur-xl border border-white/20 text-white rounded-2xl shadow-2xl overflow-hidden min-w-85 animate-in fade-in slide-in-from-bottom-4 duration-300">
       <div className="px-6 py-4 flex items-center justify-between gap-6">
         <div className="flex items-center gap-3">
           <span
             className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-              isError ? "bg-danger" : isUndo ? "bg-accent" : "bg-primary"
+              isError
+                ? "bg-danger"
+                : isUndo
+                  ? "bg-accent"
+                  : isSuccess
+                    ? "bg-emerald-400"
+                    : "bg-primary"
             }`}
           />
           <span className="text-sm font-medium tracking-wide">{message}</span>
@@ -75,4 +89,6 @@ export default function Toast({
       )}
     </div>
   );
+
+  return createPortal(toastContent, document.body);
 }

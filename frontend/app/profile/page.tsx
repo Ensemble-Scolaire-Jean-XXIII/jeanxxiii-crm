@@ -29,7 +29,7 @@ export default function ProfilePage() {
         <p className="text-white/80 mt-1">Gérez vos paramètres de sécurité</p>
       </div>
 
-      <div className="bg-white/20 dark:bg-slate-800/60 backdrop-blur-sm p-6 rounded-lg border border-white/20 shadow-lg">
+      <div className="glass-card p-6">
         {isLoading ? (
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">

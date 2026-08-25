@@ -2,26 +2,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4f6f8;
-  --foreground: #1e293b;
+  --background: #0f172a;
+  --foreground: #f8fafc;
 
   --j23-gb1: #425a72;
   --j23-gb1-hover: #3b5065;
-  --j23-gb2: #37414b;
+  --j23-gb2: #1e293b;
   --j23-gb2-hover: #22292f;
   --j23-rouge: #d54f3e;
   --j23-rouge-hover: #f80436;
   --j23-orange: #e84e1b;
   --j23-blanc: #ffffff;
   --j23-overlay: #425a7266;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f172a;
-    --foreground: #f8fafc;
-    --j23-gb2: #1e293b;
-  }
 }
 
 @theme inline {
@@ -53,27 +45,31 @@ body {
   }
 
   .btn-primary {
-    @apply bg-primary text-white hover:bg-primary-hover focus:ring-primary dark:focus:ring-offset-slate-900;
+    @apply bg-primary text-white hover:bg-primary-hover focus:ring-primary focus:ring-offset-slate-900;
   }
 
   .btn-accent {
-    @apply bg-accent text-white hover:bg-[#d44115] focus:ring-accent dark:focus:ring-offset-slate-900;
+    @apply bg-accent text-white hover:bg-[#d44115] focus:ring-accent focus:ring-offset-slate-900;
   }
 
   .btn-danger {
-    @apply bg-danger text-white hover:bg-danger-hover focus:ring-danger dark:focus:ring-offset-slate-900;
+    @apply bg-danger text-white hover:bg-danger-hover focus:ring-danger focus:ring-offset-slate-900;
   }
 
   .btn-ghost {
-    @apply bg-transparent text-primary hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-300;
+    @apply bg-transparent text-primary hover:bg-slate-800;
   }
 
   .input-field {
-    @apply w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500;
+    @apply w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
   }
 
   .label-text {
-    @apply block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1;
+    @apply block text-sm font-medium text-slate-300 mb-1;
+  }
+
+  .glass-card {
+    @apply bg-slate-900/60 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl text-white;
   }
 }
 
@@ -81,16 +77,11 @@ body {
   position: fixed;
   inset: 0;
   z-index: -10;
-  background-color: var(--j23-gb2);
+  background-color: var(--background);
 }
 
-@media (prefers-color-scheme: dark) {
-  .slideshow-container {
-    background-color: var(--background);
-  }
-  .content-overlay {
-    background-color: rgba(15, 23, 42, 0.85);
-  }
+.content-overlay {
+  background-color: rgba(15, 23, 42, 0.85);
 }
 
 .slide {
