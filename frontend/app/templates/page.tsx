@@ -58,7 +58,7 @@ export default function TemplatesPage() {
       <div className="glass-card p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-white">Nouveau template</h2>
-          <span className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full text-xs font-medium">
+          <span className="bg-slate-700 text-slate-300 px-3 py-1 rounded-full text-xs font-medium">
             Nouveau
           </span>
         </div>
@@ -95,7 +95,7 @@ export default function TemplatesPage() {
           <div>
             <label className="label-text">Contenu de l&#39;email</label>
             <textarea
-              className="input-field min-h-25"
+              className="input-field min-h-40"
               value={createForm.body}
               onChange={(e) =>
                 setCreateForm({ ...createForm, body: e.target.value })
@@ -114,14 +114,12 @@ export default function TemplatesPage() {
       <div className="glass-card p-6">
         <table className="w-full text-left">
           <thead>
-            <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
-              <th className="p-3 font-semibold text-slate-200 w-1/4">
+            <tr className="border-b border-slate-700 text-slate-300">
+              <th className="p-3 font-semibold text-white w-1/4">
                 Template & Sujet
               </th>
-              <th className="p-3 font-semibold text-slate-200 w-2/4">
-                Contenu
-              </th>
-              <th className="p-3 font-semibold text-slate-200 text-right w-1/4">
+              <th className="p-3 font-semibold text-white w-2/4">Contenu</th>
+              <th className="p-3 font-semibold text-white text-right w-1/4">
                 Actions
               </th>
             </tr>
@@ -186,14 +184,14 @@ export default function TemplatesPage() {
                   <td className="p-3">
                     {editingId === t.id ? (
                       <textarea
-                        className="input-field py-1 px-2 min-h-25 text-sm"
+                        className="input-field py-2 px-3 min-h-40 text-sm"
                         value={editForm.body || ""}
                         onChange={(e) =>
                           setEditForm({ ...editForm, body: e.target.value })
                         }
                       />
                     ) : (
-                      <p className="text-sm text-slate-300 whitespace-pre-wrap">
+                      <p className="text-sm text-slate-300 line-clamp-3 whitespace-pre-wrap">
                         {t.body}
                       </p>
                     )}
