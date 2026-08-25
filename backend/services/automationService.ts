@@ -80,6 +80,11 @@ export const deleteAutomationRule = async (id: number, actorId?: string) => {
 
 export const processAutomations = async () => {
   try {
+    const currentHour = new Date().getHours();
+    if (currentHour < 8 || currentHour >= 19) {
+      return;
+    }
+
     const [rules] = (await pool.query(
       "SELECT * FROM email_automation_rules WHERE trigger_type = 'STATUS_CHANGE' OR (trigger_type = 'SCHEDULED_DATE' AND scheduled_date <= NOW())",
     )) as any[];
@@ -101,6 +106,7 @@ export const processAutomations = async () => {
           SELECT 1 FROM email_automation_logs log 
           WHERE log.prospect_id = p.id AND log.rule_id = ?
         )
+        LIMIT 3
       `;
 
       const [prospects] = (await pool.query(query, [
@@ -135,11 +141,11 @@ export const processAutomations = async () => {
             [prospect.id],
           );
         } catch (error) {
-          console.error(error);
+          console.error(`Erreur d'envoi pour ${prospect.email}:`, error);
         }
       }
     }
   } catch (error) {
-    console.error(error);
+    console.error("Erreur processAutomations:", error);
   }
 };
