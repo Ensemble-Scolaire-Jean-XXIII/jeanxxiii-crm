@@ -41,6 +41,7 @@ services:
       LEXPRESS_USER: ${LEXPRESS_USER}
       LEXPRESS_API_KEY: ${LEXPRESS_API_KEY}
       TZ: Europe/Paris
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET}
     volumes:
       - ./backend:/app
       - /app/node_modules
