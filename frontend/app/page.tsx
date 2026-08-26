@@ -9,6 +9,7 @@ import { lexpressService } from "./services/lexpressService";
 import Image from "next/image";
 import Toast from "./components/Toast";
 import Skeleton from "./components/Skeleton";
+import PageHeader from "./components/PageHeader";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -121,65 +122,67 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col flex-1 min-h-0 gap-4">
       <Toast message={error} type="error" onClose={() => setError("")} />
       <Toast message={success} type="success" onClose={() => setSuccess("")} />
 
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-white drop-shadow-md">
-          Tableau de bord
-        </h1>
-        <p className="text-white/80 mt-1">
-          Bienvenue sur votre espace de gestion des prospects
-        </p>
-      </div>
+      <PageHeader
+        title="Tableau de bord"
+        description="Bienvenue sur votre espace de gestion des prospects"
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="glass-card p-6">
-          <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">
-            Prospects totaux
-          </h2>
-          <div className="text-4xl font-bold text-white">
-            {isLoading ? <Skeleton className="h-10 w-24" /> : stats.prospects}
-          </div>
-        </div>
-        <div className="glass-card p-6">
-          <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">
-            Règles auto
-          </h2>
-          <div className="text-4xl font-bold text-white">
-            {isLoading ? <Skeleton className="h-10 w-24" /> : stats.automations}
-          </div>
-        </div>
-
-        {isAdmin && (
-          <div className="glass-card p-6">
-            <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">
-              Utilisateurs
+      <div className="overflow-y-auto overflow-x-hidden flex-1 custom-scrollbar pr-2 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="glass-card p-4">
+            <h2 className="text-xs font-semibold text-white uppercase tracking-wider mb-1">
+              Prospects totaux
             </h2>
-            <div className="text-4xl font-bold text-white">
-              {isLoading ? <Skeleton className="h-10 w-24" /> : stats.users}
+            <div className="text-3xl font-bold text-white">
+              {isLoading ? <Skeleton className="h-8 w-24" /> : stats.prospects}
             </div>
           </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 gap-6">
-        <div className="glass-card p-6">
-          <div className="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
-            <h2 className="font-semibold text-white">Actions rapides</h2>
+          <div className="glass-card p-4">
+            <h2 className="text-xs font-semibold text-white uppercase tracking-wider mb-1">
+              Règles auto
+            </h2>
+            <div className="text-3xl font-bold text-white">
+              {isLoading ? (
+                <Skeleton className="h-8 w-24" />
+              ) : (
+                stats.automations
+              )}
+            </div>
           </div>
-          <div className="pt-6 flex flex-col gap-3">
+
+          {isAdmin && (
+            <div className="glass-card p-4">
+              <h2 className="text-xs font-semibold text-white uppercase tracking-wider mb-1">
+                Utilisateurs
+              </h2>
+              <div className="text-3xl font-bold text-white">
+                {isLoading ? <Skeleton className="h-8 w-24" /> : stats.users}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="glass-card p-4">
+          <div className="border-b border-slate-700 pb-3">
+            <h2 className="font-semibold text-white text-base">
+              Actions rapides
+            </h2>
+          </div>
+          <div className="pt-4 flex flex-col gap-2.5">
             <Link
               href="/prospects"
-              className="group flex items-center justify-between p-3 rounded-md bg-white/10 hover:bg-white/20 transition-all border border-white/10 text-white"
+              className="group flex items-center justify-between p-2.5 rounded-md bg-white/10 hover:bg-white/20 transition-all border border-white/10 text-white"
             >
               <span className="font-medium text-sm">Nouveau prospect</span>
               <Image
                 src="/icons/add.webp"
                 alt="Ajouter"
-                width={18}
-                height={18}
+                width={16}
+                height={16}
                 className="object-contain brightness-0 invert shrink-0"
                 unoptimized
               />
@@ -187,14 +190,14 @@ export default function DashboardPage() {
 
             <Link
               href="/templates"
-              className="group flex items-center justify-between p-3 rounded-md bg-white/10 hover:bg-white/20 transition-all border border-white/10 text-white"
+              className="group flex items-center justify-between p-2.5 rounded-md bg-white/10 hover:bg-white/20 transition-all border border-white/10 text-white"
             >
               <span className="font-medium text-sm">Nouveau template</span>
               <Image
                 src="/icons/add.webp"
                 alt="Ajouter"
-                width={18}
-                height={18}
+                width={16}
+                height={16}
                 className="object-contain brightness-0 invert shrink-0"
                 unoptimized
               />
@@ -202,14 +205,14 @@ export default function DashboardPage() {
 
             <Link
               href="/automations"
-              className="group flex items-center justify-between p-3 rounded-md bg-white/10 hover:bg-white/20 transition-all border border-white/10 text-white"
+              className="group flex items-center justify-between p-2.5 rounded-md bg-white/10 hover:bg-white/20 transition-all border border-white/10 text-white"
             >
               <span className="font-medium text-sm">Gérer automatisations</span>
               <Image
                 src="/icons/add.webp"
                 alt="Ajouter"
-                width={18}
-                height={18}
+                width={16}
+                height={16}
                 className="object-contain brightness-0 invert shrink-0"
                 unoptimized
               />
@@ -217,7 +220,7 @@ export default function DashboardPage() {
 
             <Link
               href="/salons"
-              className="group flex items-center justify-between p-3 rounded-md bg-blue-500/20 hover:bg-blue-500/40 transition-all border border-blue-400/30 text-white"
+              className="group flex items-center justify-between p-2.5 rounded-md bg-blue-500/20 hover:bg-blue-500/40 transition-all border border-blue-400/30 text-white"
             >
               <span className="font-medium text-sm">
                 Lancer le mode &#34;Salons&#34; (Kiosque)
@@ -225,8 +228,8 @@ export default function DashboardPage() {
               <Image
                 src="/icons/salons.webp"
                 alt="Mode Salon"
-                width={20}
-                height={20}
+                width={18}
+                height={18}
                 className="object-contain brightness-0 invert shrink-0"
                 unoptimized
               />
@@ -235,7 +238,7 @@ export default function DashboardPage() {
             <button
               onClick={handleSyncLatest}
               disabled={isSyncingLatest}
-              className="cursor-pointer group flex items-center justify-between p-3 rounded-md bg-white/10 hover:bg-white/20 transition-all border border-white/10 text-white text-left disabled:opacity-50"
+              className="cursor-pointer group flex items-center justify-between p-2.5 rounded-md bg-white/10 hover:bg-white/20 transition-all border border-white/10 text-white text-left disabled:opacity-50"
             >
               <span className="font-medium text-sm">
                 {isSyncingLatest
@@ -245,8 +248,8 @@ export default function DashboardPage() {
               <Image
                 src="/icons/refresh.webp"
                 alt="Actualiser"
-                width={20}
-                height={20}
+                width={18}
+                height={18}
                 className="object-contain brightness-0 invert shrink-0"
                 unoptimized
               />
@@ -256,7 +259,7 @@ export default function DashboardPage() {
               <button
                 onClick={handleSyncFull}
                 disabled={isSyncingFull}
-                className="cursor-pointer group flex items-center justify-between p-3 rounded-md bg-amber-500/20 hover:bg-amber-500/40 transition-all border border-amber-400/30 text-white text-left disabled:opacity-50"
+                className="cursor-pointer group flex items-center justify-between p-2.5 rounded-md bg-amber-500/20 hover:bg-amber-500/40 transition-all border border-amber-400/30 text-white text-left disabled:opacity-50"
               >
                 <span className="font-medium text-sm">
                   {isSyncingFull
@@ -266,8 +269,8 @@ export default function DashboardPage() {
                 <Image
                   src="/icons/dangerSync.webp"
                   alt="Sync"
-                  width={20}
-                  height={20}
+                  width={18}
+                  height={18}
                   className="object-contain brightness-0 invert shrink-0"
                   unoptimized
                 />

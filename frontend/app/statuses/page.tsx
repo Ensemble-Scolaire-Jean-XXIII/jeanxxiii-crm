@@ -1,10 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { statusService } from "../services/statusService";
 import { CreateStatusDTO, Status } from "../types";
 import Toast from "../components/Toast";
 import Skeleton from "../components/Skeleton";
 import { useCrud } from "../hooks/useCrud";
+import { useSearch } from "../hooks/useSearch";
+import PageHeader from "../components/PageHeader";
+import FormCard from "../components/FormCard";
+import ScrollableTableCard from "../components/ScrollableTableCard";
 
 export default function StatusesPage() {
   const {
@@ -31,8 +36,20 @@ export default function StatusesPage() {
     is_custom: true,
   });
 
+  const [showForm, setShowForm] = useState(false);
+
+  const {
+    searchQuery,
+    setSearchQuery,
+    filteredData: filteredStatuses,
+  } = useSearch(statuses, (s, query) => {
+    const name = (s.name || "").toLowerCase();
+    const type = s.is_custom ? "personnalisé" : "système";
+    return name.includes(query) || type.includes(query);
+  });
+
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col flex-1 min-h-0 gap-4">
       <Toast message={error} type="error" onClose={() => setError("")} />
       <Toast message={success} type="success" onClose={() => setSuccess("")} />
       {undoAction && (
@@ -45,52 +62,56 @@ export default function StatusesPage() {
         />
       )}
 
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-white drop-shadow-md">
-          Statuts
-        </h1>
-        <p className="text-white/80 mt-1">
-          Ajoutez des status personnalisés pour avoir le suivi idéal de vos
-          prospects
-        </p>
-      </div>
+      <PageHeader
+        title="Statuts"
+        description="Gérez les status à attribuer à vos prospects"
+      >
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="btn btn-ghost border border-white/20 text-white text-sm py-1.5 px-4 bg-white/5 hover:bg-white/10"
+        >
+          {showForm ? "Cacher le formulaire d'ajout" : "+ Nouveau statut"}
+        </button>
+      </PageHeader>
 
-      <div className="glass-card p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-white">Créer un statut</h2>
-          <span className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full text-xs font-medium">
-            Nouveau
-          </span>
-        </div>
-        <form onSubmit={(e) => create(e, createForm)} className="flex gap-4">
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Nom du statut"
-              className="input-field"
-              value={createForm.name}
-              onChange={(e) =>
-                setCreateForm({ ...createForm, name: e.target.value })
-              }
-              required
-            />
-          </div>
-          <button type="submit" className="btn btn-primary">
-            Créer
-          </button>
-        </form>
-      </div>
+      {showForm && (
+        <FormCard title="Nouveau statut">
+          <form onSubmit={(e) => create(e, createForm)} className="flex gap-4">
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="Nom du statut"
+                className="input-field py-1.5"
+                value={createForm.name}
+                onChange={(e) =>
+                  setCreateForm({ ...createForm, name: e.target.value })
+                }
+                required
+              />
+            </div>
+            <button type="submit" className="btn btn-primary py-1.5 text-sm">
+              Ajouter le statut
+            </button>
+          </form>
+        </FormCard>
+      )}
 
-      <div className="glass-card p-6">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
-              <th className="p-3 font-semibold text-slate-200">
+      <ScrollableTableCard>
+        <table className="w-full text-left text-sm">
+          <thead className="sticky top-0 bg-slate-900/95 backdrop-blur z-10 shadow-md">
+            <tr className="border-b border-slate-700 text-slate-300">
+              <th className="px-3 py-3 font-semibold text-white">
                 Nom du statut
               </th>
-              <th className="p-3 font-semibold text-slate-200">Type</th>
-              <th className="p-3 font-semibold text-slate-200 text-right">
-                Actions
+              <th className="px-3 py-3 font-semibold text-white">Type</th>
+              <th className="px-3 py-3 font-semibold text-white text-right">
+                <input
+                  type="text"
+                  className="input-field py-1 px-2 text-xs font-normal w-full max-w-44 text-right ml-auto"
+                  placeholder="Rechercher..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </th>
             </tr>
           </thead>
@@ -98,33 +119,36 @@ export default function StatusesPage() {
             {isLoading ? (
               Array.from({ length: 4 }).map((_, idx) => (
                 <tr key={idx} className="border-b border-white/5">
-                  <td className="p-3">
+                  <td className="px-3 py-2">
                     <Skeleton className="h-8 w-40" />
                   </td>
-                  <td className="p-3">
+                  <td className="px-3 py-2">
                     <Skeleton className="h-8 w-24" />
                   </td>
-                  <td className="p-3 text-right">
+                  <td className="px-3 py-2 text-right">
                     <Skeleton className="h-8 w-24 inline-block" />
                   </td>
                 </tr>
               ))
-            ) : statuses.length === 0 ? (
+            ) : filteredStatuses.length === 0 ? (
               <tr>
-                <td colSpan={3} className="p-6 text-center text-slate-400">
+                <td
+                  colSpan={3}
+                  className="px-3 py-6 text-center text-slate-400"
+                >
                   Aucun statut trouvé.
                 </td>
               </tr>
             ) : (
-              statuses.map((s) => (
+              filteredStatuses.map((s) => (
                 <tr
                   key={s.id}
                   className="group border-b border-white/5 hover:bg-white/5 transition-colors"
                 >
-                  <td className="p-3">
+                  <td className="px-3 py-2">
                     {editingId === s.id ? (
                       <input
-                        className="input-field py-1 px-2 max-w-sm"
+                        className="input-field py-1 px-2 max-w-sm text-xs"
                         value={editForm.name || ""}
                         onChange={(e) =>
                           setEditForm({ ...editForm, name: e.target.value })
@@ -134,14 +158,14 @@ export default function StatusesPage() {
                       <span className="font-medium text-white">{s.name}</span>
                     )}
                   </td>
-                  <td className="p-3">
+                  <td className="px-3 py-2">
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${s.is_custom ? "bg-white/10 text-slate-300" : "bg-primary/20 text-primary"}`}
+                      className={`px-2 py-1 rounded-full text-[10px] font-medium ${s.is_custom ? "bg-white/10 text-slate-300" : "bg-primary/20 text-primary"}`}
                     >
                       {s.is_custom ? "Personnalisé" : "Système"}
                     </span>
                   </td>
-                  <td className="p-3 text-right">
+                  <td className="px-3 py-2 text-right">
                     {editingId === s.id ? (
                       <div className="flex justify-end gap-2">
                         <button
@@ -151,29 +175,29 @@ export default function StatusesPage() {
                               is_custom: editForm.is_custom,
                             })
                           }
-                          className="btn btn-ghost text-green-400 px-2 py-1 text-sm"
+                          className="btn btn-ghost text-green-400 px-2 py-1 text-xs"
                         >
                           Valider
                         </button>
                         <button
                           onClick={() => setEditingId(null)}
-                          className="btn btn-ghost text-slate-400 px-2 py-1 text-sm"
+                          className="btn btn-ghost text-slate-400 px-2 py-1 text-xs"
                         >
                           Annuler
                         </button>
                       </div>
                     ) : (
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <div className="flex justify-end gap-2 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <button
                           onClick={() => startEdit(s)}
-                          className="btn btn-ghost text-accent px-2 py-1 text-sm"
+                          className="btn btn-ghost text-accent px-2 py-1 text-xs"
                         >
                           Corriger
                         </button>
                         {!!s.is_custom && (
                           <button
                             onClick={() => deleteWithUndo(s.id)}
-                            className="btn btn-ghost text-red-400 px-2 py-1 text-sm"
+                            className="btn btn-ghost text-red-400 px-2 py-1 text-xs"
                           >
                             Supprimer
                           </button>
@@ -186,7 +210,7 @@ export default function StatusesPage() {
             )}
           </tbody>
         </table>
-      </div>
+      </ScrollableTableCard>
     </div>
   );
 }

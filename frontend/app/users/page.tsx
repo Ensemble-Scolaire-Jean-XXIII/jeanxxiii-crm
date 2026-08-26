@@ -7,6 +7,11 @@ import { CreateUsersDTO, User, AuditLog } from "../types/index";
 import Toast from "../components/Toast";
 import Skeleton from "../components/Skeleton";
 import { useCrud } from "../hooks/useCrud";
+import { usePagination } from "../hooks/usePagination";
+import { useSearch } from "../hooks/useSearch";
+import PageHeader from "../components/PageHeader";
+import FormCard from "../components/FormCard";
+import ScrollableTableCard from "../components/ScrollableTableCard";
 
 export default function UsersPage() {
   const {
@@ -37,8 +42,44 @@ export default function UsersPage() {
   });
 
   const [logs, setLogs] = useState<AuditLog[]>([]);
-  const [logPage, setLogPage] = useState(1);
-  const [logTotalPages, setLogTotalPages] = useState(1);
+  const {
+    page: logPage,
+    setPage: setLogPage,
+    totalPages: logTotalPages,
+    setTotalPages: setLogTotalPages,
+  } = usePagination(1, 1);
+  const [showLogs, setShowLogs] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+
+  const {
+    searchQuery: userSearchQuery,
+    setSearchQuery: setUserSearchQuery,
+    filteredData: filteredUsers,
+  } = useSearch(users, (u, query) => {
+    const fullName = `${u.first_name || ""} ${u.last_name || ""}`.toLowerCase();
+    const email = (u.email || "").toLowerCase();
+    const role = (u.role || "").toLowerCase();
+    return (
+      fullName.includes(query) || email.includes(query) || role.includes(query)
+    );
+  });
+
+  const {
+    searchQuery: logSearchQuery,
+    setSearchQuery: setLogSearchQuery,
+    filteredData: filteredLogs,
+  } = useSearch(logs, (l, query) => {
+    const userName = (l.user_name || "").toLowerCase();
+    const userEmail = (l.user_email || "").toLowerCase();
+    const action = (l.action || "").toLowerCase();
+    const resource = (l.resource || "").toLowerCase();
+    return (
+      userName.includes(query) ||
+      userEmail.includes(query) ||
+      action.includes(query) ||
+      resource.includes(query)
+    );
+  });
 
   const fetchLogs = useCallback(async () => {
     try {
@@ -46,9 +87,9 @@ export default function UsersPage() {
       setLogs(res.data);
       setLogTotalPages(res.totalPages);
     } catch (err) {
-      console.error("Erreur de récupération des logs", err);
+      console.error("Erreur logs", err);
     }
-  }, [logPage]);
+  }, [logPage, setLogTotalPages]);
 
   useEffect(() => {
     fetchLogs();
@@ -68,7 +109,7 @@ export default function UsersPage() {
   };
 
   return (
-    <div className="space-y-12">
+    <div className="flex flex-col flex-1 min-h-0 gap-4">
       <Toast message={error} type="error" onClose={() => setError("")} />
       <Toast message={success} type="success" onClose={() => setSuccess("")} />
       {undoAction && (
@@ -81,347 +122,382 @@ export default function UsersPage() {
         />
       )}
 
-      <div>
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight text-white drop-shadow-md">
-            Utilisateurs
-          </h1>
-          <p className="text-white/80 mt-1">
-            Administrez les accès à l&rsquo;application et consultez les actions
-            utilisateurs
-          </p>
-        </div>
-
-        <div className="glass-card p-6 mb-8">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-white">
-              Ajouter un utilisateur
-            </h2>
-            <span className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full text-xs font-medium">
-              Nouveau
-            </span>
-          </div>
-
-          <form
-            onSubmit={(e) => create(e, createForm)}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4"
+      <PageHeader
+        title={showLogs ? "Historique des actions" : "Utilisateurs"}
+        description={
+          showLogs
+            ? "Consulter toutes les modifications effectuées sur le CRM"
+            : "Administrez les accès à l'application et consultez les actions utilisateurs"
+        }
+      >
+        <div className="flex gap-2">
+          {showLogs ? (
+            <button
+              onClick={fetchLogs}
+              className="btn btn-ghost text-white text-sm py-1.5"
+            >
+              Actualiser
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="btn btn-ghost border border-white/20 text-white text-sm py-1.5 px-4 bg-white/5 hover:bg-white/10"
+            >
+              {showForm
+                ? "Cacher le formulaire d'ajout"
+                : "+ Nouvel utilisateur"}
+            </button>
+          )}
+          <button
+            onClick={() => setShowLogs(!showLogs)}
+            className="btn btn-ghost border border-white/20 text-white text-sm py-1.5 px-4 bg-white/5 hover:bg-white/10"
           >
-            <div>
-              <label className="label-text">Prénom</label>
-              <input
-                type="text"
-                className="input-field"
-                value={createForm.first_name}
-                onChange={(e) =>
-                  setCreateForm({ ...createForm, first_name: e.target.value })
-                }
-                required
-              />
-            </div>
-            <div>
-              <label className="label-text">Nom</label>
-              <input
-                type="text"
-                className="input-field"
-                value={createForm.last_name}
-                onChange={(e) =>
-                  setCreateForm({ ...createForm, last_name: e.target.value })
-                }
-                required
-              />
-            </div>
-            <div>
-              <label className="label-text">Email</label>
-              <input
-                type="email"
-                className="input-field"
-                value={createForm.email}
-                onChange={(e) =>
-                  setCreateForm({ ...createForm, email: e.target.value })
-                }
-                required
-              />
-            </div>
-            <div>
-              <label className="label-text">Mot de passe</label>
-              <input
-                type="password"
-                className="input-field"
-                value={createForm.password_hash}
-                onChange={(e) =>
-                  setCreateForm({
-                    ...createForm,
-                    password_hash: e.target.value,
-                  })
-                }
-                required
-              />
-            </div>
-            <div>
-              <label className="label-text">Rôle</label>
-              <select
-                className="input-field"
-                value={createForm.role}
-                onChange={(e) =>
-                  setCreateForm({ ...createForm, role: e.target.value })
-                }
-              >
-                <option value="user">Utilisateur</option>
-                <option value="admin">Administrateur</option>
-              </select>
-            </div>
-            <div className="lg:col-span-5 flex justify-end mt-2">
-              <button type="submit" className="btn btn-primary">
-                Créer
-              </button>
-            </div>
-          </form>
+            {showLogs ? "← Retour aux utilisateurs" : "Voir l'historique →"}
+          </button>
         </div>
+      </PageHeader>
 
-        <div className="glass-card p-6">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
-                <th className="p-3 font-semibold text-slate-200">
-                  Nom complet
+      {!showLogs ? (
+        <>
+          {showForm && (
+            <FormCard title="Nouvel utilisateur">
+              <form
+                onSubmit={(e) => create(e, createForm)}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3"
+              >
+                <div>
+                  <label className="label-text">Prénom</label>
+                  <input
+                    type="text"
+                    className="input-field py-1.5 w-full"
+                    value={createForm.first_name}
+                    onChange={(e) =>
+                      setCreateForm({
+                        ...createForm,
+                        first_name: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="label-text">Nom</label>
+                  <input
+                    type="text"
+                    className="input-field py-1.5 w-full"
+                    value={createForm.last_name}
+                    onChange={(e) =>
+                      setCreateForm({
+                        ...createForm,
+                        last_name: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="label-text">Email</label>
+                  <input
+                    type="email"
+                    className="input-field py-1.5 w-full"
+                    value={createForm.email}
+                    onChange={(e) =>
+                      setCreateForm({ ...createForm, email: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="label-text">Mot de passe</label>
+                  <input
+                    type="password"
+                    className="input-field py-1.5 w-full"
+                    value={createForm.password_hash}
+                    onChange={(e) =>
+                      setCreateForm({
+                        ...createForm,
+                        password_hash: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="label-text">Rôle</label>
+                  <select
+                    className="input-field py-1.5 w-full"
+                    value={createForm.role}
+                    onChange={(e) =>
+                      setCreateForm({ ...createForm, role: e.target.value })
+                    }
+                  >
+                    <option value="user">Utilisateur</option>
+                    <option value="admin">Administrateur</option>
+                  </select>
+                </div>
+                <div className="lg:col-span-5 flex justify-end">
+                  <button
+                    type="submit"
+                    className="btn btn-primary py-1.5 text-sm"
+                  >
+                    Ajouter l'utilisateur
+                  </button>
+                </div>
+              </form>
+            </FormCard>
+          )}
+
+          <ScrollableTableCard>
+            <table className="w-full text-left text-sm">
+              <thead className="sticky top-0 bg-slate-900/95 backdrop-blur z-10 shadow-md">
+                <tr className="border-b border-slate-700 text-slate-300">
+                  <th className="px-3 py-3 font-semibold text-white">
+                    Nom complet
+                  </th>
+                  <th className="px-3 py-3 font-semibold text-white">Email</th>
+                  <th className="px-3 py-3 font-semibold text-white">Rôle</th>
+                  <th className="px-3 py-3 font-semibold text-white text-right">
+                    <input
+                      type="text"
+                      className="input-field py-1 px-2 text-xs font-normal w-full max-w-44 text-right ml-auto"
+                      placeholder="Rechercher..."
+                      value={userSearchQuery}
+                      onChange={(e) => setUserSearchQuery(e.target.value)}
+                    />
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {isLoading ? (
+                  Array.from({ length: 3 }).map((_, idx) => (
+                    <tr key={idx} className="border-b border-white/5">
+                      <td className="px-3 py-2">
+                        <Skeleton className="h-8 w-40" />
+                      </td>
+                      <td className="px-3 py-2">
+                        <Skeleton className="h-8 w-48" />
+                      </td>
+                      <td className="px-3 py-2">
+                        <Skeleton className="h-8 w-24" />
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        <Skeleton className="h-8 w-24 inline-block" />
+                      </td>
+                    </tr>
+                  ))
+                ) : filteredUsers.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="px-3 py-6 text-center text-slate-400"
+                    >
+                      Aucun utilisateur trouvé.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredUsers.map((u) => (
+                    <tr
+                      key={u.id}
+                      className="group border-b border-white/5 hover:bg-white/5 transition-colors"
+                    >
+                      <td className="px-3 py-2">
+                        {editingId === u.id ? (
+                          <div className="flex gap-2">
+                            <input
+                              className="input-field py-1 px-2 w-28 text-xs"
+                              value={editForm.first_name || ""}
+                              onChange={(e) =>
+                                setEditForm({
+                                  ...editForm,
+                                  first_name: e.target.value,
+                                })
+                              }
+                            />
+                            <input
+                              className="input-field py-1 px-2 w-28 text-xs"
+                              value={editForm.last_name || ""}
+                              onChange={(e) =>
+                                setEditForm({
+                                  ...editForm,
+                                  last_name: e.target.value,
+                                })
+                              }
+                            />
+                          </div>
+                        ) : (
+                          <span className="font-medium text-white">
+                            {u.first_name} {u.last_name}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2">
+                        {editingId === u.id ? (
+                          <input
+                            className="input-field py-1 px-2 text-xs w-full"
+                            value={editForm.email || ""}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                email: e.target.value,
+                              })
+                            }
+                          />
+                        ) : (
+                          <span className="text-slate-300">{u.email}</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2">
+                        <select
+                          className="input-field py-1! px-2! text-xs cursor-pointer w-full sm:w-auto"
+                          value={u.role}
+                          onChange={(e) =>
+                            updateWithUndo(u.id, { role: e.target.value })
+                          }
+                        >
+                          <option value="user">Utilisateur</option>
+                          <option value="admin">Administrateur</option>
+                        </select>
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        {editingId === u.id ? (
+                          <div className="flex justify-end gap-1">
+                            <button
+                              onClick={() =>
+                                updateWithUndo(u.id, {
+                                  first_name: editForm.first_name,
+                                  last_name: editForm.last_name,
+                                  email: editForm.email,
+                                })
+                              }
+                              className="btn btn-ghost text-green-400 px-2 py-1 text-xs font-bold"
+                            >
+                              Valider
+                            </button>
+                            <button
+                              onClick={() => setEditingId(null)}
+                              className="btn btn-ghost text-slate-400 px-2 py-1 text-xs"
+                            >
+                              Annuler
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex justify-end gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <button
+                              onClick={() => startEdit(u)}
+                              className="btn btn-ghost text-accent px-2 py-1 text-xs"
+                            >
+                              Corriger
+                            </button>
+                            <button
+                              onClick={() => deleteWithUndo(u.id)}
+                              className="btn btn-ghost text-red-400 px-2 py-1 text-xs"
+                            >
+                              Supprimer
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </ScrollableTableCard>
+        </>
+      ) : (
+        <ScrollableTableCard
+          footer={
+            logTotalPages > 1 && (
+              <>
+                <button
+                  onClick={() => setLogPage(Math.max(1, logPage - 1))}
+                  disabled={logPage === 1}
+                  className="btn btn-ghost text-white text-xs py-1"
+                >
+                  &larr; Précédent
+                </button>
+                <span className="text-[10px] font-medium text-slate-300">
+                  Page {logPage} sur {logTotalPages}
+                </span>
+                <button
+                  onClick={() =>
+                    setLogPage(Math.min(logTotalPages, logPage + 1))
+                  }
+                  disabled={logPage === logTotalPages}
+                  className="btn btn-ghost text-white text-xs py-1"
+                >
+                  Suivant &rarr;
+                </button>
+              </>
+            )
+          }
+        >
+          <table className="w-full text-left text-xs">
+            <thead className="sticky top-0 bg-slate-900/95 backdrop-blur z-10 shadow-md">
+              <tr className="border-b border-slate-700 text-slate-300">
+                <th className="px-3 py-3 font-semibold text-white whitespace-nowrap">
+                  Date
                 </th>
-                <th className="p-3 font-semibold text-slate-200">Email</th>
-                <th className="p-3 font-semibold text-slate-200">Rôle</th>
-                <th className="p-3 font-semibold text-slate-200 text-right">
-                  Actions
+                <th className="px-3 py-3 font-semibold text-white">
+                  Utilisateur
+                </th>
+                <th className="px-3 py-3 font-semibold text-white">Action</th>
+                <th className="px-3 py-3 font-semibold text-white">
+                  Ressource
+                </th>
+                <th className="px-3 py-3 font-semibold text-white text-right">
+                  <input
+                    type="text"
+                    className="input-field py-1 px-2 text-xs font-normal w-full max-w-44 text-right ml-auto"
+                    placeholder="Rechercher..."
+                    value={logSearchQuery}
+                    onChange={(e) => setLogSearchQuery(e.target.value)}
+                  />
                 </th>
               </tr>
             </thead>
             <tbody>
-              {isLoading ? (
-                Array.from({ length: 4 }).map((_, idx) => (
-                  <tr key={idx} className="border-b border-white/5">
-                    <td className="p-3">
-                      <Skeleton className="h-8 w-40" />
-                    </td>
-                    <td className="p-3">
-                      <Skeleton className="h-8 w-48" />
-                    </td>
-                    <td className="p-3">
-                      <Skeleton className="h-8 w-24" />
-                    </td>
-                    <td className="p-3 text-right">
-                      <Skeleton className="h-8 w-24 inline-block" />
-                    </td>
-                  </tr>
-                ))
-              ) : users.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="p-6 text-center text-slate-400">
-                    Aucun utilisateur trouvé.
+              {filteredLogs.map((log) => (
+                <tr
+                  key={log.id}
+                  className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                >
+                  <td className="px-3 py-2 whitespace-nowrap text-slate-400">
+                    {new Date(log.created_at).toLocaleString()}
+                  </td>
+                  <td className="px-3 py-2 font-medium text-white">
+                    {log.user_name} <br />
+                    <span className="text-[10px] text-slate-400 font-normal">
+                      {log.user_email}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2">{formatAction(log.action)}</td>
+                  <td className="px-3 py-2 font-semibold text-slate-200">
+                    {log.resource}
+                  </td>
+                  <td className="px-3 py-2 text-right">
+                    <pre className="text-[10px] bg-slate-950 p-1.5 rounded border border-white/10 max-w-xs overflow-x-auto text-slate-300 ml-auto inline-block text-left">
+                      {log.details
+                        ? JSON.stringify(log.details, null, 2)
+                        : "Aucun détail"}
+                    </pre>
                   </td>
                 </tr>
-              ) : (
-                users.map((u) => (
-                  <tr
-                    key={u.id}
-                    className="group border-b border-white/5 hover:bg-white/5 transition-colors"
+              ))}
+              {filteredLogs.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="px-3 py-6 text-center text-slate-400"
                   >
-                    <td className="p-3">
-                      {editingId === u.id ? (
-                        <div className="flex gap-2">
-                          <input
-                            className="input-field py-1 px-2 w-28"
-                            value={editForm.first_name || ""}
-                            onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                first_name: e.target.value,
-                              })
-                            }
-                          />
-                          <input
-                            className="input-field py-1 px-2 w-28"
-                            value={editForm.last_name || ""}
-                            onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                last_name: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
-                      ) : (
-                        <span className="font-medium text-white">
-                          {u.first_name} {u.last_name}
-                        </span>
-                      )}
-                    </td>
-                    <td className="p-3">
-                      {editingId === u.id ? (
-                        <input
-                          className="input-field py-1 px-2"
-                          value={editForm.email || ""}
-                          onChange={(e) =>
-                            setEditForm({ ...editForm, email: e.target.value })
-                          }
-                        />
-                      ) : (
-                        <span className="text-slate-300">{u.email}</span>
-                      )}
-                    </td>
-                    <td className="p-3">
-                      <select
-                        className="input-field py-1! px-2! text-sm cursor-pointer w-full sm:w-auto"
-                        value={u.role}
-                        onChange={(e) =>
-                          updateWithUndo(u.id, { role: e.target.value })
-                        }
-                      >
-                        <option value="user">Utilisateur</option>
-                        <option value="admin">Administrateur</option>
-                      </select>
-                    </td>
-                    <td className="p-3 text-right">
-                      {editingId === u.id ? (
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() =>
-                              updateWithUndo(u.id, {
-                                first_name: editForm.first_name,
-                                last_name: editForm.last_name,
-                                email: editForm.email,
-                              })
-                            }
-                            className="btn btn-ghost text-green-400 px-2 py-1 text-sm font-bold"
-                          >
-                            Valider
-                          </button>
-                          <button
-                            onClick={() => setEditingId(null)}
-                            className="btn btn-ghost text-slate-400 px-2 py-1 text-sm"
-                          >
-                            Annuler
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          <button
-                            onClick={() => startEdit(u)}
-                            className="btn btn-ghost text-accent px-2 py-1 text-sm"
-                          >
-                            Corriger
-                          </button>
-                          <button
-                            onClick={() => deleteWithUndo(u.id)}
-                            className="btn btn-ghost text-red-400 px-2 py-1 text-sm"
-                          >
-                            Supprimer
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))
+                    Aucun log.
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      <div>
-        <div className="mb-6 flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight text-white drop-shadow-md">
-              Historique des actions (Logs)
-            </h2>
-            <p className="text-white/80 mt-1 text-sm">
-              Trace de toutes les modifications effectuées sur le CRM
-            </p>
-          </div>
-          <button
-            onClick={fetchLogs}
-            className="btn btn-ghost text-white text-sm"
-          >
-            Actualiser
-          </button>
-        </div>
-
-        <div className="glass-card p-6">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
-                  <th className="p-3 font-semibold text-slate-200">Date</th>
-                  <th className="p-3 font-semibold text-slate-200">
-                    Utilisateur
-                  </th>
-                  <th className="p-3 font-semibold text-slate-200">Action</th>
-                  <th className="p-3 font-semibold text-slate-200">
-                    Ressource
-                  </th>
-                  <th className="p-3 font-semibold text-slate-200">Détails</th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.map((log) => (
-                  <tr
-                    key={log.id}
-                    className="border-b border-white/5 hover:bg-white/5 transition-colors"
-                  >
-                    <td className="p-3 whitespace-nowrap text-slate-400">
-                      {new Date(log.created_at).toLocaleString()}
-                    </td>
-                    <td className="p-3 font-medium text-white">
-                      {log.user_name} <br />
-                      <span className="text-xs text-slate-400 font-normal">
-                        {log.user_email}
-                      </span>
-                    </td>
-                    <td className="p-3">{formatAction(log.action)}</td>
-                    <td className="p-3 font-semibold text-slate-200">
-                      {log.resource}
-                    </td>
-                    <td className="p-3">
-                      <pre className="text-[10px] bg-slate-950 p-2 rounded border border-white/10 max-w-xs overflow-x-auto text-slate-300">
-                        {log.details
-                          ? JSON.stringify(log.details, null, 2)
-                          : "Aucun détail"}
-                      </pre>
-                    </td>
-                  </tr>
-                ))}
-                {logs.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="p-6 text-center text-slate-400">
-                      Aucun log enregistré pour le moment.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {logTotalPages > 1 && (
-            <div className="flex justify-between items-center mt-6">
-              <button
-                onClick={() => setLogPage((p) => Math.max(1, p - 1))}
-                disabled={logPage === 1}
-                className="btn btn-ghost text-sm disabled:opacity-50"
-              >
-                &larr; Précédent
-              </button>
-              <span className="text-sm font-medium text-slate-300">
-                Page {logPage} sur {logTotalPages}
-              </span>
-              <button
-                onClick={() =>
-                  setLogPage((p) => Math.min(logTotalPages, p + 1))
-                }
-                disabled={logPage === logTotalPages}
-                className="btn btn-ghost text-sm disabled:opacity-50"
-              >
-                Suivant &rarr;
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
+        </ScrollableTableCard>
+      )}
     </div>
   );
 }

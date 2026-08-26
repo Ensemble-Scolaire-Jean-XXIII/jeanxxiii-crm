@@ -68,7 +68,18 @@ export const deleteStatus = async (id: number, actorId?: string) => {
 
   if (prospects.length > 0) {
     throw new Error(
-      "Impossible de supprimer : ce statut est utilisé par des prospects.",
+      "Impossible de supprimer : ce statut est actuellement utilisé par des prospects.",
+    );
+  }
+
+  const [automations] = (await pool.query(
+    "SELECT 1 FROM email_automation_rules WHERE status_id = ? LIMIT 1",
+    [id],
+  )) as any[];
+
+  if (automations.length > 0) {
+    throw new Error(
+      "Impossible de supprimer : ce statut est utilisé comme déclencheur dans une automatisation d'email.",
     );
   }
 

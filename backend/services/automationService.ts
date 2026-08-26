@@ -9,22 +9,37 @@ export const getAutomationRules = async () => {
 };
 
 export const createAutomationRule = async (data: any, actorId?: string) => {
+  const statusId = data.status_id || null;
+  const formationId = data.formation_id || null;
+  const emailTemplateId = data.email_template_id;
+  const triggerType = data.trigger_type || "STATUS_CHANGE";
+  const scheduledDate = data.scheduled_date || null;
+
+  const [existing] = (await pool.query(
+    `SELECT 1 FROM email_automation_rules 
+     WHERE trigger_type = ? 
+     AND (status_id <=> ?) 
+     AND (formation_id <=> ?) 
+     AND email_template_id = ? 
+     AND (scheduled_date <=> ?) 
+     LIMIT 1`,
+    [triggerType, statusId, formationId, emailTemplateId, scheduledDate],
+  )) as any[];
+
+  if (existing.length > 0) {
+    throw new Error("DUPLICATE_AUTOMATION");
+  }
+
   const [result] = await pool.query(
     "INSERT INTO email_automation_rules (status_id, formation_id, email_template_id, trigger_type, scheduled_date) VALUES (?, ?, ?, ?, ?)",
-    [
-      data.status_id || null,
-      data.formation_id || null,
-      data.email_template_id,
-      data.trigger_type || "STATUS_CHANGE",
-      data.scheduled_date || null,
-    ],
+    [statusId, formationId, emailTemplateId, triggerType, scheduledDate],
   );
   const insertId = (result as any).insertId;
 
   if (actorId) {
     await logAction(actorId, "CREATE", "AUTOMATION", {
       id: insertId,
-      template_id: data.email_template_id,
+      template_id: emailTemplateId,
     });
   }
 
