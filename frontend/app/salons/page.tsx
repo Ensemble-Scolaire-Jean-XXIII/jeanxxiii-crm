@@ -140,7 +140,6 @@ export default function SalonsPage() {
                   type="text"
                   required
                   className="w-full bg-slate-800/70 border border-white/15 focus:ring-2 focus:ring-primary rounded-xl px-4 py-4 text-white placeholder-slate-400 text-lg shadow-inner transition-all outline-none"
-                  placeholder="Jean"
                   value={form.first_name}
                   onChange={(e) =>
                     setForm({ ...form, first_name: e.target.value })
@@ -155,7 +154,6 @@ export default function SalonsPage() {
                   type="text"
                   required
                   className="w-full bg-slate-800/70 border border-white/15 focus:ring-2 focus:ring-primary rounded-xl px-4 py-4 text-white placeholder-slate-400 text-lg shadow-inner transition-all outline-none"
-                  placeholder="Dupont"
                   value={form.last_name}
                   onChange={(e) =>
                     setForm({ ...form, last_name: e.target.value })
@@ -172,7 +170,6 @@ export default function SalonsPage() {
                 type="email"
                 required
                 className="w-full bg-slate-800/70 border border-white/15 focus:ring-2 focus:ring-primary rounded-xl px-4 py-4 text-white placeholder-slate-400 text-lg shadow-inner transition-all outline-none"
-                placeholder="jean.dupont@email.com"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
@@ -186,14 +183,13 @@ export default function SalonsPage() {
                 <input
                   type="tel"
                   className="w-full bg-slate-800/70 border border-white/15 focus:ring-2 focus:ring-primary rounded-xl px-4 py-4 text-white placeholder-slate-400 text-lg shadow-inner transition-all outline-none"
-                  placeholder="06 12 34 56 78"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 />
               </div>
               <div>
                 <label className="block text-white/90 text-sm font-semibold mb-2 drop-shadow-sm">
-                  Sexe *
+                  Civilité *
                 </label>
                 <select
                   className="w-full bg-slate-800/70 border border-white/15 focus:ring-2 focus:ring-primary rounded-xl px-4 py-4 text-white text-lg shadow-inner transition-all cursor-pointer outline-none"
@@ -201,10 +197,13 @@ export default function SalonsPage() {
                   onChange={(e) => setForm({ ...form, gender: e.target.value })}
                 >
                   <option value="Masculin" className="bg-slate-900">
-                    Masculin
+                    Monsieur
                   </option>
                   <option value="Féminin" className="bg-slate-900">
-                    Femme
+                    Madame
+                  </option>
+                  <option value="" className="bg-slate-900">
+                    Ne préfère pas l'indiquer
                   </option>
                 </select>
               </div>

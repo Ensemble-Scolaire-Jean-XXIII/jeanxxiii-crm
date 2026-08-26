@@ -32,7 +32,12 @@ router.post("/", authenticate, async (req: any, res) => {
       req.user.id,
     );
     res.status(201).json({ id });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === "DUPLICATE_NAME" || error.code === "ER_DUP_ENTRY") {
+      return res
+        .status(400)
+        .json({ error: "Un template avec ce nom existe déjà." });
+    }
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -45,8 +50,12 @@ router.put("/:id", authenticate, async (req: any, res) => {
       req.user.id,
     );
     res.status(204).send();
-  } catch (error) {
-    console.error("ERREUR UPDATE TEMPLATE:", error);
+  } catch (error: any) {
+    if (error.message === "DUPLICATE_NAME" || error.code === "ER_DUP_ENTRY") {
+      return res
+        .status(400)
+        .json({ error: "Un template avec ce nom existe déjà." });
+    }
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -58,7 +67,10 @@ router.delete("/:id", authenticate, async (req: any, res) => {
       req.user.id,
     );
     res.status(204).send();
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message && error.message.includes("Impossible de supprimer")) {
+      return res.status(400).json({ error: error.message });
+    }
     res.status(500).json({ error: "Internal Server Error" });
   }
 });

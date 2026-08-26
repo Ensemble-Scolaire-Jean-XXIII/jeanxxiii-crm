@@ -323,17 +323,16 @@ export default function DashboardWrapper({
         )}
 
         <main
-          className={`flex-1 overflow-y-auto ${
+          className={`flex-1 overflow-y-auto flex flex-col ${
             !isSalonsPage
               ? "p-4 pb-24 lg:p-8 lg:pb-8 bg-slate-900/40 backdrop-blur-lg rounded-2xl border border-white/15 shadow-2xl"
-              : "p-4 flex flex-col justify-center"
+              : "p-4 justify-center"
           }`}
         >
           {children}
         </main>
       </div>
 
-      {/* BOTTOM NAV MOBILE/TABLETTE PORTRAIT (Scrolable horizontalement si besoin) */}
       {!isSalonsPage && (
         <nav
           className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-slate-900/90 backdrop-blur-2xl border-t border-white/20 z-40 flex items-center justify-start sm:justify-center gap-1 overflow-x-auto px-2 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] touch-pan-x"

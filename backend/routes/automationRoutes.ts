@@ -20,7 +20,12 @@ router.post("/", authenticate, async (req: any, res) => {
       req.user.id,
     );
     res.status(201).json({ id });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === "DUPLICATE_AUTOMATION") {
+      return res
+        .status(400)
+        .json({ error: "Une règle d'automatisation identique existe déjà." });
+    }
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
