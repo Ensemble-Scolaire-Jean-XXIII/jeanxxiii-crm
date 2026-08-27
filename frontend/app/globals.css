@@ -6,27 +6,27 @@
   --bg-sidebar: rgba(24, 24, 27, 0.75);
   --bg-header: rgba(24, 24, 27, 0.75);
   --bg-card: rgba(24, 24, 27, 0.65);
-  --bg-table-header: rgba(24, 24, 27, 0.8);
+  --bg-table-header: #18181b;
   --border-color: rgba(255, 255, 255, 0.15);
   --text-main: #f4f4f5;
   --text-muted: #a1a1aa;
-  --accent: #f97316;
+  --accent: #e84e1b;
   --input-bg: rgba(9, 9, 11, 0.6);
   --radius-box: 1.5rem;
 }
 
 [data-theme="glass"] {
   --bg-main: transparent;
-  --bg-sidebar: rgba(3, 7, 18, 0.85);
-  --bg-header: rgba(3, 7, 18, 0.85);
-  --bg-card: rgba(15, 23, 42, 0.75);
-  --bg-table-header: rgba(15, 23, 42, 0.9);
-  --border-color: rgba(6, 182, 212, 0.35);
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --accent: #06b6d4;
-  --input-bg: rgba(3, 7, 18, 0.8);
-  --radius-box: 0.75rem;
+  --bg-sidebar: rgba(255, 255, 255, 0.04);
+  --bg-header: rgba(255, 255, 255, 0.05);
+  --bg-card: rgba(255, 255, 255, 0.07);
+  --bg-table-header: #09090b;
+  --border-color: rgba(255, 255, 255, 0.18);
+  --text-main: #ffffff;
+  --text-muted: #a1a1aa;
+  --accent: #e84e1b;
+  --input-bg: rgba(0, 0, 0, 0.3);
+  --radius-box: 1.25rem;
 }
 
 [data-theme="institution"] {
@@ -34,13 +34,27 @@
   --bg-sidebar: rgba(15, 23, 42, 0.75);
   --bg-header: rgba(15, 23, 42, 0.75);
   --bg-card: rgba(30, 41, 59, 0.7);
-  --bg-table-header: rgba(30, 41, 59, 0.85);
+  --bg-table-header: #1e293b;
   --border-color: rgba(255, 255, 255, 0.15);
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
-  --accent: #ea580c;
+  --accent: #e84e1b;
   --input-bg: rgba(15, 23, 42, 0.8);
   --radius-box: 1rem;
+}
+
+[data-theme="solid"] {
+  --bg-main: #09090b72;
+  --bg-sidebar: #121214;
+  --bg-header: #121214;
+  --bg-card: #18181b;
+  --bg-table-header: #18181b;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --text-main: #f4f4f5;
+  --text-muted: #a1a1aa;
+  --accent: #e84e1b;
+  --input-bg: #27272a;
+  --radius-box: 0.5rem;
 }
 
 body {
@@ -58,7 +72,9 @@ body {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-box);
     padding: 1.5rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    box-shadow:
+      0 10px 25px -5px rgba(0, 0, 0, 0.15),
+      0 8px 10px -6px rgba(0, 0, 0, 0.1);
   }
 
   .crm-input {
@@ -72,7 +88,7 @@ body {
     width: 100%;
     height: 38px;
     box-sizing: border-box;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(12px);
   }
 
   .crm-input:focus {
@@ -113,7 +129,7 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(12px);
   }
 
   .crm-btn-ghost:hover {

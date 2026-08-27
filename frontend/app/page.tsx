@@ -188,10 +188,10 @@ export default function DashboardPage() {
           </div>
           <div className="pt-4 flex flex-col gap-2.5">
             <Link
-              href="/prospects"
+              href="/prospects?action=create"
               className="group flex items-center justify-between p-2.5 rounded-xl bg-white/5 hover:bg-white/10 transition-all border border-(--border-color)"
             >
-              <span className="font-medium text-sm">Nouveau prospect</span>
+              <span className="font-medium text-sm">Ajouter un prospect</span>
               <Image
                 src="/icons/add.webp"
                 alt="Ajouter"
@@ -203,47 +203,34 @@ export default function DashboardPage() {
             </Link>
 
             <Link
-              href="/templates"
+              href="/templates?action=create"
               className="group flex items-center justify-between p-2.5 rounded-xl bg-white/5 hover:bg-white/10 transition-all border border-(--border-color)"
-            >
-              <span className="font-medium text-sm">Nouveau template</span>
-              <Image
-                src="/icons/add.webp"
-                alt="Ajouter"
-                width={16}
-                height={16}
-                className="object-contain brightness-0 invert shrink-0"
-                unoptimized
-              />
-            </Link>
-
-            <Link
-              href="/automations"
-              className="group flex items-center justify-between p-2.5 rounded-xl bg-white/5 hover:bg-white/10 transition-all border border-(--border-color)"
-            >
-              <span className="font-medium text-sm">Gérer automatisations</span>
-              <Image
-                src="/icons/add.webp"
-                alt="Ajouter"
-                width={16}
-                height={16}
-                className="object-contain brightness-0 invert shrink-0"
-                unoptimized
-              />
-            </Link>
-
-            <Link
-              href="/salons"
-              className="group flex items-center justify-between p-2.5 rounded-xl bg-blue-500/20 hover:bg-blue-500/40 transition-all border border-blue-400/30"
             >
               <span className="font-medium text-sm">
-                Lancer le mode &#34;Salons&#34; (Kiosque)
+                Créer un nouveau template
               </span>
               <Image
-                src="/icons/salons.webp"
-                alt="Mode Salon"
-                width={18}
-                height={18}
+                src="/icons/add.webp"
+                alt="Ajouter"
+                width={16}
+                height={16}
+                className="object-contain brightness-0 invert shrink-0"
+                unoptimized
+              />
+            </Link>
+
+            <Link
+              href="/automations?action=create"
+              className="group flex items-center justify-between p-2.5 rounded-xl bg-white/5 hover:bg-white/10 transition-all border border-(--border-color)"
+            >
+              <span className="font-medium text-sm">
+                Créer une nouvelle automatisation
+              </span>
+              <Image
+                src="/icons/add.webp"
+                alt="Ajouter"
+                width={16}
+                height={16}
                 className="object-contain brightness-0 invert shrink-0"
                 unoptimized
               />
@@ -268,6 +255,23 @@ export default function DashboardPage() {
                 unoptimized
               />
             </button>
+
+            <Link
+              href="/salons"
+              className="group flex items-center justify-between p-2.5 rounded-xl bg-[#e84e1b]/20 hover:bg-[#e84e1b]/40 transition-all border border-[#e84e1b]/30"
+            >
+              <span className="font-medium text-sm">
+                Lancer le mode &#34;Salons&#34; (Kiosque)
+              </span>
+              <Image
+                src="/icons/salons.webp"
+                alt="Mode Salon"
+                width={18}
+                height={18}
+                className="object-contain brightness-0 invert shrink-0"
+                unoptimized
+              />
+            </Link>
 
             {isAdmin && (
               <button
