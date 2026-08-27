@@ -4,7 +4,7 @@ import { useState } from "react";
 import { templateService } from "../services/templateService";
 import { CreateTemplateDTO, EmailTemplate } from "../types/index";
 import Toast from "../components/Toast";
-import Skeleton from "../components/Skeleton";
+import { TableSkeleton } from "../components/Skeleton";
 import { useCrud } from "../hooks/useCrud";
 import { useSearch } from "../hooks/useSearch";
 import PageHeader from "../components/PageHeader";
@@ -134,19 +134,19 @@ export default function TemplatesPage() {
       )}
 
       <ScrollableTableCard>
-        <table className="w-full text-left text-sm">
+        <table className="w-full text-left text-sm table-fixed min-w-200">
           <thead className="sticky top-0 bg-slate-900/95 backdrop-blur z-10 shadow-md">
             <tr className="border-b border-slate-700 text-slate-300">
-              <th className="px-3 py-3 font-semibold text-white w-1/4">
+              <th className="px-3 py-3 font-semibold text-white w-1/4 truncate">
                 Template & Sujet
               </th>
-              <th className="px-3 py-3 font-semibold text-white w-2/4">
+              <th className="px-3 py-3 font-semibold text-white truncate">
                 Contenu
               </th>
-              <th className="px-3 py-3 font-semibold text-white text-right w-1/4">
+              <th className="px-3 py-3 font-semibold text-white text-right w-52">
                 <input
                   type="text"
-                  className="input-field py-1 px-2 text-xs font-normal w-full max-w-44 text-right ml-auto"
+                  className="input-field py-1 px-2 text-xs font-normal w-full text-right ml-auto"
                   placeholder="Rechercher..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -156,24 +156,12 @@ export default function TemplatesPage() {
           </thead>
           <tbody>
             {isLoading ? (
-              Array.from({ length: 3 }).map((_, idx) => (
-                <tr key={idx} className="border-b border-white/5">
-                  <td className="px-3 py-2">
-                    <Skeleton className="h-10 w-full" />
-                  </td>
-                  <td className="px-3 py-2">
-                    <Skeleton className="h-12 w-full" />
-                  </td>
-                  <td className="px-3 py-2 text-right">
-                    <Skeleton className="h-8 w-24 inline-block" />
-                  </td>
-                </tr>
-              ))
+              <TableSkeleton columns={3} />
             ) : filteredTemplates.length === 0 ? (
               <tr>
                 <td
                   colSpan={3}
-                  className="px-3 py-6 text-center text-slate-400"
+                  className="px-3 py-6 text-center text-slate-400 truncate"
                 >
                   Aucun template trouvé.
                 </td>
@@ -184,18 +172,18 @@ export default function TemplatesPage() {
                   key={t.id}
                   className="group border-b border-white/5 hover:bg-white/5 transition-colors align-top"
                 >
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-3.5 truncate">
                     {editingId === t.id ? (
                       <div className="flex flex-col gap-2">
                         <input
-                          className="input-field py-1 px-2 text-xs font-medium"
+                          className="input-field py-1 px-2 text-xs font-medium w-full"
                           value={editForm.name || ""}
                           onChange={(e) =>
                             setEditForm({ ...editForm, name: e.target.value })
                           }
                         />
                         <input
-                          className="input-field py-1 px-2 text-[10px]"
+                          className="input-field py-1 px-2 text-[10px] w-full"
                           value={editForm.subject || ""}
                           onChange={(e) =>
                             setEditForm({
@@ -206,30 +194,38 @@ export default function TemplatesPage() {
                         />
                       </div>
                     ) : (
-                      <div className="flex flex-col">
-                        <span className="font-medium text-white">{t.name}</span>
-                        <span className="text-xs text-slate-400 mt-1">
+                      <div className="flex flex-col truncate w-full">
+                        <span
+                          className="font-medium text-white block truncate"
+                          title={t.name}
+                        >
+                          {t.name}
+                        </span>
+                        <span
+                          className="text-xs text-slate-400 mt-1 block truncate"
+                          title={t.subject}
+                        >
                           {t.subject}
                         </span>
                       </div>
                     )}
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-3.5">
                     {editingId === t.id ? (
                       <textarea
-                        className="input-field py-2 px-3 min-h-40 text-xs"
+                        className="input-field py-2 px-3 min-h-40 text-xs w-full"
                         value={editForm.body || ""}
                         onChange={(e) =>
                           setEditForm({ ...editForm, body: e.target.value })
                         }
                       />
                     ) : (
-                      <p className="text-xs text-slate-300 line-clamp-3 whitespace-pre-wrap">
+                      <p className="text-xs text-slate-300 line-clamp-3 whitespace-pre-wrap wrap-break-word">
                         {t.body}
                       </p>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="px-3 py-3.5 text-right">
                     {editingId === t.id ? (
                       <div className="flex justify-end gap-2">
                         <button

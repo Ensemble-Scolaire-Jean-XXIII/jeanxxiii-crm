@@ -13,7 +13,7 @@ import {
   EmailAutomationRule,
 } from "../types";
 import Toast from "../components/Toast";
-import Skeleton from "../components/Skeleton";
+import { TableSkeleton } from "../components/Skeleton";
 import { useCrud } from "../hooks/useCrud";
 import { useSearch } from "../hooks/useSearch";
 import PageHeader from "../components/PageHeader";
@@ -163,7 +163,7 @@ export default function AutomationsPage() {
             <div>
               <label className="label-text">Type de déclencheur</label>
               <select
-                className="input-field py-1.5"
+                className="input-field py-1.5 w-full truncate"
                 value={createForm.trigger_type}
                 onChange={(e) =>
                   setCreateForm({
@@ -186,7 +186,7 @@ export default function AutomationsPage() {
               <div>
                 <label className="label-text">Statut déclencheur</label>
                 <select
-                  className="input-field py-1.5"
+                  className="input-field py-1.5 w-full truncate"
                   value={
                     createForm.status_id === null ? "" : createForm.status_id
                   }
@@ -211,7 +211,7 @@ export default function AutomationsPage() {
                 <label className="label-text">Date et Heure d&apos;envoi</label>
                 <input
                   type="datetime-local"
-                  className="input-field py-1.5"
+                  className="input-field py-1.5 w-full"
                   value={createForm.scheduled_date || ""}
                   onChange={(e) =>
                     setCreateForm({
@@ -226,7 +226,7 @@ export default function AutomationsPage() {
             <div>
               <label className="label-text">Formation (Cible)</label>
               <select
-                className="input-field py-1.5"
+                className="input-field py-1.5 w-full truncate"
                 value={createForm.formation_id?.toString() || ""}
                 onChange={(e) =>
                   setCreateForm({
@@ -248,7 +248,7 @@ export default function AutomationsPage() {
             <div>
               <label className="label-text">Template d&apos;email</label>
               <select
-                className="input-field py-1.5"
+                className="input-field py-1.5 w-full truncate"
                 value={createForm.email_template_id}
                 onChange={(e) =>
                   setCreateForm({
@@ -277,22 +277,22 @@ export default function AutomationsPage() {
       )}
 
       <ScrollableTableCard>
-        <table className="w-full text-left text-sm">
+        <table className="w-full text-left text-sm table-fixed min-w-200">
           <thead className="sticky top-0 bg-slate-900/95 backdrop-blur z-10 shadow-md">
             <tr className="border-b border-slate-700 text-slate-300">
-              <th className="px-3 py-3 font-semibold text-white">
+              <th className="px-3 py-3 font-semibold text-white truncate">
                 Déclencheur (Statut / Date)
               </th>
-              <th className="px-3 py-3 font-semibold text-white">
+              <th className="px-3 py-3 font-semibold text-white truncate">
                 Formation Cible
               </th>
-              <th className="px-3 py-3 font-semibold text-white">
+              <th className="px-3 py-3 font-semibold text-white truncate">
                 Template d&apos;email
               </th>
-              <th className="px-3 py-3 font-semibold text-white text-right">
+              <th className="px-3 py-3 font-semibold text-white text-right w-52">
                 <input
                   type="text"
-                  className="input-field py-1 px-2 text-xs font-normal w-full max-w-44 text-right ml-auto"
+                  className="input-field py-1 px-2 text-xs font-normal w-full text-right ml-auto"
                   placeholder="Rechercher..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -302,27 +302,12 @@ export default function AutomationsPage() {
           </thead>
           <tbody>
             {isLoading ? (
-              Array.from({ length: 4 }).map((_, idx) => (
-                <tr key={idx} className="border-b border-white/5">
-                  <td className="px-3 py-2">
-                    <Skeleton className="h-8 w-full" />
-                  </td>
-                  <td className="px-3 py-2">
-                    <Skeleton className="h-8 w-full" />
-                  </td>
-                  <td className="px-3 py-2">
-                    <Skeleton className="h-8 w-full" />
-                  </td>
-                  <td className="px-3 py-2 text-right">
-                    <Skeleton className="h-8 w-16 inline-block" />
-                  </td>
-                </tr>
-              ))
+              <TableSkeleton columns={4} />
             ) : filteredAutomations.length === 0 ? (
               <tr>
                 <td
                   colSpan={4}
-                  className="px-3 py-6 text-center text-slate-400"
+                  className="px-3 py-6 text-center text-slate-400 truncate"
                 >
                   Aucune règle d&apos;automatisation trouvée.
                 </td>
@@ -333,10 +318,10 @@ export default function AutomationsPage() {
                   key={rule.id}
                   className="group border-b border-white/5 hover:bg-white/5 transition-colors"
                 >
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-3.5 truncate">
                     {rule.trigger_type === "STATUS_CHANGE" ? (
                       <select
-                        className="input-field py-1 px-2 text-xs sm:text-sm cursor-pointer w-full"
+                        className="input-field py-1 px-2 text-xs sm:text-sm cursor-pointer w-full truncate"
                         value={rule.status_id ?? ""}
                         onChange={(e) =>
                           updateWithUndo(rule.id, {
@@ -355,7 +340,7 @@ export default function AutomationsPage() {
                     ) : (
                       <input
                         type="datetime-local"
-                        className="input-field py-1 px-2 text-xs sm:text-sm w-full"
+                        className="input-field py-1 px-2 text-xs sm:text-sm w-full truncate"
                         value={
                           rule.scheduled_date
                             ? new Date(rule.scheduled_date)
@@ -374,9 +359,9 @@ export default function AutomationsPage() {
                       />
                     )}
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-3.5 truncate">
                     <select
-                      className="input-field py-1 px-2 text-xs sm:text-sm cursor-pointer w-full"
+                      className="input-field py-1 px-2 text-xs sm:text-sm cursor-pointer w-full truncate"
                       value={rule.formation_id ?? ""}
                       onChange={(e) =>
                         updateWithUndo(rule.id, {
@@ -394,9 +379,9 @@ export default function AutomationsPage() {
                       ))}
                     </select>
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-3.5 truncate">
                     <select
-                      className="input-field py-1 px-2 text-xs sm:text-sm cursor-pointer w-full"
+                      className="input-field py-1 px-2 text-xs sm:text-sm cursor-pointer w-full truncate"
                       value={rule.email_template_id}
                       onChange={(e) =>
                         updateWithUndo(rule.id, {
@@ -411,7 +396,7 @@ export default function AutomationsPage() {
                       ))}
                     </select>
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="px-3 py-3.5 text-right">
                     <button
                       onClick={() => deleteWithUndo(rule.id)}
                       className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 btn btn-ghost text-red-400 px-2 py-1 text-sm"

@@ -44,7 +44,7 @@ export default function Toast({
   const isSuccess = type === "success";
 
   const toastContent = (
-    <div className="fixed bottom-6 right-6 z-[9999] bg-slate-900/60 backdrop-blur-xl border border-white/20 text-white rounded-2xl shadow-2xl overflow-hidden min-w-85 animate-in fade-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed bottom-6 right-6 z-9999 bg-slate-900/60 backdrop-blur-xl border border-white/20 text-white rounded-2xl shadow-2xl overflow-hidden min-w-85 animate-in fade-in slide-in-from-bottom-4 duration-300">
       <div className="px-6 py-4 flex items-center justify-between gap-6">
         <div className="flex items-center gap-3">
           <span
