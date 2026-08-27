@@ -1,21 +1,24 @@
-import React from "react";
-
-interface ScrollableTableCardProps {
-  children: React.ReactNode;
-  footer?: React.ReactNode;
-}
+import { ReactNode } from "react";
+import { useTheme } from "../contexts/ThemeContext";
 
 export default function ScrollableTableCard({
   children,
   footer,
-}: ScrollableTableCardProps) {
+}: {
+  children: ReactNode;
+  footer?: ReactNode;
+}) {
+  const { t } = useTheme();
+
   return (
-    <div className="glass-card p-3 flex flex-col flex-1 min-h-62.5 overflow-hidden">
-      <div className="overflow-y-auto overflow-x-auto flex-1 rounded-t-lg custom-scrollbar pr-4">
+    <div
+      className={`${t.card} flex flex-col flex-1 min-h-0 overflow-hidden p-0!`}
+    >
+      <div className="overflow-y-auto overflow-x-auto flex-1 custom-scrollbar relative">
         {children}
       </div>
       {footer && (
-        <div className="flex justify-between items-center pt-3 mt-3 border-t border-white/10 shrink-0">
+        <div className="p-3 border-t border-(--border-color) flex items-center justify-between bg-(--bg-card) shrink-0">
           {footer}
         </div>
       )}

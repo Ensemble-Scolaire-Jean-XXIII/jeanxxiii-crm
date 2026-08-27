@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { templateService } from "../services/templateService";
-import { CreateTemplateDTO, EmailTemplate } from "../types/index";
+import { CreateTemplatePayload, EmailTemplate } from "../types/index";
 import Toast from "../components/Toast";
 import { TableSkeleton } from "../components/Skeleton";
 import { useCrud } from "../hooks/useCrud";
@@ -10,8 +10,10 @@ import { useSearch } from "../hooks/useSearch";
 import PageHeader from "../components/PageHeader";
 import FormCard from "../components/FormCard";
 import ScrollableTableCard from "../components/ScrollableTableCard";
+import { useTheme } from "../contexts/ThemeContext";
 
 export default function TemplatesPage() {
+  const { t } = useTheme();
   const {
     data: templates,
     isLoading,
@@ -31,7 +33,7 @@ export default function TemplatesPage() {
     create,
     updateWithUndo,
     deleteWithUndo,
-  } = useCrud<EmailTemplate, CreateTemplateDTO>(templateService, {
+  } = useCrud<EmailTemplate, CreateTemplatePayload>(templateService, {
     name: "",
     subject: "",
     body: "",
@@ -43,10 +45,10 @@ export default function TemplatesPage() {
     searchQuery,
     setSearchQuery,
     filteredData: filteredTemplates,
-  } = useSearch(templates, (t, query) => {
-    const name = (t.name || "").toLowerCase();
-    const subject = (t.subject || "").toLowerCase();
-    const body = (t.body || "").toLowerCase();
+  } = useSearch(templates, (tpl, query) => {
+    const name = (tpl.name || "").toLowerCase();
+    const subject = (tpl.subject || "").toLowerCase();
+    const body = (tpl.body || "").toLowerCase();
     return (
       name.includes(query) || subject.includes(query) || body.includes(query)
     );
@@ -70,10 +72,7 @@ export default function TemplatesPage() {
         title="Templates d'email"
         description="Rédigez les emails qui seront distribués automatiquement"
       >
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="btn btn-ghost border border-white/20 text-white text-sm py-1.5 px-4 bg-white/5 hover:bg-white/10"
-        >
+        <button onClick={() => setShowForm(!showForm)} className={t.btnGhost}>
           {showForm ? "Cacher le formulaire d'ajout" : "+ Nouveau template"}
         </button>
       </PageHeader>
@@ -86,10 +85,12 @@ export default function TemplatesPage() {
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="label-text">Nom du template</label>
+                <label className={`block text-xs mb-1 ${t.textMuted}`}>
+                  Nom du template
+                </label>
                 <input
                   type="text"
-                  className="input-field py-1.5"
+                  className={`${t.input} py-1.5`}
                   placeholder="Statut - Formation"
                   value={createForm.name}
                   onChange={(e) =>
@@ -99,10 +100,12 @@ export default function TemplatesPage() {
                 />
               </div>
               <div>
-                <label className="label-text">Sujet de l&#39;email</label>
+                <label className={`block text-xs mb-1 ${t.textMuted}`}>
+                  Sujet de l&apos;email
+                </label>
                 <input
                   type="text"
-                  className="input-field py-1.5"
+                  className={`${t.input} py-1.5`}
                   placeholder="Dernière relance suite à votre demande - Formation"
                   value={createForm.subject}
                   onChange={(e) =>
@@ -113,9 +116,11 @@ export default function TemplatesPage() {
               </div>
             </div>
             <div>
-              <label className="label-text">Contenu de l&#39;email</label>
+              <label className={`block text-xs mb-1 ${t.textMuted}`}>
+                Contenu de l&apos;email
+              </label>
               <textarea
-                className="input-field min-h-20 py-1.5"
+                className={`${t.input} min-h-20 py-1.5`}
                 value={createForm.body}
                 placeholder="Bonjour {{civility}} {{first_name}} {{last_name}},"
                 onChange={(e) =>
@@ -125,7 +130,7 @@ export default function TemplatesPage() {
               />
             </div>
             <div className="flex justify-end mt-2">
-              <button type="submit" className="btn btn-primary py-1.5 text-sm">
+              <button type="submit" className={t.btnPrimary}>
                 Ajouter le template
               </button>
             </div>
@@ -135,18 +140,16 @@ export default function TemplatesPage() {
 
       <ScrollableTableCard>
         <table className="w-full text-left text-sm table-fixed min-w-200">
-          <thead className="sticky top-0 bg-slate-900/95 backdrop-blur z-10 shadow-md">
-            <tr className="border-b border-slate-700 text-slate-300">
-              <th className="px-3 py-3 font-semibold text-white w-1/4 truncate">
+          <thead className={`sticky top-0 z-10 shadow-md ${t.tableHeader}`}>
+            <tr className="border-b border-slate-700">
+              <th className="px-3 py-3 font-semibold w-1/4 truncate">
                 Template & Sujet
               </th>
-              <th className="px-3 py-3 font-semibold text-white truncate">
-                Contenu
-              </th>
-              <th className="px-3 py-3 font-semibold text-white text-right w-52">
+              <th className="px-3 py-3 font-semibold truncate">Contenu</th>
+              <th className="px-3 py-3 font-semibold text-right w-52">
                 <input
                   type="text"
-                  className="input-field py-1 px-2 text-xs font-normal w-full text-right ml-auto"
+                  className={`${t.input} w-48 ml-auto py-1! text-xs! font-normal`}
                   placeholder="Rechercher..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -159,31 +162,32 @@ export default function TemplatesPage() {
               <TableSkeleton columns={3} />
             ) : filteredTemplates.length === 0 ? (
               <tr>
+                {" "}
                 <td
                   colSpan={3}
-                  className="px-3 py-6 text-center text-slate-400 truncate"
+                  className={`px-3 py-6 text-center truncate ${t.textMuted}`}
                 >
                   Aucun template trouvé.
                 </td>
               </tr>
             ) : (
-              filteredTemplates.map((t) => (
+              filteredTemplates.map((tpl) => (
                 <tr
-                  key={t.id}
-                  className="group border-b border-white/5 hover:bg-white/5 transition-colors align-top"
+                  key={tpl.id}
+                  className={`group border-b transition-colors align-top ${t.tableRow}`}
                 >
                   <td className="px-3 py-3.5 truncate">
-                    {editingId === t.id ? (
+                    {editingId === tpl.id ? (
                       <div className="flex flex-col gap-2">
                         <input
-                          className="input-field py-1 px-2 text-xs font-medium w-full"
+                          className={`${t.input} py-1 px-2 text-xs font-medium w-full`}
                           value={editForm.name || ""}
                           onChange={(e) =>
                             setEditForm({ ...editForm, name: e.target.value })
                           }
                         />
                         <input
-                          className="input-field py-1 px-2 text-[10px] w-full"
+                          className={`${t.input} py-1 px-2 text-[10px] w-full`}
                           value={editForm.subject || ""}
                           onChange={(e) =>
                             setEditForm({
@@ -196,53 +200,55 @@ export default function TemplatesPage() {
                     ) : (
                       <div className="flex flex-col truncate w-full">
                         <span
-                          className="font-medium text-white block truncate"
-                          title={t.name}
+                          className="font-medium block truncate"
+                          title={tpl.name}
                         >
-                          {t.name}
+                          {tpl.name}
                         </span>
                         <span
-                          className="text-xs text-slate-400 mt-1 block truncate"
-                          title={t.subject}
+                          className={`text-xs mt-1 block truncate ${t.textMuted}`}
+                          title={tpl.subject}
                         >
-                          {t.subject}
+                          {tpl.subject}
                         </span>
                       </div>
                     )}
                   </td>
                   <td className="px-3 py-3.5">
-                    {editingId === t.id ? (
+                    {editingId === tpl.id ? (
                       <textarea
-                        className="input-field py-2 px-3 min-h-40 text-xs w-full"
+                        className={`${t.input} py-2 px-3 min-h-40 text-xs w-full`}
                         value={editForm.body || ""}
                         onChange={(e) =>
                           setEditForm({ ...editForm, body: e.target.value })
                         }
                       />
                     ) : (
-                      <p className="text-xs text-slate-300 line-clamp-3 whitespace-pre-wrap wrap-break-word">
-                        {t.body}
+                      <p
+                        className={`text-xs line-clamp-3 whitespace-pre-wrap ${t.textMuted}`}
+                      >
+                        {tpl.body}
                       </p>
                     )}
                   </td>
                   <td className="px-3 py-3.5 text-right">
-                    {editingId === t.id ? (
+                    {editingId === tpl.id ? (
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() =>
-                            updateWithUndo(t.id, {
+                            updateWithUndo(tpl.id, {
                               name: editForm.name,
                               subject: editForm.subject,
                               body: editForm.body,
                             })
                           }
-                          className="btn btn-ghost text-green-400 px-2 py-1 text-xs"
+                          className="text-green-400 hover:bg-green-500/10 px-2 py-1 rounded text-xs"
                         >
                           Valider
                         </button>
                         <button
                           onClick={() => setEditingId(null)}
-                          className="btn btn-ghost text-slate-400 px-2 py-1 text-xs"
+                          className={`${t.textMuted} hover:bg-black/5 px-2 py-1 rounded text-xs`}
                         >
                           Annuler
                         </button>
@@ -250,14 +256,14 @@ export default function TemplatesPage() {
                     ) : (
                       <div className="flex justify-end gap-2 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <button
-                          onClick={() => startEdit(t)}
-                          className="btn btn-ghost text-accent px-2 py-1 text-xs"
+                          onClick={() => startEdit(tpl)}
+                          className="text-accent hover:bg-accent/10 px-2 py-1 rounded text-xs"
                         >
                           Corriger
                         </button>
                         <button
-                          onClick={() => deleteWithUndo(t.id)}
-                          className="btn btn-ghost text-red-400 px-2 py-1 text-xs"
+                          onClick={() => deleteWithUndo(tpl.id)}
+                          className="text-red-400 hover:bg-red-500/10 px-2 py-1 rounded text-xs"
                         >
                           Supprimer
                         </button>

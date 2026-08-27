@@ -21,7 +21,6 @@ export default function Toast({
 
   useEffect(() => {
     if (!message) return;
-    if (type !== "undo") return;
 
     setProgress(100);
     const startTime = Date.now();
@@ -35,7 +34,7 @@ export default function Toast({
     }, 50);
 
     return () => clearInterval(interval);
-  }, [message, type, duration]);
+  }, [message, duration]);
 
   if (!message || !mounted) return null;
 
@@ -43,21 +42,27 @@ export default function Toast({
   const isError = type === "error";
   const isSuccess = type === "success";
 
+  const dotColor = isError
+    ? "bg-red-500"
+    : isUndo
+      ? "bg-[var(--accent)]"
+      : isSuccess
+        ? "bg-emerald-400"
+        : "bg-blue-400";
+
+  const progressBarColor = isError
+    ? "bg-red-500"
+    : isUndo
+      ? "bg-[var(--accent)]"
+      : isSuccess
+        ? "bg-emerald-400"
+        : "bg-[var(--accent)]";
+
   const toastContent = (
-    <div className="fixed bottom-6 right-6 z-9999 bg-slate-900/60 backdrop-blur-xl border border-white/20 text-white rounded-2xl shadow-2xl overflow-hidden min-w-85 animate-in fade-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed bottom-6 right-6 z-9999 bg-(--bg-card) backdrop-blur-xl border border-(--border-color) text-(--text-main) rounded-2xl shadow-2xl overflow-hidden min-w-85 animate-in fade-in slide-in-from-bottom-4 duration-300">
       <div className="px-6 py-4 flex items-center justify-between gap-6">
         <div className="flex items-center gap-3">
-          <span
-            className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-              isError
-                ? "bg-danger"
-                : isUndo
-                  ? "bg-accent"
-                  : isSuccess
-                    ? "bg-emerald-400"
-                    : "bg-primary"
-            }`}
-          />
+          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${dotColor}`} />
           <span className="text-sm font-medium tracking-wide">{message}</span>
         </div>
 
@@ -65,28 +70,26 @@ export default function Toast({
           {isUndo && onUndo && (
             <button
               onClick={onUndo}
-              className="text-xs font-bold text-accent hover:text-accent/80 transition-colors uppercase tracking-wider cursor-pointer"
+              className="text-xs font-bold text-(--accent) hover:opacity-80 transition-opacity uppercase tracking-wider cursor-pointer"
             >
               Annuler
             </button>
           )}
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors text-lg font-bold cursor-pointer"
+            className="text-(--text-muted) hover:text-(--text-main) transition-colors text-lg font-bold cursor-pointer"
           >
             &times;
           </button>
         </div>
       </div>
 
-      {isUndo && (
-        <div className="w-full bg-white/10 h-1">
-          <div
-            className="bg-accent h-full transition-all duration-75 ease-linear"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      )}
+      <div className="w-full bg-white/10 h-1">
+        <div
+          className={`${progressBarColor} h-full transition-all duration-75 ease-linear`}
+          style={{ width: `${progress}%` }}
+        />
+      </div>
     </div>
   );
 

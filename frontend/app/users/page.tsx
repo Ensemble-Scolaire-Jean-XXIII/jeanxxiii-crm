@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { userService } from "../services/userService";
 import { auditLogService } from "../services/auditLogService";
-import { CreateUsersDTO, User, AuditLog } from "../types/index";
+import { CreateUserPayload, User, AuditLog } from "../types/index";
 import Toast from "../components/Toast";
 import { TableSkeleton } from "../components/Skeleton";
 import { useCrud } from "../hooks/useCrud";
@@ -12,8 +12,10 @@ import { useSearch } from "../hooks/useSearch";
 import PageHeader from "../components/PageHeader";
 import FormCard from "../components/FormCard";
 import ScrollableTableCard from "../components/ScrollableTableCard";
+import { useTheme } from "../contexts/ThemeContext";
 
 export default function UsersPage() {
+  const { t } = useTheme();
   const {
     data: users,
     isLoading,
@@ -33,7 +35,7 @@ export default function UsersPage() {
     create,
     updateWithUndo,
     deleteWithUndo,
-  } = useCrud<User, CreateUsersDTO>(userService, {
+  } = useCrud<User, CreateUserPayload>(userService, {
     email: "",
     password_hash: "",
     first_name: "",
@@ -138,26 +140,20 @@ export default function UsersPage() {
       >
         <div className="flex gap-2">
           {showLogs ? (
-            <button
-              onClick={fetchLogs}
-              className="btn btn-ghost text-white text-sm py-1.5"
-            >
+            <button onClick={fetchLogs} className={t.btnGhost}>
               Actualiser
             </button>
           ) : (
             <button
               onClick={() => setShowForm(!showForm)}
-              className="btn btn-ghost border border-white/20 text-white text-sm py-1.5 px-4 bg-white/5 hover:bg-white/10"
+              className={t.btnGhost}
             >
               {showForm
                 ? "Cacher le formulaire d'ajout"
                 : "+ Nouvel utilisateur"}
             </button>
           )}
-          <button
-            onClick={() => setShowLogs(!showLogs)}
-            className="btn btn-ghost border border-white/20 text-white text-sm py-1.5 px-4 bg-white/5 hover:bg-white/10"
-          >
+          <button onClick={() => setShowLogs(!showLogs)} className={t.btnGhost}>
             {showLogs ? "← Retour aux utilisateurs" : "Voir l'historique →"}
           </button>
         </div>
@@ -172,10 +168,12 @@ export default function UsersPage() {
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3"
               >
                 <div>
-                  <label className="label-text">Prénom</label>
+                  <label className={`block text-xs mb-1 ${t.textMuted}`}>
+                    Prénom
+                  </label>
                   <input
                     type="text"
-                    className="input-field py-1.5 w-full"
+                    className={`${t.input} py-1.5 w-full`}
                     value={createForm.first_name}
                     onChange={(e) =>
                       setCreateForm({
@@ -187,10 +185,12 @@ export default function UsersPage() {
                   />
                 </div>
                 <div>
-                  <label className="label-text">Nom</label>
+                  <label className={`block text-xs mb-1 ${t.textMuted}`}>
+                    Nom
+                  </label>
                   <input
                     type="text"
-                    className="input-field py-1.5 w-full"
+                    className={`${t.input} py-1.5 w-full`}
                     value={createForm.last_name}
                     onChange={(e) =>
                       setCreateForm({
@@ -202,10 +202,12 @@ export default function UsersPage() {
                   />
                 </div>
                 <div>
-                  <label className="label-text">Email</label>
+                  <label className={`block text-xs mb-1 ${t.textMuted}`}>
+                    Email
+                  </label>
                   <input
                     type="email"
-                    className="input-field py-1.5 w-full"
+                    className={`${t.input} py-1.5 w-full`}
                     value={createForm.email}
                     onChange={(e) =>
                       setCreateForm({ ...createForm, email: e.target.value })
@@ -214,10 +216,12 @@ export default function UsersPage() {
                   />
                 </div>
                 <div>
-                  <label className="label-text">Mot de passe</label>
+                  <label className={`block text-xs mb-1 ${t.textMuted}`}>
+                    Mot de passe
+                  </label>
                   <input
                     type="password"
-                    className="input-field py-1.5 w-full"
+                    className={`${t.input} py-1.5 w-full`}
                     value={createForm.password_hash}
                     onChange={(e) =>
                       setCreateForm({
@@ -229,9 +233,11 @@ export default function UsersPage() {
                   />
                 </div>
                 <div>
-                  <label className="label-text">Rôle</label>
+                  <label className={`block text-xs mb-1 ${t.textMuted}`}>
+                    Rôle
+                  </label>
                   <select
-                    className="input-field py-1.5 w-full"
+                    className={`${t.input} py-1.5 w-full`}
                     value={createForm.role}
                     onChange={(e) =>
                       setCreateForm({ ...createForm, role: e.target.value })
@@ -242,11 +248,8 @@ export default function UsersPage() {
                   </select>
                 </div>
                 <div className="lg:col-span-5 flex justify-end">
-                  <button
-                    type="submit"
-                    className="btn btn-primary py-1.5 text-sm"
-                  >
-                    Ajouter l'utilisateur
+                  <button type="submit" className={t.btnPrimary}>
+                    Ajouter l&apos;utilisateur
                   </button>
                 </div>
               </form>
@@ -255,21 +258,17 @@ export default function UsersPage() {
 
           <ScrollableTableCard>
             <table className="w-full text-left text-sm table-fixed min-w-175">
-              <thead className="sticky top-0 bg-slate-900/95 backdrop-blur z-10 shadow-md">
-                <tr className="border-b border-slate-700 text-slate-300">
-                  <th className="px-3 py-3 font-semibold text-white truncate">
+              <thead className={`sticky top-0 z-10 shadow-md ${t.tableHeader}`}>
+                <tr className="border-b border-slate-700">
+                  <th className="px-3 py-3 font-semibold truncate">
                     Nom complet
                   </th>
-                  <th className="px-3 py-3 font-semibold text-white truncate">
-                    Email
-                  </th>
-                  <th className="px-3 py-3 font-semibold text-white truncate">
-                    Rôle
-                  </th>
-                  <th className="px-3 py-3 font-semibold text-white text-right w-52">
+                  <th className="px-3 py-3 font-semibold truncate">Email</th>
+                  <th className="px-3 py-3 font-semibold truncate">Rôle</th>
+                  <th className="px-3 py-3 font-semibold text-right w-52">
                     <input
                       type="text"
-                      className="input-field py-1 px-2 text-xs font-normal w-full text-right ml-auto"
+                      className={`${t.input} w-48 ml-auto py-1! text-xs! font-normal`}
                       placeholder="Rechercher..."
                       value={userSearchQuery}
                       onChange={(e) => setUserSearchQuery(e.target.value)}
@@ -282,9 +281,10 @@ export default function UsersPage() {
                   <TableSkeleton columns={4} />
                 ) : filteredUsers.length === 0 ? (
                   <tr>
+                    {" "}
                     <td
                       colSpan={4}
-                      className="px-3 py-6 text-center text-slate-400 truncate"
+                      className={`px-3 py-6 text-center truncate ${t.textMuted}`}
                     >
                       Aucun utilisateur trouvé.
                     </td>
@@ -293,13 +293,13 @@ export default function UsersPage() {
                   filteredUsers.map((u) => (
                     <tr
                       key={u.id}
-                      className="group border-b border-white/5 hover:bg-white/5 transition-colors"
+                      className={`group border-b transition-colors ${t.tableRow}`}
                     >
                       <td className="px-3 py-3.5 truncate">
                         {editingId === u.id ? (
                           <div className="flex gap-2">
                             <input
-                              className="input-field py-1 px-2 w-full text-xs"
+                              className={`${t.input} py-1 px-2 w-full text-xs`}
                               value={editForm.first_name || ""}
                               onChange={(e) =>
                                 setEditForm({
@@ -309,7 +309,7 @@ export default function UsersPage() {
                               }
                             />
                             <input
-                              className="input-field py-1 px-2 w-full text-xs"
+                              className={`${t.input} py-1 px-2 w-full text-xs`}
                               value={editForm.last_name || ""}
                               onChange={(e) =>
                                 setEditForm({
@@ -321,7 +321,7 @@ export default function UsersPage() {
                           </div>
                         ) : (
                           <span
-                            className="font-medium text-white block truncate"
+                            className="font-medium block truncate"
                             title={`${u.first_name} ${u.last_name}`}
                           >
                             {u.first_name} {u.last_name}
@@ -331,7 +331,7 @@ export default function UsersPage() {
                       <td className="px-3 py-3.5 truncate">
                         {editingId === u.id ? (
                           <input
-                            className="input-field py-1 px-2 text-xs w-full truncate"
+                            className={`${t.input} py-1 px-2 text-xs w-full truncate`}
                             value={editForm.email || ""}
                             onChange={(e) =>
                               setEditForm({
@@ -342,7 +342,7 @@ export default function UsersPage() {
                           />
                         ) : (
                           <span
-                            className="text-slate-300 block truncate"
+                            className={`block truncate ${t.textMuted}`}
                             title={u.email}
                           >
                             {u.email}
@@ -351,7 +351,7 @@ export default function UsersPage() {
                       </td>
                       <td className="px-3 py-3.5 truncate">
                         <select
-                          className="input-field py-1! px-2! text-xs cursor-pointer w-full truncate"
+                          className={`${t.input} py-1 px-2 text-xs cursor-pointer w-full truncate`}
                           value={u.role}
                           onChange={(e) =>
                             updateWithUndo(u.id, { role: e.target.value })
@@ -372,13 +372,13 @@ export default function UsersPage() {
                                   email: editForm.email,
                                 })
                               }
-                              className="btn btn-ghost text-green-400 px-2 py-1 text-xs font-bold"
+                              className="text-green-400 hover:bg-green-500/10 px-2 py-1 rounded text-xs font-bold"
                             >
                               Valider
                             </button>
                             <button
                               onClick={() => setEditingId(null)}
-                              className="btn btn-ghost text-slate-400 px-2 py-1 text-xs"
+                              className={`${t.textMuted} hover:bg-black/5 px-2 py-1 rounded text-xs`}
                             >
                               Annuler
                             </button>
@@ -387,13 +387,13 @@ export default function UsersPage() {
                           <div className="flex justify-end gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                             <button
                               onClick={() => startEdit(u)}
-                              className="btn btn-ghost text-accent px-2 py-1 text-xs"
+                              className="text-accent hover:bg-accent/10 px-2 py-1 rounded text-xs"
                             >
                               Corriger
                             </button>
                             <button
                               onClick={() => deleteWithUndo(u.id)}
-                              className="btn btn-ghost text-red-400 px-2 py-1 text-xs"
+                              className="text-red-400 hover:bg-red-500/10 px-2 py-1 rounded text-xs"
                             >
                               Supprimer
                             </button>
@@ -415,11 +415,13 @@ export default function UsersPage() {
                 <button
                   onClick={() => setLogPage(Math.max(1, logPage - 1))}
                   disabled={logPage === 1}
-                  className="btn btn-ghost text-white text-xs py-1"
+                  className={t.btnGhost + " text-xs py-1!"}
                 >
                   &larr; Précédent
                 </button>
-                <span className="text-[10px] font-medium text-slate-300 truncate">
+                <span
+                  className={`text-[10px] font-medium truncate ${t.textMuted}`}
+                >
                   Page {logPage} sur {logTotalPages}
                 </span>
                 <button
@@ -427,7 +429,7 @@ export default function UsersPage() {
                     setLogPage(Math.min(logTotalPages, logPage + 1))
                   }
                   disabled={logPage === logTotalPages}
-                  className="btn btn-ghost text-white text-xs py-1"
+                  className={t.btnGhost + " text-xs py-1!"}
                 >
                   Suivant &rarr;
                 </button>
@@ -436,24 +438,22 @@ export default function UsersPage() {
           }
         >
           <table className="w-full text-left text-xs table-fixed min-w-225">
-            <thead className="sticky top-0 bg-slate-900/95 backdrop-blur z-10 shadow-md">
-              <tr className="border-b border-slate-700 text-slate-300">
-                <th className="px-3 py-3 font-semibold text-white w-32 truncate">
-                  Date
-                </th>
-                <th className="px-3 py-3 font-semibold text-white w-40 truncate">
+            <thead className={`sticky top-0 z-10 shadow-md ${t.tableHeader}`}>
+              <tr className="border-b border-slate-700">
+                <th className="px-3 py-3 font-semibold w-32 truncate">Date</th>
+                <th className="px-3 py-3 font-semibold w-40 truncate">
                   Utilisateur
                 </th>
-                <th className="px-3 py-3 font-semibold text-white w-32 truncate">
+                <th className="px-3 py-3 font-semibold w-32 truncate">
                   Action
                 </th>
-                <th className="px-3 py-3 font-semibold text-white w-40 truncate">
+                <th className="px-3 py-3 font-semibold w-40 truncate">
                   Ressource
                 </th>
-                <th className="px-3 py-3 font-semibold text-white text-right w-52">
+                <th className="px-3 py-3 font-semibold text-right w-52">
                   <input
                     type="text"
-                    className="input-field py-1 px-2 text-xs font-normal w-full text-right ml-auto"
+                    className={`${t.input} py-1 px-2 text-xs font-normal w-full text-right ml-auto`}
                     placeholder="Rechercher..."
                     value={logSearchQuery}
                     onChange={(e) => setLogSearchQuery(e.target.value)}
@@ -465,17 +465,19 @@ export default function UsersPage() {
               {filteredLogs.map((log) => (
                 <tr
                   key={log.id}
-                  className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                  className={`border-b transition-colors ${t.tableRow}`}
                 >
-                  <td className="px-3 py-3.5 text-slate-400 truncate">
+                  <td className={`px-3 py-3.5 truncate ${t.textMuted}`}>
                     {new Date(log.created_at).toLocaleString()}
                   </td>
                   <td
-                    className="px-3 py-3.5 font-medium text-white truncate"
+                    className="px-3 py-3.5 font-medium truncate"
                     title={`${log.user_name} - ${log.user_email}`}
                   >
                     <span className="block truncate">{log.user_name}</span>
-                    <span className="text-[10px] text-slate-400 font-normal block truncate">
+                    <span
+                      className={`text-[10px] font-normal block truncate ${t.textMuted}`}
+                    >
                       {log.user_email}
                     </span>
                   </td>
@@ -483,7 +485,7 @@ export default function UsersPage() {
                     {formatAction(log.action)}
                   </td>
                   <td
-                    className="px-3 py-3.5 font-semibold text-slate-200 truncate"
+                    className="px-3 py-3.5 font-semibold truncate"
                     title={log.resource}
                   >
                     {log.resource}
@@ -499,9 +501,10 @@ export default function UsersPage() {
               ))}
               {filteredLogs.length === 0 && (
                 <tr>
+                  {" "}
                   <td
                     colSpan={5}
-                    className="px-3 py-6 text-center text-slate-400 truncate"
+                    className={`px-3 py-6 text-center truncate ${t.textMuted}`}
                   >
                     Aucun log.
                   </td>

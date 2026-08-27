@@ -1,4 +1,6 @@
-// Data types
+// ==========================================
+// ENTITÉS DE BASE ET MODELES DE DONNÉES
+// ==========================================
 
 export interface User {
   id: string;
@@ -97,21 +99,23 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
-// --- DTOs (Data Transfer Objects) ---
+// ==========================================
+// PAYLOADS API (CRÉATION / MODIFICATION)
+// ==========================================
 
-export interface CreateFormationDTO {
+export interface CreateFormationPayload {
   name: string;
 }
 
-export interface CreateUsersDTO {
+export interface CreateUserPayload {
   email: string;
   password_hash: string;
   first_name: string;
   last_name: string;
-  role: string;
+  role?: string;
 }
 
-export interface CreateProspectsDTO {
+export interface CreateProspectPayload {
   first_name: string;
   last_name: string;
   email: string;
@@ -122,18 +126,18 @@ export interface CreateProspectsDTO {
   formation_id: number | null;
 }
 
-export interface CreateStatusDTO {
+export interface CreateStatusPayload {
   name: string;
   is_custom?: boolean;
 }
 
-export interface CreateTemplateDTO {
+export interface CreateTemplatePayload {
   name: string;
   subject: string;
   body: string;
 }
 
-export interface CreateAutomationDTO {
+export interface CreateAutomationPayload {
   status_id: number | "" | null;
   formation_id: number | null;
   email_template_id: string;
@@ -141,13 +145,16 @@ export interface CreateAutomationDTO {
   scheduled_date: string | null;
 }
 
-export interface CreateUserDTO {
-  email: string;
-  password_hash: string;
+export interface UpdateProfilePayload {
   first_name: string;
   last_name: string;
-  role?: string;
+  email: string;
+  password_hash?: string;
 }
+
+// ==========================================
+// INTERFACES FRONTEND ET UTILITAIRES UI
+// ==========================================
 
 export interface SortHeaderProps {
   field: string;
@@ -157,8 +164,6 @@ export interface SortHeaderProps {
   onSort: (field: string) => void;
 }
 
-// Frontend data types & DTOs
-
 export interface ToastProps {
   message: string;
   type: "success" | "error" | "undo";
@@ -167,12 +172,12 @@ export interface ToastProps {
   onUndo?: () => void;
 }
 
-export interface CrudService<T, CreateDTO, UpdateDTO = Partial<T>> {
+export interface CrudService<T, CreatePayload, UpdatePayload = Partial<T>> {
   getAll: () => Promise<T[]>;
-  create: (data: CreateDTO) => Promise<unknown>;
+  create: (data: CreatePayload) => Promise<unknown>;
   update: (
     id: string | number,
-    data: UpdateDTO | Record<string, unknown>,
+    data: UpdatePayload | Record<string, unknown>,
   ) => Promise<unknown>;
   delete: (id: string | number) => Promise<unknown>;
 }
@@ -184,9 +189,37 @@ export interface UndoAction {
   onUndo: () => void;
 }
 
-export interface UpdateProfileDTO {
-  first_name: string;
-  last_name: string;
-  email: string;
-  password_hash?: string;
+export type ThemeName = "islands" | "glass" | "institution";
+
+export type ThemeContextType = {
+  themeName: ThemeName;
+  setThemeName: (name: ThemeName) => void;
+  t: {
+    wrapper: string;
+    sidebar: string;
+    header: string;
+    main: string;
+    card: string;
+    tableHeader: string;
+    tableRow: string;
+    input: string;
+    btnPrimary: string;
+    btnGhost: string;
+    textMuted: string;
+    title: string;
+    activeNav: string;
+    navHover: string;
+  };
+};
+
+export interface FormCardProps {
+  title: string;
+  badge?: string;
+  children: React.ReactNode;
+}
+
+export interface PageHeaderProps {
+  title: string;
+  description: string;
+  children?: React.ReactNode;
 }

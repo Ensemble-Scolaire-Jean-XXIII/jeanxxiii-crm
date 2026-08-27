@@ -4,8 +4,10 @@ import Toast from "../components/Toast";
 import Skeleton from "../components/Skeleton";
 import { useProfile } from "../hooks/useProfile";
 import PageHeader from "../components/PageHeader";
+import { useTheme } from "../contexts/ThemeContext";
 
 export default function ProfilePage() {
+  const { t, themeName, setThemeName } = useTheme();
   const {
     user,
     formData,
@@ -25,148 +27,153 @@ export default function ProfilePage() {
 
       <PageHeader
         title="Mon profil"
-        description="Gérez vos paramètres de sécurité"
+        description="Gérez vos paramètres et préférences d'affichage"
       />
 
-      <div className="glass-card p-4 flex flex-col flex-1 min-h-62.5 overflow-hidden">
-        <div className="overflow-y-auto overflow-x-auto flex-1 rounded-t-lg custom-scrollbar pr-4">
-          {isLoading ? (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="label-text mb-2 block">Prénom</label>
-                  <Skeleton className="h-10 w-full" />
-                </div>
-                <div>
-                  <label className="label-text mb-2 block">Nom</label>
-                  <Skeleton className="h-10 w-full" />
-                </div>
-              </div>
-              <div>
-                <label className="label-text mb-2 block">Email</label>
-                <Skeleton className="h-10 w-full" />
-              </div>
-              <div>
-                <label className="label-text mb-2 block">Rôle</label>
-                <Skeleton className="h-10 w-full" />
-              </div>
-              <div className="border-t border-slate-200 dark:border-slate-700 my-4 pt-4 space-y-4">
-                <Skeleton className="h-6 w-48 mb-4" />
-                <div>
-                  <label className="label-text mb-2 block">
-                    Ancien mot de passe
-                  </label>
-                  <Skeleton className="h-10 w-full" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                </div>
-              </div>
-              <Skeleton className="h-10 w-full" />
-            </div>
-          ) : (
-            <form onSubmit={handleUpdate} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="label-text">Prénom</label>
-                  <input
-                    type="text"
-                    className="cursor-no-drop input-field bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-white disabled:opacity-70"
-                    value={formData.first_name}
-                    disabled
-                  />
-                </div>
-                <div>
-                  <label className="label-text">Nom</label>
-                  <input
-                    type="text"
-                    className="cursor-no-drop input-field bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-white disabled:opacity-70"
-                    value={formData.last_name}
-                    disabled
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="label-text">Email</label>
-                <input
-                  type="email"
-                  className="cursor-no-drop input-field bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-white disabled:opacity-70"
-                  value={formData.email}
-                  disabled
-                />
-              </div>
-              <div>
-                <label className="label-text">Rôle</label>
-                <input
-                  type="text"
-                  className="cursor-no-drop input-field bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-white disabled:opacity-70"
-                  value={user?.role || ""}
-                  disabled
-                />
-              </div>
-
-              <div className="border-t border-slate-200 dark:border-slate-700 my-4 pt-4">
-                <h3 className="text-lg font-bold mb-4 text-white">
-                  Modifier le mot de passe
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="label-text">Ancien mot de passe</label>
-                    <input
-                      type="password"
-                      className="input-field"
-                      value={(formData as any).old_password || ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          old_password: e.target.value,
-                        } as any)
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="label-text">Nouveau mot de passe</label>
-                      <input
-                        type="password"
-                        className="input-field"
-                        value={formData.password_hash}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            password_hash: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className="label-text">
-                        Confirmer le mot de passe
-                      </label>
-                      <input
-                        type="password"
-                        className="input-field"
-                        value={formData.confirmPassword}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            confirmPassword: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <button type="submit" className="btn btn-primary w-full">
-                Enregistrer les modifications
-              </button>
-            </form>
-          )}
+      <form
+        onSubmit={handleUpdate}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 overflow-y-auto custom-scrollbar"
+      >
+        <div className={`${t.card} flex flex-col gap-4`}>
+          <h3 className="text-lg font-bold text-(--text-main)">
+            Informations personnelles
+          </h3>
+          <div>
+            <label className="label-text">Prénom</label>
+            {isLoading ? (
+              <Skeleton className="h-9.5 w-full" />
+            ) : (
+              <input
+                type="text"
+                className={`${t.input} opacity-70 cursor-not-allowed`}
+                value={formData.first_name}
+                disabled
+              />
+            )}
+          </div>
+          <div>
+            <label className="label-text">Nom</label>
+            {isLoading ? (
+              <Skeleton className="h-9.5 w-full" />
+            ) : (
+              <input
+                type="text"
+                className={`${t.input} opacity-70 cursor-not-allowed`}
+                value={formData.last_name}
+                disabled
+              />
+            )}
+          </div>
+          <div>
+            <label className="label-text">Email</label>
+            {isLoading ? (
+              <Skeleton className="h-9.5full" />
+            ) : (
+              <input
+                type="email"
+                className={`${t.input} opacity-70 cursor-not-allowed`}
+                value={formData.email}
+                disabled
+              />
+            )}
+          </div>
+          <div>
+            <label className="label-text">Rôle</label>
+            {isLoading ? (
+              <Skeleton className="h-9.5 w-full" />
+            ) : (
+              <input
+                type="text"
+                className={`${t.input} opacity-70 cursor-not-allowed`}
+                value={user?.role || ""}
+                disabled
+              />
+            )}
+          </div>
         </div>
-      </div>
+
+        <div className={`${t.card} flex flex-col justify-between gap-4`}>
+          <div className="space-y-4">
+            <h3 className="text-lg font-bold text-(--text-main)">Sécurité</h3>
+            <div>
+              <label className="label-text">Ancien mot de passe</label>
+              <input
+                type="password"
+                className={t.input}
+                value={(formData as any).old_password || ""}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    old_password: e.target.value,
+                  } as any)
+                }
+                required
+              />
+            </div>
+            <div>
+              <label className="label-text">Nouveau mot de passe</label>
+              <input
+                type="password"
+                className={t.input}
+                value={formData.password_hash}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    password_hash: e.target.value,
+                  })
+                }
+              />
+            </div>
+            <div>
+              <label className="label-text">Confirmer le mot de passe</label>
+              <input
+                type="password"
+                className={t.input}
+                value={formData.confirmPassword}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    confirmPassword: e.target.value,
+                  })
+                }
+              />
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-(--border-color)">
+            <button type="submit" className={t.btnPrimary + " w-full"}>
+              Enregistrer les modifications
+            </button>
+          </div>
+        </div>
+
+        <div className={`${t.card} flex flex-col gap-4`}>
+          <div>
+            <h3 className="text-lg font-bold mb-3 text-(--text-main)">
+              Apparence
+            </h3>
+            <label className="label-text">Thème de l'application</label>
+            <select
+              value={themeName}
+              onChange={(e) => setThemeName(e.target.value as any)}
+              className={`${t.input} cursor-pointer`}
+            >
+              <option value="islands" className="bg-slate-900 text-white">
+                Islands
+              </option>
+              <option value="glass" className="bg-slate-900 text-white">
+                Glass
+              </option>
+              <option value="institution" className="bg-slate-900 text-white">
+                Institution
+              </option>
+            </select>
+            <p className={`text-xs mt-2 ${t.textMuted}`}>
+              Modifie l'apparence globale instantanément.
+            </p>
+          </div>
+        </div>
+      </form>
     </div>
   );
 }

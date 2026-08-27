@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { userService } from "../services/userService";
-import { UpdateProfileDTO, User } from "../types/index";
+import { UpdateProfilePayload, User } from "../types/index";
 
 export function useProfile() {
   const [user, setUser] = useState<User | null>(null);
@@ -67,7 +67,7 @@ export function useProfile() {
     }
 
     try {
-      const updateData: UpdateProfileDTO = {
+      const updateData: UpdateProfilePayload = {
         first_name: formData.first_name,
         last_name: formData.last_name,
         email: formData.email,
