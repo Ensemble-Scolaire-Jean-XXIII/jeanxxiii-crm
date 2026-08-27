@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { automationService } from "../services/automationService";
 import { statusService } from "../services/statusService";
 import { templateService } from "../services/templateService";
@@ -21,8 +22,10 @@ import FormCard from "../components/FormCard";
 import ScrollableTableCard from "../components/ScrollableTableCard";
 import { useTheme } from "../contexts/ThemeContext";
 
-export default function AutomationsPage() {
+function AutomationsContent() {
   const { t } = useTheme();
+  const searchParams = useSearchParams();
+
   const {
     data: automations,
     isLoading,
@@ -48,7 +51,9 @@ export default function AutomationsPage() {
   const [statuses, setStatuses] = useState<Status[]>([]);
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [formations, setFormations] = useState<Formation[]>([]);
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(
+    searchParams.get("action") === "create",
+  );
 
   const {
     searchQuery,
@@ -301,7 +306,7 @@ export default function AutomationsPage() {
               <th className="px-3 py-3 font-semibold text-right w-52">
                 <input
                   type="text"
-                  className={`${t.input} w-48 ml-auto py-1! text-xs! font-normal`}
+                  className={`${t.input} w-36 ml-auto py-1! text-xs! font-normal`}
                   placeholder="Rechercher..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -314,7 +319,6 @@ export default function AutomationsPage() {
               <TableSkeleton columns={4} />
             ) : filteredAutomations.length === 0 ? (
               <tr>
-                {" "}
                 <td
                   colSpan={4}
                   className={`px-3 py-6 text-center truncate ${t.textMuted}`}
@@ -421,5 +425,13 @@ export default function AutomationsPage() {
         </table>
       </ScrollableTableCard>
     </div>
+  );
+}
+
+export default function AutomationsPage() {
+  return (
+    <Suspense>
+      <AutomationsContent />
+    </Suspense>
   );
 }

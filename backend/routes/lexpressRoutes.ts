@@ -17,8 +17,11 @@ router.post("/sync-latest", authenticate, async (req, res, next) => {
   }
 });
 
-router.post("/sync-full", authenticate, async (req, res, next) => {
+router.post("/sync-full", authenticate, async (req: any, res, next) => {
   try {
+    if (req.user?.role !== "admin") {
+      return res.status(403).json({ message: "Accès refusé" });
+    }
     const count = await syncLexpressSubmissionsToDb();
     res.json({ message: "Synchronisation complète réussie", count });
   } catch (error) {

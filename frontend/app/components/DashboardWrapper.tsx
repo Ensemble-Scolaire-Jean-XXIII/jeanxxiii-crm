@@ -79,7 +79,7 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
   const [exitError, setExitError] = useState("");
   const [isExiting, setIsExiting] = useState(false);
 
-  const { t } = useTheme();
+  const { t, themeName } = useTheme();
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem("token");
@@ -195,7 +195,8 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
             <span className="font-black text-sm tracking-wider text-white sm:hidden">
               JEAN XXIII
             </span>
-            <span className="bg-accent/20 text-accent text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 rounded-md border border-accent/30 uppercase tracking-widest shrink-0">
+            <span className="bg-[#e84e1b]/20 text-[#e84e1b] text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 rounded-md border border-[#e84e1b]/30 uppercase tracking-widest shrink-0">
+              {" "}
               {isSalonsPage ? "SALON" : "CRM"}
             </span>
           </div>
@@ -221,7 +222,7 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
 
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 bg-white/10 hover:bg-danger/80 text-white px-3 py-2 rounded-xl text-xs font-semibold backdrop-blur-md border border-white/10 transition-all duration-300 hover:shadow-lg hover:shadow-danger/20 cursor-pointer"
+                className={`${t.btnGhost} text-xs flex items-center gap-2`}
               >
                 <Image
                   src="/icons/logout.webp"
@@ -241,7 +242,7 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
                 setExitPassword("");
                 setShowExitModal(true);
               }}
-              className="flex items-center gap-2 bg-white/10 hover:bg-danger/80 text-white px-3 py-2 rounded-xl text-xs font-semibold backdrop-blur-md border border-white/10 transition-all duration-300 hover:shadow-lg hover:shadow-danger/20 cursor-pointer"
+              className={`${t.btnGhost} text-xs flex items-center gap-2`}
             >
               <Image
                 src="/icons/back.webp"
@@ -257,16 +258,17 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden gap-4">
+      <div
+        className={`flex flex-1 overflow-hidden ${themeName === "solid" ? "gap-0" : "gap-4"}`}
+      >
         {!isSalonsPage && isMobileMenuOpen && (
           <div
             className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
             onClick={() => setIsMobileMenuOpen(false)}
           />
         )}
-
         <aside
-          className={`fixed lg:relative inset-y-0 left-0 z-50 flex ${t.sidebar} text-white rounded-r-2xl lg:rounded-2xl border-r lg:border border-(--border-color) shadow-2xl flex-col shrink-0 overflow-y-auto transition-all duration-300 ease-in-out ${
+          className={`fixed lg:relative inset-y-0 left-0 z-50 flex ${t.sidebar} text-white border-r lg:border border-(--border-color) shadow-2xl flex-col shrink-0 overflow-y-auto transition-all duration-300 ease-in-out ${
             isSidebarOpen ? "w-64" : "w-20"
           } ${
             isMobileMenuOpen
@@ -404,7 +406,6 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
             </NavLink>
           </nav>
         </aside>
-
         <main className={t.main}>{children}</main>
       </div>
 

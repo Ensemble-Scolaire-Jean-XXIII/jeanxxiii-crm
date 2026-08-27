@@ -189,7 +189,7 @@ export interface UndoAction {
   onUndo: () => void;
 }
 
-export type ThemeName = "islands" | "glass" | "institution";
+export type ThemeName = "shadowIslands" | "glass" | "institution" | "solid";
 
 export type ThemeContextType = {
   themeName: ThemeName;

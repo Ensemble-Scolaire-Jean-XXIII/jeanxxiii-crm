@@ -120,7 +120,7 @@ export default function SalonsPage() {
       >
         <div className="overflow-y-auto flex-1 custom-scrollbar px-6 py-8 flex flex-col justify-center">
           {isLoading ? (
-            <div className="space-y-4 max-w-xl mx-auto w-full">
+            <div className="space-y-6 max-w-xl mx-auto w-full">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Skeleton className="h-10 w-full" />
                 <Skeleton className="h-10 w-full" />
@@ -135,7 +135,7 @@ export default function SalonsPage() {
           ) : (
             <form
               onSubmit={handleSubmit}
-              className="space-y-4 max-w-xl mx-auto w-full"
+              className="space-y-6 max-w-xl mx-auto w-full"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -228,7 +228,7 @@ export default function SalonsPage() {
                 </select>
               </div>
 
-              <button type="submit" className={t.btnPrimary + " w-full mt-4"}>
+              <button type="submit" className={t.btnPrimary + " w-full mt-6"}>
                 Valider mes informations
               </button>
             </form>

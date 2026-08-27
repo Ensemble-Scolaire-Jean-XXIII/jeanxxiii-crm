@@ -106,7 +106,7 @@ export default function StatusesPage() {
               <th className="px-3 py-3 font-semibold text-right w-52">
                 <input
                   type="text"
-                  className={`${t.input} w-48 ml-auto py-1! text-xs! font-normal`}
+                  className={`${t.input} w-36 ml-auto py-1! text-xs! font-normal`}
                   placeholder="Rechercher..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}

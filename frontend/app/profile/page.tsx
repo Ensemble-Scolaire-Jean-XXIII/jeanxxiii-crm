@@ -146,8 +146,7 @@ export default function ProfilePage() {
             </button>
           </div>
         </div>
-
-        <div className={`${t.card} flex flex-col gap-4`}>
+        <div className={`${t.card} shadow-sm flex flex-col gap-4`}>
           <div>
             <h3 className="text-lg font-bold mb-3 text-(--text-main)">
               Apparence
@@ -158,14 +157,17 @@ export default function ProfilePage() {
               onChange={(e) => setThemeName(e.target.value as any)}
               className={`${t.input} cursor-pointer`}
             >
-              <option value="islands" className="bg-slate-900 text-white">
-                Islands
+              <option value="shadowIslands" className="bg-slate-900 text-white">
+                Shadow Islands
               </option>
               <option value="glass" className="bg-slate-900 text-white">
                 Glass
               </option>
               <option value="institution" className="bg-slate-900 text-white">
-                Institution
+                Jean 23
+              </option>
+              <option value="solid" className="bg-slate-900 text-white">
+                Solid
               </option>
             </select>
             <p className={`text-xs mt-2 ${t.textMuted}`}>

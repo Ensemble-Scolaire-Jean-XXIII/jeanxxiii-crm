@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { prospectService } from "../services/prospectService";
 import { statusService } from "../services/statusService";
 import { countryService } from "../services/countryService";
@@ -11,7 +12,6 @@ import {
   Country,
   Formation,
   CreateProspectPayload,
-  SortHeaderProps,
 } from "../types";
 import Toast from "../components/Toast";
 import { TableSkeleton } from "../components/Skeleton";
@@ -21,6 +21,7 @@ import { useSort } from "../hooks/useSort";
 import PageHeader from "../components/PageHeader";
 import FormCard from "../components/FormCard";
 import ScrollableTableCard from "../components/ScrollableTableCard";
+import SortHeader from "../components/SortHeader";
 import { useTheme } from "../contexts/ThemeContext";
 
 const formInputs: {
@@ -35,8 +36,9 @@ const formInputs: {
   { name: "phone", type: "tel", placeholder: "Téléphone", required: false },
 ];
 
-export default function ProspectsPage() {
+function ProspectsContent() {
   const { t } = useTheme();
+  const searchParams = useSearchParams();
 
   const {
     data: prospects,
@@ -71,7 +73,9 @@ export default function ProspectsPage() {
   const [statuses, setStatuses] = useState<Status[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
   const [formations, setFormations] = useState<Formation[]>([]);
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(
+    searchParams.get("action") === "create",
+  );
 
   const { sortField, sortDirection, handleSort } = useSort("date", "desc");
 
@@ -166,24 +170,6 @@ export default function ProspectsPage() {
     }
     return sortDirection === "asc" ? compareResult : -compareResult;
   });
-
-  const SortHeader = ({ field, label }: { field: string; label: string }) => (
-    <th
-      className={`px-3 py-3 font-semibold cursor-pointer hover:opacity-70 select-none ${t.tableHeader}`}
-      onClick={() => handleSort(field)}
-    >
-      <div className="flex items-center gap-2">
-        <span>{label}</span>
-        <span
-          className={`text-[10px] ${
-            sortField === field ? "opacity-100" : "opacity-30"
-          }`}
-        >
-          {sortField === field ? (sortDirection === "asc" ? "▲" : "▼") : "↕"}
-        </span>
-      </div>
-    </th>
-  );
 
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-4">
@@ -317,16 +303,52 @@ export default function ProspectsPage() {
         <table className="w-full text-left text-sm table-fixed min-w-200">
           <thead className={`sticky top-0 z-10 shadow-md ${t.tableHeader}`}>
             <tr className="border-b border-(--border-color)">
-              <SortHeader field="name" label="Nom" />
-              <SortHeader field="contact" label="Contact" />
-              <SortHeader field="formation" label="Formation" />
-              <SortHeader field="country" label="Pays" />
-              <SortHeader field="status" label="Statut" />
-              <SortHeader field="date" label="Dernière action" />
+              <SortHeader
+                field="name"
+                label="Nom"
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+              <SortHeader
+                field="contact"
+                label="Contact"
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+              <SortHeader
+                field="formation"
+                label="Formation"
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+              <SortHeader
+                field="country"
+                label="Pays"
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+              <SortHeader
+                field="status"
+                label="Statut"
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+              <SortHeader
+                field="date"
+                label="Dernière action"
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
               <th className={`px-3 py-3 text-right ${t.tableHeader}`}>
                 <input
                   type="text"
-                  className={`${t.input} w-48 ml-auto py-1! text-xs! font-normal`}
+                  className={`${t.input} w-36 ml-auto py-1! text-xs! font-normal`}
                   placeholder="Rechercher..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -535,5 +557,13 @@ export default function ProspectsPage() {
         </table>
       </ScrollableTableCard>
     </div>
+  );
+}
+
+export default function ProspectsPage() {
+  return (
+    <Suspense>
+      <ProspectsContent />
+    </Suspense>
   );
 }

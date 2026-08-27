@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { templateService } from "../services/templateService";
 import { CreateTemplatePayload, EmailTemplate } from "../types/index";
 import Toast from "../components/Toast";
@@ -12,8 +13,9 @@ import FormCard from "../components/FormCard";
 import ScrollableTableCard from "../components/ScrollableTableCard";
 import { useTheme } from "../contexts/ThemeContext";
 
-export default function TemplatesPage() {
+function TemplatesContent() {
   const { t } = useTheme();
+  const searchParams = useSearchParams();
   const {
     data: templates,
     isLoading,
@@ -39,7 +41,9 @@ export default function TemplatesPage() {
     body: "",
   });
 
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(
+    searchParams.get("action") === "create",
+  );
 
   const {
     searchQuery,
@@ -149,7 +153,7 @@ export default function TemplatesPage() {
               <th className="px-3 py-3 font-semibold text-right w-52">
                 <input
                   type="text"
-                  className={`${t.input} w-48 ml-auto py-1! text-xs! font-normal`}
+                  className={`${t.input} w-36 ml-auto py-1! text-xs! font-normal`}
                   placeholder="Rechercher..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -277,5 +281,13 @@ export default function TemplatesPage() {
         </table>
       </ScrollableTableCard>
     </div>
+  );
+}
+
+export default function TemplatesPage() {
+  return (
+    <Suspense>
+      <TemplatesContent />
+    </Suspense>
   );
 }

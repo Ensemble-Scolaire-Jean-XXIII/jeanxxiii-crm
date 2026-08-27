@@ -268,7 +268,7 @@ export default function UsersPage() {
                   <th className="px-3 py-3 font-semibold text-right w-52">
                     <input
                       type="text"
-                      className={`${t.input} w-48 ml-auto py-1! text-xs! font-normal`}
+                      className={`${t.input} w-36 ml-auto py-1! text-xs! font-normal`}
                       placeholder="Rechercher..."
                       value={userSearchQuery}
                       onChange={(e) => setUserSearchQuery(e.target.value)}
@@ -453,7 +453,7 @@ export default function UsersPage() {
                 <th className="px-3 py-3 font-semibold text-right w-52">
                   <input
                     type="text"
-                    className={`${t.input} py-1 px-2 text-xs font-normal w-full text-right ml-auto`}
+                    className={`${t.input} w-36 ml-auto py-1! text-xs! font-normal`}
                     placeholder="Rechercher..."
                     value={logSearchQuery}
                     onChange={(e) => setLogSearchQuery(e.target.value)}
