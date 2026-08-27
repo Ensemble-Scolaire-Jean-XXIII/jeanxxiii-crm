@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { formationService } from "../services/formationService";
-import { Formation, CreateFormationDTO } from "../types";
+import { Formation, CreateFormationPayload } from "../types";
 import Toast from "../components/Toast";
 import { TableSkeleton } from "../components/Skeleton";
 import { useCrud } from "../hooks/useCrud";
@@ -10,8 +10,10 @@ import { useSearch } from "../hooks/useSearch";
 import PageHeader from "../components/PageHeader";
 import FormCard from "../components/FormCard";
 import ScrollableTableCard from "../components/ScrollableTableCard";
+import { useTheme } from "../contexts/ThemeContext";
 
 export default function FormationsPage() {
+  const { t } = useTheme();
   const {
     data: formations,
     isLoading,
@@ -31,7 +33,9 @@ export default function FormationsPage() {
     create,
     updateWithUndo,
     deleteWithUndo,
-  } = useCrud<Formation, CreateFormationDTO>(formationService, { name: "" });
+  } = useCrud<Formation, CreateFormationPayload>(formationService, {
+    name: "",
+  });
 
   const [showForm, setShowForm] = useState(false);
 
@@ -61,10 +65,7 @@ export default function FormationsPage() {
         title="Formations"
         description="Gérez les formations proposées par l'établissement"
       >
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="btn btn-ghost border border-white/20 text-white text-sm py-1.5 px-4 bg-white/5 hover:bg-white/10"
-        >
+        <button onClick={() => setShowForm(!showForm)} className={t.btnGhost}>
           {showForm ? "Cacher le formulaire d'ajout" : "+ Nouvelle formation"}
         </button>
       </PageHeader>
@@ -76,7 +77,7 @@ export default function FormationsPage() {
               <input
                 type="text"
                 placeholder="Nom de la formation"
-                className="input-field py-1.5"
+                className={`${t.input} py-1.5`}
                 value={createForm.name}
                 onChange={(e) =>
                   setCreateForm({ ...createForm, name: e.target.value })
@@ -84,7 +85,7 @@ export default function FormationsPage() {
                 required
               />
             </div>
-            <button type="submit" className="btn btn-primary py-1.5 text-sm">
+            <button type="submit" className={t.btnPrimary}>
               Ajouter la formation
             </button>
           </form>
@@ -93,15 +94,15 @@ export default function FormationsPage() {
 
       <ScrollableTableCard>
         <table className="w-full text-left text-sm table-fixed min-w-150">
-          <thead className="sticky top-0 bg-slate-900/95 backdrop-blur z-10 shadow-md">
-            <tr className="border-b border-slate-700 text-slate-300">
-              <th className="px-3 py-3 font-semibold text-white truncate">
+          <thead className={`sticky top-0 z-10 shadow-md ${t.tableHeader}`}>
+            <tr className="border-b border-slate-700">
+              <th className="px-3 py-3 font-semibold truncate">
                 Nom de la formation
               </th>
-              <th className="px-3 py-3 font-semibold text-white text-right w-52">
+              <th className="px-3 py-3 font-semibold text-right w-52">
                 <input
                   type="text"
-                  className="input-field py-1 px-2 text-xs font-normal w-full text-right ml-auto"
+                  className={`${t.input} w-48 ml-auto py-1! text-xs! font-normal`}
                   placeholder="Rechercher..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -114,9 +115,10 @@ export default function FormationsPage() {
               <TableSkeleton columns={2} />
             ) : filteredFormations.length === 0 ? (
               <tr>
+                {" "}
                 <td
                   colSpan={2}
-                  className="px-3 py-6 text-center text-slate-400 truncate"
+                  className={`px-3 py-6 text-center truncate ${t.textMuted}`}
                 >
                   Aucune formation enregistrée.
                 </td>
@@ -125,12 +127,12 @@ export default function FormationsPage() {
               filteredFormations.map((f) => (
                 <tr
                   key={f.id}
-                  className="group border-b border-white/5 hover:bg-white/5 transition-colors"
+                  className={`group border-b transition-colors ${t.tableRow}`}
                 >
                   <td className="px-3 py-3.5 truncate">
                     {editingId === f.id ? (
                       <input
-                        className="input-field py-1 px-2 w-full text-xs"
+                        className={`${t.input} py-1 px-2 w-full text-xs`}
                         value={editForm.name || ""}
                         onChange={(e) =>
                           setEditForm({ ...editForm, name: e.target.value })
@@ -138,7 +140,7 @@ export default function FormationsPage() {
                       />
                     ) : (
                       <span
-                        className="font-medium text-white block truncate"
+                        className="font-medium block truncate"
                         title={f.name}
                       >
                         {f.name}
@@ -152,13 +154,13 @@ export default function FormationsPage() {
                           onClick={() =>
                             updateWithUndo(f.id, { name: editForm.name })
                           }
-                          className="btn btn-ghost text-green-400 px-2 py-1 text-xs font-bold"
+                          className="text-green-400 hover:bg-green-500/10 px-2 py-1 rounded text-xs font-bold"
                         >
                           Valider
                         </button>
                         <button
                           onClick={() => setEditingId(null)}
-                          className="btn btn-ghost text-slate-400 px-2 py-1 text-xs"
+                          className={`${t.textMuted} hover:bg-black/5 px-2 py-1 rounded text-xs`}
                         >
                           Annuler
                         </button>
@@ -167,13 +169,13 @@ export default function FormationsPage() {
                       <div className="flex justify-end gap-2 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <button
                           onClick={() => startEdit(f)}
-                          className="btn btn-ghost text-accent px-2 py-1 text-xs"
+                          className="text-blue-400 hover:bg-blue-500/10 px-2 py-1 rounded text-xs"
                         >
                           Modifier
                         </button>
                         <button
                           onClick={() => deleteWithUndo(f.id)}
-                          className="btn btn-ghost text-red-400 px-2 py-1 text-xs"
+                          className="text-red-400 hover:bg-red-500/10 px-2 py-1 rounded text-xs"
                         >
                           Supprimer
                         </button>

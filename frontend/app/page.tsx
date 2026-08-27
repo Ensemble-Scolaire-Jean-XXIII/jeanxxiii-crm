@@ -10,8 +10,10 @@ import Image from "next/image";
 import Toast from "./components/Toast";
 import Skeleton from "./components/Skeleton";
 import PageHeader from "./components/PageHeader";
+import { useTheme } from "./contexts/ThemeContext";
 
 export default function DashboardPage() {
+  const { t } = useTheme();
   const [stats, setStats] = useState({
     prospects: 0,
     users: 0,
@@ -133,19 +135,27 @@ export default function DashboardPage() {
 
       <div className="overflow-y-auto overflow-x-hidden flex-1 custom-scrollbar pr-2 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="glass-card p-4">
-            <h2 className="text-xs font-semibold text-white uppercase tracking-wider mb-1">
+          <div
+            className={`${t.card} border border-(--border-color) rounded-2xl p-4`}
+          >
+            <h2
+              className={`text-xs font-semibold uppercase tracking-wider mb-1 ${t.textMuted}`}
+            >
               Prospects totaux
             </h2>
-            <div className="text-3xl font-bold text-white">
+            <div className="text-3xl font-bold">
               {isLoading ? <Skeleton className="h-8 w-24" /> : stats.prospects}
             </div>
           </div>
-          <div className="glass-card p-4">
-            <h2 className="text-xs font-semibold text-white uppercase tracking-wider mb-1">
+          <div
+            className={`${t.card} border border-(--border-color) rounded-2xl p-4`}
+          >
+            <h2
+              className={`text-xs font-semibold uppercase tracking-wider mb-1 ${t.textMuted}`}
+            >
               Règles auto
             </h2>
-            <div className="text-3xl font-bold text-white">
+            <div className="text-3xl font-bold">
               {isLoading ? (
                 <Skeleton className="h-8 w-24" />
               ) : (
@@ -155,27 +165,31 @@ export default function DashboardPage() {
           </div>
 
           {isAdmin && (
-            <div className="glass-card p-4">
-              <h2 className="text-xs font-semibold text-white uppercase tracking-wider mb-1">
+            <div
+              className={`${t.card} border border-(--border-color) rounded-2xl p-4`}
+            >
+              <h2
+                className={`text-xs font-semibold uppercase tracking-wider mb-1 ${t.textMuted}`}
+              >
                 Utilisateurs
               </h2>
-              <div className="text-3xl font-bold text-white">
+              <div className="text-3xl font-bold">
                 {isLoading ? <Skeleton className="h-8 w-24" /> : stats.users}
               </div>
             </div>
           )}
         </div>
 
-        <div className="glass-card p-4">
-          <div className="border-b border-slate-700 pb-3">
-            <h2 className="font-semibold text-white text-base">
-              Actions rapides
-            </h2>
+        <div
+          className={`${t.card} border border-(--border-color) rounded-2xl p-4`}
+        >
+          <div className="border-b border-(--border-color) pb-3">
+            <h2 className="font-semibold text-base">Actions rapides</h2>
           </div>
           <div className="pt-4 flex flex-col gap-2.5">
             <Link
               href="/prospects"
-              className="group flex items-center justify-between p-2.5 rounded-md bg-white/10 hover:bg-white/20 transition-all border border-white/10 text-white"
+              className="group flex items-center justify-between p-2.5 rounded-xl bg-white/5 hover:bg-white/10 transition-all border border-(--border-color)"
             >
               <span className="font-medium text-sm">Nouveau prospect</span>
               <Image
@@ -190,7 +204,7 @@ export default function DashboardPage() {
 
             <Link
               href="/templates"
-              className="group flex items-center justify-between p-2.5 rounded-md bg-white/10 hover:bg-white/20 transition-all border border-white/10 text-white"
+              className="group flex items-center justify-between p-2.5 rounded-xl bg-white/5 hover:bg-white/10 transition-all border border-(--border-color)"
             >
               <span className="font-medium text-sm">Nouveau template</span>
               <Image
@@ -205,7 +219,7 @@ export default function DashboardPage() {
 
             <Link
               href="/automations"
-              className="group flex items-center justify-between p-2.5 rounded-md bg-white/10 hover:bg-white/20 transition-all border border-white/10 text-white"
+              className="group flex items-center justify-between p-2.5 rounded-xl bg-white/5 hover:bg-white/10 transition-all border border-(--border-color)"
             >
               <span className="font-medium text-sm">Gérer automatisations</span>
               <Image
@@ -220,7 +234,7 @@ export default function DashboardPage() {
 
             <Link
               href="/salons"
-              className="group flex items-center justify-between p-2.5 rounded-md bg-blue-500/20 hover:bg-blue-500/40 transition-all border border-blue-400/30 text-white"
+              className="group flex items-center justify-between p-2.5 rounded-xl bg-blue-500/20 hover:bg-blue-500/40 transition-all border border-blue-400/30"
             >
               <span className="font-medium text-sm">
                 Lancer le mode &#34;Salons&#34; (Kiosque)
@@ -238,7 +252,7 @@ export default function DashboardPage() {
             <button
               onClick={handleSyncLatest}
               disabled={isSyncingLatest}
-              className="cursor-pointer group flex items-center justify-between p-2.5 rounded-md bg-white/10 hover:bg-white/20 transition-all border border-white/10 text-white text-left disabled:opacity-50"
+              className="cursor-pointer group flex items-center justify-between p-2.5 rounded-xl bg-white/5 hover:bg-white/10 transition-all border border-(--border-color) text-left disabled:opacity-50"
             >
               <span className="font-medium text-sm">
                 {isSyncingLatest
@@ -259,7 +273,7 @@ export default function DashboardPage() {
               <button
                 onClick={handleSyncFull}
                 disabled={isSyncingFull}
-                className="cursor-pointer group flex items-center justify-between p-2.5 rounded-md bg-amber-500/20 hover:bg-amber-500/40 transition-all border border-amber-400/30 text-white text-left disabled:opacity-50"
+                className="cursor-pointer group flex items-center justify-between p-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/40 transition-all border border-amber-400/30 text-left disabled:opacity-50"
               >
                 <span className="font-medium text-sm">
                   {isSyncingFull

@@ -1,9 +1,9 @@
 import { api } from "./api";
-import { ProspectExtended, CreateProspectsDTO } from "../types";
+import { ProspectExtended, CreateProspectPayload } from "../types";
 
 export const prospectService = {
   getAll: (): Promise<ProspectExtended[]> => api.get("/prospects"),
-  create: (data: CreateProspectsDTO): Promise<{ id: string }> =>
+  create: (data: CreateProspectPayload): Promise<{ id: string }> =>
     api.post("/prospects", data),
   update: (
     id: string | number,

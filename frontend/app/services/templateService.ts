@@ -1,9 +1,9 @@
 import { api } from "./api";
-import { EmailTemplate, CreateTemplateDTO } from "../types";
+import { EmailTemplate, CreateTemplatePayload } from "../types";
 
 export const templateService = {
   getAll: (): Promise<EmailTemplate[]> => api.get("/email-templates"),
-  create: (data: CreateTemplateDTO): Promise<{ id: string }> =>
+  create: (data: CreateTemplatePayload): Promise<{ id: string }> =>
     api.post("/email-templates", data),
   update: (id: string | number, data: Partial<EmailTemplate>): Promise<void> =>
     api.put(`/email-templates/${id}`, data),

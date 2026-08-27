@@ -1,9 +1,9 @@
 import { api } from "./api";
-import { Status, CreateStatusDTO } from "../types";
+import { Status, CreateStatusPayload } from "../types";
 
 export const statusService = {
   getAll: (): Promise<Status[]> => api.get("/statuses"),
-  create: (data: CreateStatusDTO): Promise<{ id: number }> =>
+  create: (data: CreateStatusPayload): Promise<{ id: number }> =>
     api.post("/statuses", data),
   update: (id: string | number, data: Partial<Status>): Promise<void> =>
     api.put(`/statuses/${id}`, data),

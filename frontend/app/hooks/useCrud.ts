@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { CrudService, UndoAction } from "../types";
 
-export function useCrud<T extends { id: string | number }, CreateDTO>(
-  service: CrudService<T, CreateDTO>,
-  initialCreateState: CreateDTO,
+export function useCrud<T extends { id: string | number }, CreatePayload>(
+  service: CrudService<T, CreatePayload>,
+  initialCreateState: CreatePayload,
 ) {
   const [data, setData] = useState<T[]>([]);
   const [error, setError] = useState("");
@@ -11,7 +11,8 @@ export function useCrud<T extends { id: string | number }, CreateDTO>(
   const [isLoading, setIsLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | number | null>(null);
   const [editForm, setEditForm] = useState<Partial<T>>({});
-  const [createForm, setCreateForm] = useState<CreateDTO>(initialCreateState);
+  const [createForm, setCreateForm] =
+    useState<CreatePayload>(initialCreateState);
   const [undoAction, setUndoAction] = useState<UndoAction | null>(null);
 
   const loadData = useCallback(async () => {
@@ -37,7 +38,7 @@ export function useCrud<T extends { id: string | number }, CreateDTO>(
     setEditForm(item);
   };
 
-  const create = async (e: React.FormEvent, payload: CreateDTO) => {
+  const create = async (e: React.FormEvent, payload: CreatePayload) => {
     e.preventDefault();
     setError("");
     setSuccess("");

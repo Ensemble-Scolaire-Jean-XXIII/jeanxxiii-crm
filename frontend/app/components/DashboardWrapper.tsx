@@ -4,8 +4,9 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 import { parseJwt } from "../lib/auth";
-import { useAuth } from "../hooks/useAuth";
+import { userService } from "../services/userService";
 import Image from "next/image";
+import { ThemeProvider, useTheme } from "../contexts/ThemeContext";
 
 function NavLink({
   href,
@@ -13,25 +14,31 @@ function NavLink({
   iconAlt,
   children,
   isOpen,
+  onClick,
+  disabled,
 }: {
   href: string;
   iconSrc: string;
   iconAlt: string;
   children: React.ReactNode;
   isOpen: boolean;
+  onClick?: () => void;
+  disabled?: boolean;
 }) {
   const pathname = usePathname();
   const isActive = pathname === href;
 
   return (
     <Link
-      href={href}
+      href={disabled ? "#" : href}
       title={!isOpen ? String(children) : undefined}
+      onClick={disabled ? (e) => e.preventDefault() : onClick}
+      aria-disabled={disabled}
       className={`group relative px-3 py-2.5 rounded-xl transition-all duration-200 flex items-center gap-3 font-medium overflow-hidden whitespace-nowrap shrink-0 ${
         isActive
           ? "bg-accent/20 text-white border border-accent/30 shadow-lg shadow-accent/10"
           : "text-slate-300 hover:text-white hover:bg-white/10"
-      }`}
+      } ${disabled ? "opacity-40 cursor-not-allowed pointer-events-none" : ""}`}
     >
       <span className="shrink-0 w-6 h-6 relative flex items-center justify-center">
         <Image
@@ -56,11 +63,7 @@ function NavLink({
   );
 }
 
-export default function DashboardWrapper({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function DashboardInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const isLoginPage = pathname === "/login";
@@ -69,16 +72,14 @@ export default function DashboardWrapper({
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(!isLoginPage);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [showExitModal, setShowExitModal] = useState(false);
   const [exitPassword, setExitPassword] = useState("");
+  const [exitError, setExitError] = useState("");
+  const [isExiting, setIsExiting] = useState(false);
 
-  const {
-    handleExitKiosk,
-    isLoading: isExiting,
-    error: exitError,
-    setError: setExitError,
-  } = useAuth();
+  const { t } = useTheme();
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem("token");
@@ -122,22 +123,61 @@ export default function DashboardWrapper({
   if (!isSalonsPage && showExitModal) {
     setShowExitModal(false);
     setExitPassword("");
-    if (setExitError) setExitError("");
+    setExitError("");
   }
+
+  const handleExitSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setExitError("");
+    setIsExiting(true);
+    try {
+      await userService.reauthenticate(exitPassword);
+      localStorage.removeItem("isKioskMode");
+      setShowExitModal(false);
+      setExitPassword("");
+      router.push("/");
+    } catch (err) {
+      setExitError(
+        err instanceof Error ? err.message : "Mot de passe incorrect",
+      );
+    } finally {
+      setIsExiting(false);
+    }
+  };
 
   if (isLoginPage) return <>{children}</>;
 
   if (isLoading)
     return (
-      <div className="h-screen flex items-center justify-center text-white font-medium">
+      <div className="h-screen flex items-center justify-center bg-(--bg-card) backdrop-blur-xl font-medium text-(--text-main)">
         Chargement...
       </div>
     );
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden p-2 md:p-4 gap-2 md:gap-4 bg-transparent relative">
-      <header className="h-16 bg-slate-900/60 backdrop-blur-xl text-white flex items-center justify-between px-3 md:px-6 rounded-2xl border border-white/20 shadow-2xl shrink-0 z-20">
+    <div className={t.wrapper}>
+      <header className={t.header}>
         <div className="flex items-center gap-2 md:gap-4">
+          {!isSalonsPage && (
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="lg:hidden p-2 text-white hover:bg-white/10 rounded-xl transition-colors cursor-pointer"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </button>
+          )}
           <div className="h-8 md:h-9 w-auto relative flex items-center shrink-0">
             <Image
               src="/j23.webp"
@@ -166,19 +206,17 @@ export default function DashboardWrapper({
             <>
               <Link
                 href="/salons"
-                className="group relative inline-flex items-center justify-center p-0.5 overflow-hidden text-xs font-semibold rounded-xl bg-linear-to-br from-accent to-orange-600 hover:from-accent hover:to-orange-500 text-white shadow-lg shadow-accent/20 transition-all hover:scale-[1.02]"
+                className={`${t.btnPrimary} text-xs flex items-center gap-2`}
               >
-                <span className="relative px-3 py-2 transition-all ease-in duration-75 bg-slate-900/40 rounded-[10px] group-hover:bg-transparent flex items-center gap-2">
-                  <Image
-                    src="/icons/salons.webp"
-                    alt="Salons"
-                    width={16}
-                    height={16}
-                    className="object-contain brightness-0 invert shrink-0"
-                    unoptimized
-                  />
-                  <span className="hidden md:inline-block">Mode Salon</span>
-                </span>
+                <Image
+                  src="/icons/salons.webp"
+                  alt="Salons"
+                  width={16}
+                  height={16}
+                  className="object-contain brightness-0 invert shrink-0"
+                  unoptimized
+                />
+                <span className="hidden md:inline-block">Mode Salon</span>
               </Link>
 
               <button
@@ -198,7 +236,11 @@ export default function DashboardWrapper({
             </>
           ) : (
             <button
-              onClick={() => setShowExitModal(true)}
+              onClick={() => {
+                setExitError("");
+                setExitPassword("");
+                setShowExitModal(true);
+              }}
               className="flex items-center gap-2 bg-white/10 hover:bg-danger/80 text-white px-3 py-2 rounded-xl text-xs font-semibold backdrop-blur-md border border-white/10 transition-all duration-300 hover:shadow-lg hover:shadow-danger/20 cursor-pointer"
             >
               <Image
@@ -216,215 +258,170 @@ export default function DashboardWrapper({
       </header>
 
       <div className="flex flex-1 overflow-hidden gap-4">
-        {!isSalonsPage && (
-          <aside
-            className={`hidden lg:flex bg-slate-900/60 backdrop-blur-xl text-white rounded-2xl border border-white/20 shadow-2xl flex-col shrink-0 overflow-y-auto transition-all duration-300 ease-in-out ${
-              isSidebarOpen ? "w-64" : "w-20"
-            }`}
-          >
-            <div className="p-4 flex items-center justify-between border-b border-white/10">
-              <span
-                className={`font-bold tracking-wider text-xs text-slate-400 transition-opacity duration-300 ${
-                  isSidebarOpen ? "opacity-100" : "opacity-0 hidden"
-                }`}
-              >
-                NAVIGATION
-              </span>
-              <button
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all text-xs mx-auto flex items-center justify-center cursor-pointer"
-                title={isSidebarOpen ? "Réduire" : "Déplier"}
-              >
-                <Image
-                  src={
-                    isSidebarOpen
-                      ? "/icons/chevronLeft.webp"
-                      : "/icons/chevronRight.webp"
-                  }
-                  alt={isSidebarOpen ? "Réduire" : "Déplier"}
-                  width={14}
-                  height={14}
-                  className="object-contain brightness-0 invert shrink-0"
-                  unoptimized
-                />
-              </button>
-            </div>
-
-            <nav className="p-3 flex flex-col gap-2">
-              <NavLink
-                href="/"
-                iconSrc="/icons/dashboard.webp"
-                iconAlt="Dashboard"
-                isOpen={isSidebarOpen}
-              >
-                Tableau de bord
-              </NavLink>
-              {isAdmin && (
-                <NavLink
-                  href="/users"
-                  iconSrc="/icons/users.webp"
-                  iconAlt="Users"
-                  isOpen={isSidebarOpen}
-                >
-                  Utilisateurs
-                </NavLink>
-              )}
-              <NavLink
-                href="/prospects"
-                iconSrc="/icons/prospects.webp"
-                iconAlt="Prospects"
-                isOpen={isSidebarOpen}
-              >
-                Prospects
-              </NavLink>
-              <NavLink
-                href="/automations"
-                iconSrc="/icons/automations.webp"
-                iconAlt="Automations"
-                isOpen={isSidebarOpen}
-              >
-                Automatisations
-              </NavLink>
-              <NavLink
-                href="/formations"
-                iconSrc="/icons/formations.webp"
-                iconAlt="Formations"
-                isOpen={isSidebarOpen}
-              >
-                Formations
-              </NavLink>
-              <NavLink
-                href="/statuses"
-                iconSrc="/icons/statuses.webp"
-                iconAlt="Statuses"
-                isOpen={isSidebarOpen}
-              >
-                Statuts
-              </NavLink>
-              <NavLink
-                href="/templates"
-                iconSrc="/icons/templates.webp"
-                iconAlt="Templates"
-                isOpen={isSidebarOpen}
-              >
-                Templates
-              </NavLink>
-              <NavLink
-                href="/profile"
-                iconSrc="/icons/profile.webp"
-                iconAlt="Profile"
-                isOpen={isSidebarOpen}
-              >
-                Mon profil
-              </NavLink>
-            </nav>
-          </aside>
+        {!isSalonsPage && isMobileMenuOpen && (
+          <div
+            className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
         )}
 
-        <main
-          className={`flex-1 overflow-y-auto flex flex-col p-4 lg:p-8 ${
-            !isSalonsPage
-              ? "pb-24 lg:pb-8 bg-slate-900/40 backdrop-blur-lg rounded-2xl border border-white/15 shadow-2xl"
-              : ""
+        <aside
+          className={`fixed lg:relative inset-y-0 left-0 z-50 flex ${t.sidebar} text-white rounded-r-2xl lg:rounded-2xl border-r lg:border border-(--border-color) shadow-2xl flex-col shrink-0 overflow-y-auto transition-all duration-300 ease-in-out ${
+            isSidebarOpen ? "w-64" : "w-20"
+          } ${
+            isMobileMenuOpen
+              ? "translate-x-0"
+              : "-translate-x-full lg:translate-x-0"
           }`}
         >
-          {children}
-        </main>
-      </div>
-
-      {!isSalonsPage && (
-        <nav
-          className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-slate-900/90 backdrop-blur-2xl border-t border-white/20 z-40 flex items-center justify-start sm:justify-center gap-1 overflow-x-auto px-2 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] touch-pan-x"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-          <style
-            dangerouslySetInnerHTML={{
-              __html: `nav::-webkit-scrollbar { display: none; }`,
-            }}
-          />
-          <NavLink
-            href="/"
-            iconSrc="/icons/dashboard.webp"
-            iconAlt="Dashboard"
-            isOpen={false}
-          >
-            Tableau de bord
-          </NavLink>
-          {isAdmin && (
-            <NavLink
-              href="/users"
-              iconSrc="/icons/users.webp"
-              iconAlt="Users"
-              isOpen={false}
+          <div className="p-4 flex items-center justify-between border-b border-white/10 min-h-16">
+            <span
+              className={`font-bold tracking-wider text-xs text-slate-400 transition-opacity duration-300 ${
+                isSidebarOpen ? "opacity-100" : "opacity-0 hidden"
+              }`}
             >
-              Utilisateurs
+              NAVIGATION
+            </span>
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="hidden lg:flex p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all text-xs mx-auto items-center justify-center cursor-pointer"
+            >
+              <Image
+                src={
+                  isSidebarOpen
+                    ? "/icons/chevronLeft.webp"
+                    : "/icons/chevronRight.webp"
+                }
+                alt={isSidebarOpen ? "Réduire" : "Déplier"}
+                width={14}
+                height={14}
+                className="object-contain brightness-0 invert shrink-0"
+                unoptimized
+              />
+            </button>
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="lg:hidden p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer ml-auto"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <nav className="p-3 flex flex-col gap-2">
+            <NavLink
+              href="/"
+              iconSrc="/icons/dashboard.webp"
+              iconAlt="Dashboard"
+              isOpen={isSidebarOpen || isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen(false)}
+              disabled={isSalonsPage}
+            >
+              Tableau de bord
             </NavLink>
-          )}
-          <NavLink
-            href="/prospects"
-            iconSrc="/icons/prospects.webp"
-            iconAlt="Prospects"
-            isOpen={false}
-          >
-            Prospects
-          </NavLink>
-          <NavLink
-            href="/automations"
-            iconSrc="/icons/automations.webp"
-            iconAlt="Automations"
-            isOpen={false}
-          >
-            Automatisations
-          </NavLink>
-          <NavLink
-            href="/formations"
-            iconSrc="/icons/formations.webp"
-            iconAlt="Formations"
-            isOpen={false}
-          >
-            Formations
-          </NavLink>
-          <NavLink
-            href="/statuses"
-            iconSrc="/icons/statuses.webp"
-            iconAlt="Statuses"
-            isOpen={false}
-          >
-            Statuts
-          </NavLink>
-          <NavLink
-            href="/templates"
-            iconSrc="/icons/templates.webp"
-            iconAlt="Templates"
-            isOpen={false}
-          >
-            Templates
-          </NavLink>
-          <NavLink
-            href="/profile"
-            iconSrc="/icons/profile.webp"
-            iconAlt="Profile"
-            isOpen={false}
-          >
-            Mon profil
-          </NavLink>
-        </nav>
-      )}
+            {isAdmin && (
+              <NavLink
+                href="/users"
+                iconSrc="/icons/users.webp"
+                iconAlt="Users"
+                isOpen={isSidebarOpen || isMobileMenuOpen}
+                onClick={() => setIsMobileMenuOpen(false)}
+                disabled={isSalonsPage}
+              >
+                Utilisateurs
+              </NavLink>
+            )}
+            <NavLink
+              href="/prospects"
+              iconSrc="/icons/prospects.webp"
+              iconAlt="Prospects"
+              isOpen={isSidebarOpen || isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen(false)}
+              disabled={isSalonsPage}
+            >
+              Prospects
+            </NavLink>
+            <NavLink
+              href="/automations"
+              iconSrc="/icons/automations.webp"
+              iconAlt="Automations"
+              isOpen={isSidebarOpen || isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen(false)}
+              disabled={isSalonsPage}
+            >
+              Automatisations
+            </NavLink>
+            <NavLink
+              href="/formations"
+              iconSrc="/icons/formations.webp"
+              iconAlt="Formations"
+              isOpen={isSidebarOpen || isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen(false)}
+              disabled={isSalonsPage}
+            >
+              Formations
+            </NavLink>
+            <NavLink
+              href="/statuses"
+              iconSrc="/icons/statuses.webp"
+              iconAlt="Statuses"
+              isOpen={isSidebarOpen || isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen(false)}
+              disabled={isSalonsPage}
+            >
+              Statuts
+            </NavLink>
+            <NavLink
+              href="/templates"
+              iconSrc="/icons/templates.webp"
+              iconAlt="Templates"
+              isOpen={isSidebarOpen || isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen(false)}
+              disabled={isSalonsPage}
+            >
+              Templates
+            </NavLink>
+            <NavLink
+              href="/profile"
+              iconSrc="/icons/profile.webp"
+              iconAlt="Profile"
+              isOpen={isSidebarOpen || isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen(false)}
+              disabled={isSalonsPage}
+            >
+              Mon profil
+            </NavLink>
+          </nav>
+        </aside>
+
+        <main className={t.main}>{children}</main>
+      </div>
 
       {showExitModal && (
         <div className="fixed inset-0 z-100 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <form
-            onSubmit={(e) => handleExitKiosk(e, exitPassword)}
-            className="bg-slate-900/90 border border-white/20 p-8 rounded-2xl w-full max-w-md shadow-2xl relative text-white"
+            onSubmit={handleExitSubmit}
+            className={`${t.card} w-full max-w-md shadow-2xl relative space-y-4`}
           >
-            <h3 className="text-xl font-bold mb-2">Quitter le Mode Salon</h3>
-            <p className="text-sm text-slate-300 mb-6">
+            <h3 className="text-xl font-bold text-(--text-main)">
+              Quitter le Mode Salon
+            </h3>
+            <p className="text-sm text-(--text-muted)">
               Saisis ton mot de passe pour retourner au CRM.
             </p>
             {exitError && (
-              <p className="text-danger text-sm mb-4 font-medium">
-                {exitError}
-              </p>
+              <p className="text-red-400 text-xs font-medium">{exitError}</p>
             )}
             <input
               type="password"
@@ -432,33 +429,45 @@ export default function DashboardWrapper({
               autoFocus
               autoComplete="new-password"
               placeholder="Mot de passe..."
-              className="w-full bg-slate-800/80 border border-white/15 rounded-xl px-4 py-3 text-white placeholder-slate-400 mb-6 focus:ring-2 focus:ring-accent outline-none"
+              className={t.input}
               value={exitPassword}
               onChange={(e) => setExitPassword(e.target.value)}
             />
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => {
                   setShowExitModal(false);
-                  if (setExitError) setExitError("");
+                  setExitError("");
                   setExitPassword("");
                 }}
-                className="px-4 py-2 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer"
+                className={t.btnGhost}
               >
                 Annuler
               </button>
               <button
                 type="submit"
                 disabled={isExiting}
-                className="px-4 py-2 rounded-xl text-xs font-semibold bg-accent hover:bg-accent/80 text-white transition-all cursor-pointer disabled:opacity-50 shadow-lg shadow-accent/20"
+                className={t.btnPrimary}
               >
-                Déverrouiller
+                {isExiting ? "Vérification..." : "Déverrouiller"}
               </button>
             </div>
           </form>
         </div>
       )}
     </div>
+  );
+}
+
+export default function DashboardWrapper({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <ThemeProvider>
+      <DashboardInner>{children}</DashboardInner>
+    </ThemeProvider>
   );
 }

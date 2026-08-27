@@ -12,7 +12,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" suppressHydrationWarning>
-      <body className="text-foreground font-sans antialiased relative">
+      <body className="font-sans antialiased relative">
         <div className="slideshow-container">
           <div className="slide bg-1"></div>
           <div className="slide bg-2"></div>

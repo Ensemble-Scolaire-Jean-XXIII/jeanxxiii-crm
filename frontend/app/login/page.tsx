@@ -4,12 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { userService } from "../services/userService";
 import Toast from "../components/Toast";
+import { ThemeProvider, useTheme } from "../contexts/ThemeContext";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const [email, setEmail] = useState("");
   const [passwordHash, setPasswordHash] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+  const { t } = useTheme();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,15 +28,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-transparent relative items-center justify-center p-4">
+    <div className={t.wrapper + " items-center justify-center"}>
       <Toast message={error} type="error" onClose={() => setError("")} />
 
-      <div className="w-full max-w-md bg-white/25 dark:bg-slate-900/70 backdrop-blur-xl p-8 sm:p-10 rounded-3xl border border-white/20 shadow-2xl z-10">
+      <div className={`${t.card} w-full max-w-md p-8 sm:p-10 z-10 shadow-2xl`}>
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white drop-shadow-md mb-1">
+          <h1 className="text-3xl font-bold text-(--text-main) mb-1">
             CRM Jean XXIII
           </h1>
-          <p className="text-white/80 text-sm">
+          <p className="text-(--text-muted) text-sm">
             Connexion à l&apos;espace sécurisé
           </p>
         </div>
@@ -44,7 +46,7 @@ export default function LoginPage() {
             <input
               type="email"
               placeholder="Adresse email"
-              className="w-full bg-white/70 dark:bg-slate-800/70 border-0 focus:ring-2 focus:ring-primary rounded-xl px-4 py-4 text-slate-800 dark:text-white placeholder-slate-500 text-base shadow-inner transition-all"
+              className={t.input}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -55,7 +57,7 @@ export default function LoginPage() {
             <input
               type="password"
               placeholder="Mot de passe"
-              className="w-full bg-white/70 dark:bg-slate-800/70 border-0 focus:ring-2 focus:ring-primary rounded-xl px-4 py-4 text-slate-800 dark:text-white placeholder-slate-500 text-base shadow-inner transition-all"
+              className={t.input}
               value={passwordHash}
               onChange={(e) => setPasswordHash(e.target.value)}
               required
@@ -64,12 +66,20 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-lg transition-transform transform hover:scale-[1.02] text-lg mt-2"
+            className={`${t.btnPrimary} w-full text-base py-3`}
           >
             Se connecter
           </button>
         </form>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <ThemeProvider>
+      <LoginPageContent />
+    </ThemeProvider>
   );
 }

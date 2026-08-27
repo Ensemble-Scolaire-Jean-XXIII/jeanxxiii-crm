@@ -7,8 +7,11 @@ import { countryService } from "../services/countryService";
 import { Formation } from "../types";
 import Toast from "../components/Toast";
 import Skeleton from "../components/Skeleton";
+import PageHeader from "../components/PageHeader";
+import { useTheme } from "../contexts/ThemeContext";
 
 export default function SalonsPage() {
+  const { t } = useTheme();
   const [formations, setFormations] = useState<Formation[]>([]);
   const [franceCountryId, setFranceCountryId] = useState<number | null>(null);
   const [error, setError] = useState("");
@@ -74,8 +77,10 @@ export default function SalonsPage() {
 
   if (showSuccessAnim) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/60 backdrop-blur-md">
-        <div className="bg-slate-900/80 backdrop-blur-xl p-12 rounded-3xl flex flex-col items-center border border-white/20 shadow-2xl animate-fade-in-up">
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md">
+        <div
+          className={`${t.card} max-w-md w-full p-12 flex flex-col items-center animate-fade-in-up`}
+        >
           <div className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-emerald-500/30">
             <svg
               className="w-12 h-12 text-white"
@@ -92,7 +97,7 @@ export default function SalonsPage() {
             </svg>
           </div>
           <h2 className="text-4xl font-bold text-white mb-2">Merci !</h2>
-          <p className="text-white/90 text-lg">
+          <p className="text-white/90 text-lg text-center">
             Vos informations ont bien été enregistrées.
           </p>
         </div>
@@ -101,146 +106,135 @@ export default function SalonsPage() {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto flex flex-col p-5 sm:p-6 bg-slate-900/40 backdrop-blur-lg rounded-2xl border border-white/15 shadow-2xl">
+    <div className="flex flex-col flex-1 min-h-0 gap-4 max-w-3xl mx-auto w-full justify-center">
       <Toast message={error} type="error" onClose={() => setError("")} />
       <Toast message={success} type="success" onClose={() => setSuccess("")} />
 
-      <div className="text-center mb-4">
-        <h1 className="text-3xl font-bold text-white drop-shadow-md mb-1">
-          Rencontrons-nous !
-        </h1>
-        <p className="text-white/90 text-sm">
-          Laissez-nous vos coordonnées pour rester en contact.
-        </p>
-      </div>
+      <PageHeader
+        title="Rencontrons-nous !"
+        description="Laissez-nous vos coordonnées pour rester en contact."
+      />
 
-      {isLoading ? (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Skeleton className="h-10 w-full rounded-xl" />
-            <Skeleton className="h-10 w-full rounded-xl" />
-          </div>
-          <Skeleton className="h-10 w-full rounded-xl" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Skeleton className="h-10 w-full rounded-xl" />
-            <Skeleton className="h-10 w-full rounded-xl" />
-          </div>
-          <Skeleton className="h-10 w-full rounded-xl" />
-          <Skeleton className="h-10 w-full rounded-xl" />
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-white/90 text-xs font-semibold mb-1 drop-shadow-sm">
-                Prénom *
-              </label>
-              <input
-                type="text"
-                required
-                className="w-full bg-slate-800/70 border border-white/15 focus:ring-2 focus:ring-primary rounded-xl px-3 py-2.5 text-white placeholder-slate-400 text-sm shadow-inner transition-all outline-none"
-                value={form.first_name}
-                onChange={(e) =>
-                  setForm({ ...form, first_name: e.target.value })
-                }
-              />
+      <div
+        className={`${t.card} flex flex-col flex-1 overflow-hidden justify-center shadow-2xl`}
+      >
+        <div className="overflow-y-auto flex-1 custom-scrollbar px-6 py-8 flex flex-col justify-center">
+          {isLoading ? (
+            <div className="space-y-4 max-w-xl mx-auto w-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <Skeleton className="h-10 w-full" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <Skeleton className="h-10 w-full" />
             </div>
-            <div>
-              <label className="block text-white/90 text-xs font-semibold mb-1 drop-shadow-sm">
-                Nom *
-              </label>
-              <input
-                type="text"
-                required
-                className="w-full bg-slate-800/70 border border-white/15 focus:ring-2 focus:ring-primary rounded-xl px-3 py-2.5 text-white placeholder-slate-400 text-sm shadow-inner transition-all outline-none"
-                value={form.last_name}
-                onChange={(e) =>
-                  setForm({ ...form, last_name: e.target.value })
-                }
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-white/90 text-xs font-semibold mb-1 drop-shadow-sm">
-              Email *
-            </label>
-            <input
-              type="email"
-              required
-              className="w-full bg-slate-800/70 border border-white/15 focus:ring-2 focus:ring-primary rounded-xl px-3 py-2.5 text-white placeholder-slate-400 text-sm shadow-inner transition-all outline-none"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-white/90 text-xs font-semibold mb-1 drop-shadow-sm">
-                Téléphone
-              </label>
-              <input
-                type="tel"
-                className="w-full bg-slate-800/70 border border-white/15 focus:ring-2 focus:ring-primary rounded-xl px-3 py-2.5 text-white placeholder-slate-400 text-sm shadow-inner transition-all outline-none"
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="block text-white/90 text-xs font-semibold mb-1 drop-shadow-sm">
-                Civilité *
-              </label>
-              <select
-                className="w-full bg-slate-800/70 border border-white/15 focus:ring-2 focus:ring-primary rounded-xl px-3 py-2.5 text-white text-sm shadow-inner transition-all cursor-pointer outline-none"
-                value={form.gender}
-                onChange={(e) => setForm({ ...form, gender: e.target.value })}
-              >
-                <option value="Masculin" className="bg-slate-900">
-                  Monsieur
-                </option>
-                <option value="Féminin" className="bg-slate-900">
-                  Madame
-                </option>
-                <option value="" className="bg-slate-900">
-                  Ne préfère pas l'indiquer
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-white/90 text-xs font-semibold mb-1 drop-shadow-sm">
-              Formation visée (Optionnel)
-            </label>
-            <select
-              className="w-full bg-slate-800/70 border border-white/15 focus:ring-2 focus:ring-primary rounded-xl px-3 py-2.5 text-white text-sm shadow-inner transition-all cursor-pointer outline-none"
-              value={form.formation_id || ""}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  formation_id: e.target.value ? Number(e.target.value) : null,
-                })
-              }
+          ) : (
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-4 max-w-xl mx-auto w-full"
             >
-              <option value="" className="bg-slate-900">
-                -- Non défini --
-              </option>
-              {formations.map((f) => (
-                <option key={f.id} value={f.id} className="bg-slate-900">
-                  {f.name}
-                </option>
-              ))}
-            </select>
-          </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="label-text">Prénom *</label>
+                  <input
+                    type="text"
+                    required
+                    className={t.input}
+                    value={form.first_name}
+                    onChange={(e) =>
+                      setForm({ ...form, first_name: e.target.value })
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="label-text">Nom *</label>
+                  <input
+                    type="text"
+                    required
+                    className={t.input}
+                    value={form.last_name}
+                    onChange={(e) =>
+                      setForm({ ...form, last_name: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
 
-          <button
-            type="submit"
-            className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3.5 rounded-xl shadow-lg transition-transform transform hover:scale-[1.02] text-base mt-2 cursor-pointer"
-          >
-            Valider mes informations
-          </button>
-        </form>
-      )}
+              <div>
+                <label className="label-text">Email *</label>
+                <input
+                  type="email"
+                  required
+                  className={t.input}
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="label-text">Téléphone</label>
+                  <input
+                    type="tel"
+                    className={t.input}
+                    value={form.phone}
+                    onChange={(e) =>
+                      setForm({ ...form, phone: e.target.value })
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="label-text">Civilité *</label>
+                  <select
+                    className={t.input}
+                    value={form.gender}
+                    onChange={(e) =>
+                      setForm({ ...form, gender: e.target.value })
+                    }
+                  >
+                    <option value="Masculin">Monsieur</option>
+                    <option value="Féminin">Madame</option>
+                    <option value="">Ne préfère pas l'indiquer</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="label-text">
+                  Formation visée (Optionnel)
+                </label>
+                <select
+                  className={t.input}
+                  value={form.formation_id || ""}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      formation_id: e.target.value
+                        ? Number(e.target.value)
+                        : null,
+                    })
+                  }
+                >
+                  <option value="">-- Non défini --</option>
+                  {formations.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <button type="submit" className={t.btnPrimary + " w-full mt-4"}>
+                Valider mes informations
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

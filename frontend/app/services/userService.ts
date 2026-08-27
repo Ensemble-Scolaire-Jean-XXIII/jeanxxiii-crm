@@ -1,5 +1,5 @@
 import { api, BASE_URL } from "./api";
-import { User, CreateUserDTO } from "../types";
+import { User, CreateUserPayload } from "../types";
 
 export const userService = {
   login: async (
@@ -19,7 +19,7 @@ export const userService = {
   },
   getAll: (): Promise<User[]> => api.get("/users"),
   getMe: (): Promise<User> => api.get("/users/me"),
-  create: (data: CreateUserDTO): Promise<{ id: string }> =>
+  create: (data: CreateUserPayload): Promise<{ id: string }> =>
     api.post("/users", data),
   update: (id: string | number, data: Partial<User>): Promise<void> =>
     api.put(`/users/${id}`, data),

@@ -10,7 +10,7 @@ import {
   Status,
   Country,
   Formation,
-  CreateProspectsDTO,
+  CreateProspectPayload,
   SortHeaderProps,
 } from "../types";
 import Toast from "../components/Toast";
@@ -21,9 +21,10 @@ import { useSort } from "../hooks/useSort";
 import PageHeader from "../components/PageHeader";
 import FormCard from "../components/FormCard";
 import ScrollableTableCard from "../components/ScrollableTableCard";
+import { useTheme } from "../contexts/ThemeContext";
 
 const formInputs: {
-  name: keyof CreateProspectsDTO;
+  name: keyof CreateProspectPayload;
   type: string;
   placeholder: string;
   required: boolean;
@@ -34,28 +35,9 @@ const formInputs: {
   { name: "phone", type: "tel", placeholder: "Téléphone", required: false },
 ];
 
-const SortHeader = ({
-  field,
-  label,
-  sortField,
-  sortDirection,
-  onSort,
-}: SortHeaderProps) => (
-  <th
-    className="px-3 py-3 font-semibold text-white cursor-pointer hover:text-primary transition-colors group select-none truncate"
-    onClick={() => onSort(field)}
-    title={label}
-  >
-    <div className="flex items-center gap-2 truncate">
-      <span className="truncate">{label}</span>
-      <span className="text-[10px] text-slate-400 opacity-50 group-hover:opacity-100 transition-opacity shrink-0">
-        {sortField === field ? (sortDirection === "asc" ? "▲" : "▼") : "↕"}
-      </span>
-    </div>
-  </th>
-);
-
 export default function ProspectsPage() {
+  const { t } = useTheme();
+
   const {
     data: prospects,
     isLoading,
@@ -75,7 +57,7 @@ export default function ProspectsPage() {
     create,
     updateWithUndo,
     deleteWithUndo,
-  } = useCrud<ProspectExtended, CreateProspectsDTO>(prospectService, {
+  } = useCrud<ProspectExtended, CreateProspectPayload>(prospectService, {
     first_name: "",
     last_name: "",
     email: "",
@@ -128,7 +110,7 @@ export default function ProspectsPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
-    setCreateForm((prev: CreateProspectsDTO) => ({
+    setCreateForm((prev: CreateProspectPayload) => ({
       ...prev,
       [name]:
         name.endsWith("_id") || name === "formation_id"
@@ -185,6 +167,24 @@ export default function ProspectsPage() {
     return sortDirection === "asc" ? compareResult : -compareResult;
   });
 
+  const SortHeader = ({ field, label }: { field: string; label: string }) => (
+    <th
+      className={`px-3 py-3 font-semibold cursor-pointer hover:opacity-70 select-none ${t.tableHeader}`}
+      onClick={() => handleSort(field)}
+    >
+      <div className="flex items-center gap-2">
+        <span>{label}</span>
+        <span
+          className={`text-[10px] ${
+            sortField === field ? "opacity-100" : "opacity-30"
+          }`}
+        >
+          {sortField === field ? (sortDirection === "asc" ? "▲" : "▼") : "↕"}
+        </span>
+      </div>
+    </th>
+  );
+
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-4">
       <Toast message={error} type="error" onClose={() => setError("")} />
@@ -203,10 +203,7 @@ export default function ProspectsPage() {
         title="Prospects"
         description="Gérez vos prospects facilement"
       >
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="btn btn-ghost border border-white/20 text-white text-sm py-1.5 px-4 bg-white/5 hover:bg-white/10"
-        >
+        <button onClick={() => setShowForm(!showForm)} className={t.btnGhost}>
           {showForm ? "Cacher le formulaire d'ajout" : "+ Nouveau prospect"}
         </button>
       </PageHeader>
@@ -219,12 +216,18 @@ export default function ProspectsPage() {
           >
             {formInputs.map((input) => (
               <div key={input.name} className="w-full">
-                <label className="label-text">{input.placeholder}</label>
+                <label className={`block text-xs mb-1 ${t.textMuted}`}>
+                  {input.placeholder}
+                </label>
                 <input
                   name={input.name}
                   type={input.type}
-                  className="input-field w-full py-1.5"
-                  value={(createForm[input.name] as string) || ""}
+                  className={`${t.input} w-full py-1.5`}
+                  value={
+                    (createForm[
+                      input.name as keyof CreateProspectPayload
+                    ] as string) || ""
+                  }
                   onChange={handleCreateChange}
                   required={input.required}
                 />
@@ -232,10 +235,12 @@ export default function ProspectsPage() {
             ))}
 
             <div className="w-full">
-              <label className="label-text">Pays</label>
+              <label className={`block text-xs mb-1 ${t.textMuted}`}>
+                Pays
+              </label>
               <select
                 name="country_id"
-                className="input-field w-full py-1.5"
+                className={`${t.input} w-full py-1.5`}
                 value={createForm.country_id}
                 onChange={handleCreateChange}
               >
@@ -248,10 +253,12 @@ export default function ProspectsPage() {
             </div>
 
             <div className="w-full">
-              <label className="label-text">Formation</label>
+              <label className={`block text-xs mb-1 ${t.textMuted}`}>
+                Formation
+              </label>
               <select
                 name="formation_id"
-                className="input-field w-full py-1.5"
+                className={`${t.input} w-full py-1.5`}
                 value={createForm.formation_id || ""}
                 onChange={handleCreateChange}
               >
@@ -265,10 +272,12 @@ export default function ProspectsPage() {
             </div>
 
             <div className="w-full">
-              <label className="label-text">Civilité</label>
+              <label className={`block text-xs mb-1 ${t.textMuted}`}>
+                Civilité
+              </label>
               <select
                 name="gender"
-                className="input-field w-full py-1.5"
+                className={`${t.input} w-full py-1.5`}
                 value={createForm.gender}
                 onChange={handleCreateChange}
               >
@@ -278,10 +287,12 @@ export default function ProspectsPage() {
             </div>
 
             <div className="w-full">
-              <label className="label-text">Statut</label>
+              <label className={`block text-xs mb-1 ${t.textMuted}`}>
+                Statut
+              </label>
               <select
                 name="status_id"
-                className="input-field w-full py-1.5"
+                className={`${t.input} w-full py-1.5`}
                 value={createForm.status_id}
                 onChange={handleCreateChange}
               >
@@ -294,7 +305,7 @@ export default function ProspectsPage() {
             </div>
 
             <div className="md:col-span-2 lg:col-span-4 flex justify-end">
-              <button type="submit" className="btn btn-primary py-1.5 text-sm">
+              <button type="submit" className={t.btnPrimary}>
                 Ajouter le prospect
               </button>
             </div>
@@ -303,55 +314,19 @@ export default function ProspectsPage() {
       )}
 
       <ScrollableTableCard>
-        <table className="w-full text-left text-sm table-fixed min-w-275">
-          <thead className="sticky top-0 bg-slate-900/95 backdrop-blur z-10 shadow-md">
-            <tr className="border-b border-slate-700 text-slate-300">
-              <SortHeader
-                field="name"
-                label="Nom"
-                sortField={sortField}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-              />
-              <SortHeader
-                field="contact"
-                label="Contact"
-                sortField={sortField}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-              />
-              <SortHeader
-                field="formation"
-                label="Formation"
-                sortField={sortField}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-              />
-              <SortHeader
-                field="country"
-                label="Pays"
-                sortField={sortField}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-              />
-              <SortHeader
-                field="status"
-                label="Statut"
-                sortField={sortField}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-              />
-              <SortHeader
-                field="date"
-                label="Dernière action"
-                sortField={sortField}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-              />
-              <th className="px-3 py-2 text-right w-52">
+        <table className="w-full text-left text-sm table-fixed min-w-200">
+          <thead className={`sticky top-0 z-10 shadow-md ${t.tableHeader}`}>
+            <tr className="border-b border-(--border-color)">
+              <SortHeader field="name" label="Nom" />
+              <SortHeader field="contact" label="Contact" />
+              <SortHeader field="formation" label="Formation" />
+              <SortHeader field="country" label="Pays" />
+              <SortHeader field="status" label="Statut" />
+              <SortHeader field="date" label="Dernière action" />
+              <th className={`px-3 py-3 text-right ${t.tableHeader}`}>
                 <input
                   type="text"
-                  className="input-field py-1 px-2 text-xs font-normal w-full text-right ml-auto"
+                  className={`${t.input} w-48 ml-auto py-1! text-xs! font-normal`}
                   placeholder="Rechercher..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -366,7 +341,7 @@ export default function ProspectsPage() {
               <tr>
                 <td
                   colSpan={7}
-                  className="px-3 py-6 text-center text-slate-400 truncate"
+                  className={`px-3 py-6 text-center truncate ${t.textMuted}`}
                 >
                   Aucun prospect trouvé.
                 </td>
@@ -375,13 +350,13 @@ export default function ProspectsPage() {
               sortedProspects.map((p) => (
                 <tr
                   key={p.id}
-                  className="group border-b border-white/5 hover:bg-white/5 transition-colors"
+                  className={`group border-b transition-colors ${t.tableRow}`}
                 >
                   <td className="px-3 py-3.5 truncate">
                     {editingId === p.id ? (
                       <div className="flex flex-col sm:flex-row gap-1">
                         <input
-                          className="input-field py-1 px-2 w-full text-xs truncate"
+                          className={`${t.input} py-1! px-2! text-xs! truncate`}
                           value={editForm.first_name || ""}
                           onChange={(e) =>
                             setEditForm({
@@ -391,7 +366,7 @@ export default function ProspectsPage() {
                           }
                         />
                         <input
-                          className="input-field py-1 px-2 w-full text-xs truncate"
+                          className={`${t.input} py-1! px-2! text-xs! truncate`}
                           value={editForm.last_name || ""}
                           onChange={(e) =>
                             setEditForm({
@@ -403,7 +378,7 @@ export default function ProspectsPage() {
                       </div>
                     ) : (
                       <span
-                        className="block w-full truncate text-white font-medium"
+                        className="block w-full truncate font-medium"
                         title={`${p.first_name || ""} ${p.last_name || ""}`}
                       >
                         {p.first_name} {p.last_name}
@@ -415,7 +390,7 @@ export default function ProspectsPage() {
                     {editingId === p.id ? (
                       <div className="flex flex-col gap-1">
                         <input
-                          className="input-field py-1 px-2 text-xs w-full truncate"
+                          className={`${t.input} py-1! px-2! text-xs! truncate`}
                           value={editForm.email || ""}
                           onChange={(e) =>
                             setEditForm({
@@ -425,7 +400,7 @@ export default function ProspectsPage() {
                           }
                         />
                         <input
-                          className="input-field py-1 px-2 text-xs w-full truncate"
+                          className={`${t.input} py-1! px-2! text-xs! truncate`}
                           value={editForm.phone || ""}
                           placeholder="Téléphone"
                           onChange={(e) =>
@@ -438,13 +413,12 @@ export default function ProspectsPage() {
                       </div>
                     ) : (
                       <div className="w-full truncate">
-                        <span
-                          className="block w-full truncate text-slate-300"
-                          title={p.email}
-                        >
+                        <span className="block w-full truncate" title={p.email}>
                           {p.email}
                         </span>
-                        <span className="block w-full truncate text-[10px] text-slate-400 font-medium">
+                        <span
+                          className={`block w-full truncate text-[10px] font-medium ${t.textMuted}`}
+                        >
                           {p.phone ? p.phone : "Aucun téléphone"}
                         </span>
                       </div>
@@ -453,7 +427,7 @@ export default function ProspectsPage() {
 
                   <td className="px-3 py-3.5 truncate">
                     <select
-                      className="input-field py-1! px-2! text-xs cursor-pointer w-full truncate"
+                      className={`${t.input} py-1! px-2! text-xs! cursor-pointer truncate`}
                       value={p.formation_id ?? ""}
                       onChange={(e) =>
                         updateWithUndo(p.id, {
@@ -474,7 +448,7 @@ export default function ProspectsPage() {
 
                   <td className="px-3 py-3.5 truncate">
                     <select
-                      className="input-field py-1! px-2! text-xs cursor-pointer w-full truncate"
+                      className={`${t.input} py-1! px-2! text-xs! cursor-pointer truncate`}
                       value={p.country_id ?? ""}
                       onChange={(e) =>
                         updateWithUndo(p.id, {
@@ -492,7 +466,7 @@ export default function ProspectsPage() {
 
                   <td className="px-3 py-3.5 truncate">
                     <select
-                      className="input-field py-1! px-2! text-xs cursor-pointer w-full truncate"
+                      className={`${t.input} py-1! px-2! text-xs! cursor-pointer truncate`}
                       value={p.status_id ?? ""}
                       onChange={(e) =>
                         updateWithUndo(p.id, {
@@ -508,7 +482,7 @@ export default function ProspectsPage() {
                     </select>
                   </td>
 
-                  <td className="px-3 py-3.5 text-xs text-slate-300 truncate">
+                  <td className={`px-3 py-3.5 text-xs truncate ${t.textMuted}`}>
                     {p.last_action_date
                       ? new Date(p.last_action_date).toLocaleDateString()
                       : "Jamais"}
@@ -526,13 +500,13 @@ export default function ProspectsPage() {
                               phone: editForm.phone,
                             })
                           }
-                          className="btn btn-ghost text-green-400 px-2 py-1 text-xs font-bold"
+                          className="text-green-500 hover:bg-green-500/10 px-2 py-1 rounded text-xs font-bold cursor-pointer"
                         >
                           Valider
                         </button>
                         <button
                           onClick={() => setEditingId(null)}
-                          className="btn btn-ghost text-slate-400 px-2 py-1 text-xs"
+                          className={`${t.textMuted} px-2 py-1 rounded text-xs hover:bg-black/5 cursor-pointer`}
                         >
                           Annuler
                         </button>
@@ -541,15 +515,15 @@ export default function ProspectsPage() {
                       <div className="flex justify-end gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <button
                           onClick={() => startEdit(p)}
-                          className="btn btn-ghost text-accent px-2 py-1 text-xs"
+                          className="text-blue-500 hover:bg-blue-500/10 px-2 py-1 rounded text-xs cursor-pointer"
                         >
                           Modifier
                         </button>
                         <button
                           onClick={() => deleteWithUndo(p.id)}
-                          className="btn btn-ghost text-red-400 px-2 py-1 text-xs"
+                          className="text-red-500 hover:bg-red-500/10 px-2 py-1 rounded text-xs cursor-pointer"
                         >
-                          Suppr.
+                          Supprimer
                         </button>
                       </div>
                     )}

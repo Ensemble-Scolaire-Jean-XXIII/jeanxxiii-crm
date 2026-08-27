@@ -1,9 +1,9 @@
 import { api } from "./api";
-import { Formation, CreateFormationDTO } from "../types";
+import { Formation, CreateFormationPayload } from "../types";
 
 export const formationService = {
   getAll: (): Promise<Formation[]> => api.get("/formations"),
-  create: (data: CreateFormationDTO): Promise<{ id: number }> =>
+  create: (data: CreateFormationPayload): Promise<{ id: number }> =>
     api.post("/formations", data),
   update: (id: string | number, data: Partial<Formation>): Promise<void> =>
     api.put(`/formations/${id}`, data),

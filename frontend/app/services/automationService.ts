@@ -1,9 +1,9 @@
 import { api } from "./api";
-import { EmailAutomationRule, CreateAutomationDTO } from "../types";
+import { EmailAutomationRule, CreateAutomationPayload } from "../types";
 
 export const automationService = {
   getAll: (): Promise<EmailAutomationRule[]> => api.get("/automations"),
-  create: (data: CreateAutomationDTO): Promise<{ id: number }> =>
+  create: (data: CreateAutomationPayload): Promise<{ id: number }> =>
     api.post("/automations", data),
   update: (
     id: string | number,
