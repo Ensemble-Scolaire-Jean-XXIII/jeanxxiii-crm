@@ -5,7 +5,7 @@ import { userService } from "../services/userService";
 import { auditLogService } from "../services/auditLogService";
 import { CreateUsersDTO, User, AuditLog } from "../types/index";
 import Toast from "../components/Toast";
-import Skeleton from "../components/Skeleton";
+import { TableSkeleton } from "../components/Skeleton";
 import { useCrud } from "../hooks/useCrud";
 import { usePagination } from "../hooks/usePagination";
 import { useSearch } from "../hooks/useSearch";
@@ -98,13 +98,19 @@ export default function UsersPage() {
   const formatAction = (action: string) => {
     switch (action) {
       case "CREATE":
-        return <span className="text-emerald-400 font-bold">CRÉATION</span>;
+        return (
+          <span className="text-emerald-400 font-bold truncate">CRÉATION</span>
+        );
       case "UPDATE":
-        return <span className="text-blue-400 font-bold">MODIFICATION</span>;
+        return (
+          <span className="text-blue-400 font-bold truncate">MODIFICATION</span>
+        );
       case "DELETE":
-        return <span className="text-red-400 font-bold">SUPPRESSION</span>;
+        return (
+          <span className="text-red-400 font-bold truncate">SUPPRESSION</span>
+        );
       default:
-        return <span>{action}</span>;
+        return <span className="truncate">{action}</span>;
     }
   };
 
@@ -248,18 +254,22 @@ export default function UsersPage() {
           )}
 
           <ScrollableTableCard>
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left text-sm table-fixed min-w-175">
               <thead className="sticky top-0 bg-slate-900/95 backdrop-blur z-10 shadow-md">
                 <tr className="border-b border-slate-700 text-slate-300">
-                  <th className="px-3 py-3 font-semibold text-white">
+                  <th className="px-3 py-3 font-semibold text-white truncate">
                     Nom complet
                   </th>
-                  <th className="px-3 py-3 font-semibold text-white">Email</th>
-                  <th className="px-3 py-3 font-semibold text-white">Rôle</th>
-                  <th className="px-3 py-3 font-semibold text-white text-right">
+                  <th className="px-3 py-3 font-semibold text-white truncate">
+                    Email
+                  </th>
+                  <th className="px-3 py-3 font-semibold text-white truncate">
+                    Rôle
+                  </th>
+                  <th className="px-3 py-3 font-semibold text-white text-right w-52">
                     <input
                       type="text"
-                      className="input-field py-1 px-2 text-xs font-normal w-full max-w-44 text-right ml-auto"
+                      className="input-field py-1 px-2 text-xs font-normal w-full text-right ml-auto"
                       placeholder="Rechercher..."
                       value={userSearchQuery}
                       onChange={(e) => setUserSearchQuery(e.target.value)}
@@ -269,27 +279,12 @@ export default function UsersPage() {
               </thead>
               <tbody>
                 {isLoading ? (
-                  Array.from({ length: 3 }).map((_, idx) => (
-                    <tr key={idx} className="border-b border-white/5">
-                      <td className="px-3 py-2">
-                        <Skeleton className="h-8 w-40" />
-                      </td>
-                      <td className="px-3 py-2">
-                        <Skeleton className="h-8 w-48" />
-                      </td>
-                      <td className="px-3 py-2">
-                        <Skeleton className="h-8 w-24" />
-                      </td>
-                      <td className="px-3 py-2 text-right">
-                        <Skeleton className="h-8 w-24 inline-block" />
-                      </td>
-                    </tr>
-                  ))
+                  <TableSkeleton columns={4} />
                 ) : filteredUsers.length === 0 ? (
                   <tr>
                     <td
                       colSpan={4}
-                      className="px-3 py-6 text-center text-slate-400"
+                      className="px-3 py-6 text-center text-slate-400 truncate"
                     >
                       Aucun utilisateur trouvé.
                     </td>
@@ -300,11 +295,11 @@ export default function UsersPage() {
                       key={u.id}
                       className="group border-b border-white/5 hover:bg-white/5 transition-colors"
                     >
-                      <td className="px-3 py-2">
+                      <td className="px-3 py-3.5 truncate">
                         {editingId === u.id ? (
                           <div className="flex gap-2">
                             <input
-                              className="input-field py-1 px-2 w-28 text-xs"
+                              className="input-field py-1 px-2 w-full text-xs"
                               value={editForm.first_name || ""}
                               onChange={(e) =>
                                 setEditForm({
@@ -314,7 +309,7 @@ export default function UsersPage() {
                               }
                             />
                             <input
-                              className="input-field py-1 px-2 w-28 text-xs"
+                              className="input-field py-1 px-2 w-full text-xs"
                               value={editForm.last_name || ""}
                               onChange={(e) =>
                                 setEditForm({
@@ -325,15 +320,18 @@ export default function UsersPage() {
                             />
                           </div>
                         ) : (
-                          <span className="font-medium text-white">
+                          <span
+                            className="font-medium text-white block truncate"
+                            title={`${u.first_name} ${u.last_name}`}
+                          >
                             {u.first_name} {u.last_name}
                           </span>
                         )}
                       </td>
-                      <td className="px-3 py-2">
+                      <td className="px-3 py-3.5 truncate">
                         {editingId === u.id ? (
                           <input
-                            className="input-field py-1 px-2 text-xs w-full"
+                            className="input-field py-1 px-2 text-xs w-full truncate"
                             value={editForm.email || ""}
                             onChange={(e) =>
                               setEditForm({
@@ -343,12 +341,17 @@ export default function UsersPage() {
                             }
                           />
                         ) : (
-                          <span className="text-slate-300">{u.email}</span>
+                          <span
+                            className="text-slate-300 block truncate"
+                            title={u.email}
+                          >
+                            {u.email}
+                          </span>
                         )}
                       </td>
-                      <td className="px-3 py-2">
+                      <td className="px-3 py-3.5 truncate">
                         <select
-                          className="input-field py-1! px-2! text-xs cursor-pointer w-full sm:w-auto"
+                          className="input-field py-1! px-2! text-xs cursor-pointer w-full truncate"
                           value={u.role}
                           onChange={(e) =>
                             updateWithUndo(u.id, { role: e.target.value })
@@ -358,7 +361,7 @@ export default function UsersPage() {
                           <option value="admin">Administrateur</option>
                         </select>
                       </td>
-                      <td className="px-3 py-2 text-right">
+                      <td className="px-3 py-3.5 text-right">
                         {editingId === u.id ? (
                           <div className="flex justify-end gap-1">
                             <button
@@ -416,7 +419,7 @@ export default function UsersPage() {
                 >
                   &larr; Précédent
                 </button>
-                <span className="text-[10px] font-medium text-slate-300">
+                <span className="text-[10px] font-medium text-slate-300 truncate">
                   Page {logPage} sur {logTotalPages}
                 </span>
                 <button
@@ -432,23 +435,25 @@ export default function UsersPage() {
             )
           }
         >
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-xs table-fixed min-w-225">
             <thead className="sticky top-0 bg-slate-900/95 backdrop-blur z-10 shadow-md">
               <tr className="border-b border-slate-700 text-slate-300">
-                <th className="px-3 py-3 font-semibold text-white whitespace-nowrap">
+                <th className="px-3 py-3 font-semibold text-white w-32 truncate">
                   Date
                 </th>
-                <th className="px-3 py-3 font-semibold text-white">
+                <th className="px-3 py-3 font-semibold text-white w-40 truncate">
                   Utilisateur
                 </th>
-                <th className="px-3 py-3 font-semibold text-white">Action</th>
-                <th className="px-3 py-3 font-semibold text-white">
+                <th className="px-3 py-3 font-semibold text-white w-32 truncate">
+                  Action
+                </th>
+                <th className="px-3 py-3 font-semibold text-white w-40 truncate">
                   Ressource
                 </th>
-                <th className="px-3 py-3 font-semibold text-white text-right">
+                <th className="px-3 py-3 font-semibold text-white text-right w-52">
                   <input
                     type="text"
-                    className="input-field py-1 px-2 text-xs font-normal w-full max-w-44 text-right ml-auto"
+                    className="input-field py-1 px-2 text-xs font-normal w-full text-right ml-auto"
                     placeholder="Rechercher..."
                     value={logSearchQuery}
                     onChange={(e) => setLogSearchQuery(e.target.value)}
@@ -462,21 +467,29 @@ export default function UsersPage() {
                   key={log.id}
                   className="border-b border-white/5 hover:bg-white/5 transition-colors"
                 >
-                  <td className="px-3 py-2 whitespace-nowrap text-slate-400">
+                  <td className="px-3 py-3.5 text-slate-400 truncate">
                     {new Date(log.created_at).toLocaleString()}
                   </td>
-                  <td className="px-3 py-2 font-medium text-white">
-                    {log.user_name} <br />
-                    <span className="text-[10px] text-slate-400 font-normal">
+                  <td
+                    className="px-3 py-3.5 font-medium text-white truncate"
+                    title={`${log.user_name} - ${log.user_email}`}
+                  >
+                    <span className="block truncate">{log.user_name}</span>
+                    <span className="text-[10px] text-slate-400 font-normal block truncate">
                       {log.user_email}
                     </span>
                   </td>
-                  <td className="px-3 py-2">{formatAction(log.action)}</td>
-                  <td className="px-3 py-2 font-semibold text-slate-200">
+                  <td className="px-3 py-3.5 truncate">
+                    {formatAction(log.action)}
+                  </td>
+                  <td
+                    className="px-3 py-3.5 font-semibold text-slate-200 truncate"
+                    title={log.resource}
+                  >
                     {log.resource}
                   </td>
-                  <td className="px-3 py-2 text-right">
-                    <pre className="text-[10px] bg-slate-950 p-1.5 rounded border border-white/10 max-w-xs overflow-x-auto text-slate-300 ml-auto inline-block text-left">
+                  <td className="px-3 py-3.5 text-right truncate">
+                    <pre className="text-[10px] bg-slate-950 p-1.5 rounded border border-white/10 text-slate-300 ml-auto inline-block text-left truncate max-w-full">
                       {log.details
                         ? JSON.stringify(log.details, null, 2)
                         : "Aucun détail"}
@@ -488,7 +501,7 @@ export default function UsersPage() {
                 <tr>
                   <td
                     colSpan={5}
-                    className="px-3 py-6 text-center text-slate-400"
+                    className="px-3 py-6 text-center text-slate-400 truncate"
                   >
                     Aucun log.
                   </td>

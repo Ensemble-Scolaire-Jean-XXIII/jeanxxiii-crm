@@ -4,7 +4,7 @@ import { useState } from "react";
 import { statusService } from "../services/statusService";
 import { CreateStatusDTO, Status } from "../types";
 import Toast from "../components/Toast";
-import Skeleton from "../components/Skeleton";
+import { TableSkeleton } from "../components/Skeleton";
 import { useCrud } from "../hooks/useCrud";
 import { useSearch } from "../hooks/useSearch";
 import PageHeader from "../components/PageHeader";
@@ -97,17 +97,19 @@ export default function StatusesPage() {
       )}
 
       <ScrollableTableCard>
-        <table className="w-full text-left text-sm">
+        <table className="w-full text-left text-sm table-fixed min-w-[600px]">
           <thead className="sticky top-0 bg-slate-900/95 backdrop-blur z-10 shadow-md">
             <tr className="border-b border-slate-700 text-slate-300">
-              <th className="px-3 py-3 font-semibold text-white">
+              <th className="px-3 py-3 font-semibold text-white truncate">
                 Nom du statut
               </th>
-              <th className="px-3 py-3 font-semibold text-white">Type</th>
-              <th className="px-3 py-3 font-semibold text-white text-right">
+              <th className="px-3 py-3 font-semibold text-white truncate">
+                Type
+              </th>
+              <th className="px-3 py-3 font-semibold text-white text-right w-52">
                 <input
                   type="text"
-                  className="input-field py-1 px-2 text-xs font-normal w-full max-w-44 text-right ml-auto"
+                  className="input-field py-1 px-2 text-xs font-normal w-full text-right ml-auto"
                   placeholder="Rechercher..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -117,24 +119,12 @@ export default function StatusesPage() {
           </thead>
           <tbody>
             {isLoading ? (
-              Array.from({ length: 4 }).map((_, idx) => (
-                <tr key={idx} className="border-b border-white/5">
-                  <td className="px-3 py-2">
-                    <Skeleton className="h-8 w-40" />
-                  </td>
-                  <td className="px-3 py-2">
-                    <Skeleton className="h-8 w-24" />
-                  </td>
-                  <td className="px-3 py-2 text-right">
-                    <Skeleton className="h-8 w-24 inline-block" />
-                  </td>
-                </tr>
-              ))
+              <TableSkeleton columns={3} />
             ) : filteredStatuses.length === 0 ? (
               <tr>
                 <td
                   colSpan={3}
-                  className="px-3 py-6 text-center text-slate-400"
+                  className="px-3 py-6 text-center text-slate-400 truncate"
                 >
                   Aucun statut trouvé.
                 </td>
@@ -145,27 +135,32 @@ export default function StatusesPage() {
                   key={s.id}
                   className="group border-b border-white/5 hover:bg-white/5 transition-colors"
                 >
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-3.5 truncate">
                     {editingId === s.id ? (
                       <input
-                        className="input-field py-1 px-2 max-w-sm text-xs"
+                        className="input-field py-1 px-2 w-full text-xs"
                         value={editForm.name || ""}
                         onChange={(e) =>
                           setEditForm({ ...editForm, name: e.target.value })
                         }
                       />
                     ) : (
-                      <span className="font-medium text-white">{s.name}</span>
+                      <span
+                        className="font-medium text-white block truncate"
+                        title={s.name}
+                      >
+                        {s.name}
+                      </span>
                     )}
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-3.5 truncate">
                     <span
                       className={`px-2 py-1 rounded-full text-[10px] font-medium ${s.is_custom ? "bg-white/10 text-slate-300" : "bg-primary/20 text-primary"}`}
                     >
                       {s.is_custom ? "Personnalisé" : "Système"}
                     </span>
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="px-3 py-3.5 text-right">
                     {editingId === s.id ? (
                       <div className="flex justify-end gap-2">
                         <button

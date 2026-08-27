@@ -136,7 +136,6 @@ export default function DashboardWrapper({
 
   return (
     <div className="flex flex-col h-screen overflow-hidden p-2 md:p-4 gap-2 md:gap-4 bg-transparent relative">
-      {/* HEADER ADAPTATIF */}
       <header className="h-16 bg-slate-900/60 backdrop-blur-xl text-white flex items-center justify-between px-3 md:px-6 rounded-2xl border border-white/20 shadow-2xl shrink-0 z-20">
         <div className="flex items-center gap-2 md:gap-4">
           <div className="h-8 md:h-9 w-auto relative flex items-center shrink-0">
@@ -323,10 +322,10 @@ export default function DashboardWrapper({
         )}
 
         <main
-          className={`flex-1 overflow-y-auto flex flex-col ${
+          className={`flex-1 overflow-y-auto flex flex-col p-4 lg:p-8 ${
             !isSalonsPage
-              ? "p-4 pb-24 lg:p-8 lg:pb-8 bg-slate-900/40 backdrop-blur-lg rounded-2xl border border-white/15 shadow-2xl"
-              : "p-4 justify-center"
+              ? "pb-24 lg:pb-8 bg-slate-900/40 backdrop-blur-lg rounded-2xl border border-white/15 shadow-2xl"
+              : ""
           }`}
         >
           {children}
