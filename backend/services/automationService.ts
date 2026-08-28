@@ -100,6 +100,12 @@ export const processAutomations = async () => {
       return;
     }
 
+    const [statusRows] = (await pool.query(
+      "SELECT id FROM statuses WHERE LOWER(name) LIKE ? LIMIT 1",
+      ["%En attente de réponse%"],
+    )) as any[];
+    const pendingStatusId = statusRows.length > 0 ? statusRows[0].id : null;
+
     const [rules] = (await pool.query(
       "SELECT * FROM email_automation_rules WHERE trigger_type = 'STATUS_CHANGE' OR (trigger_type = 'SCHEDULED_DATE' AND scheduled_date <= NOW())",
     )) as any[];
@@ -151,10 +157,17 @@ export const processAutomations = async () => {
             [prospect.id, rule.id],
           );
 
-          await pool.query(
-            "UPDATE prospects SET last_action_date = NOW() WHERE id = ?",
-            [prospect.id],
-          );
+          if (rule.trigger_type !== "SCHEDULED_DATE" && pendingStatusId) {
+            await pool.query(
+              "UPDATE prospects SET status_id = ?, last_action_date = NOW() WHERE id = ?",
+              [pendingStatusId, prospect.id],
+            );
+          } else {
+            await pool.query(
+              "UPDATE prospects SET last_action_date = NOW() WHERE id = ?",
+              [prospect.id],
+            );
+          }
         } catch (error) {
           console.error(`Erreur d'envoi pour ${prospect.email}:`, error);
         }

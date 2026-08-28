@@ -1,5 +1,6 @@
 import { Router } from "express";
 import * as statusService from "../services/statusService";
+import * as userService from "../services/userService";
 import { authenticate } from "../middleware/auth";
 
 const router = Router();
@@ -39,11 +40,23 @@ router.post("/", authenticate, async (req: any, res) => {
 
 router.put("/:id", authenticate, async (req: any, res) => {
   try {
-    await statusService.updateStatus(
-      Number(req.params.id),
-      req.body,
-      req.user.id,
-    );
+    const id = Number(req.params.id);
+    const status = await statusService.getStatusById(id);
+
+    if (!status) {
+      return res.status(404).json({ error: "Not found" });
+    }
+
+    if (!status.is_custom) {
+      const user = await userService.getUserById(req.user.id);
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({
+          error: "Seuls les administrateurs peuvent modifier un statut système",
+        });
+      }
+    }
+
+    await statusService.updateStatus(id, req.body, req.user.id);
     res.status(204).send();
   } catch (error: any) {
     if (error.code === "ER_DUP_ENTRY") {

@@ -72,6 +72,7 @@ export function useCrud<T extends { id: string | number }, CreatePayload>(
     const timerId = setTimeout(async () => {
       try {
         await service.update(id, payload);
+        loadData();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erreur de modification");
         setData(previousData);
@@ -101,6 +102,7 @@ export function useCrud<T extends { id: string | number }, CreatePayload>(
     const timerId = setTimeout(async () => {
       try {
         await service.delete(id);
+        loadData();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erreur de suppression");
         setData(previousData);

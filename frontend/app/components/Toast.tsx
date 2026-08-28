@@ -30,11 +30,12 @@ export default function Toast({
       setProgress(remaining);
       if (remaining <= 0) {
         clearInterval(interval);
+        onClose();
       }
     }, 50);
 
     return () => clearInterval(interval);
-  }, [message, duration]);
+  }, [message, duration, onClose]);
 
   if (!message || !mounted) return null;
 
@@ -69,7 +70,10 @@ export default function Toast({
         <div className="flex items-center gap-4 ml-auto shrink-0">
           {isUndo && onUndo && (
             <button
-              onClick={onUndo}
+              onClick={() => {
+                onUndo();
+                onClose();
+              }}
               className="text-xs font-bold text-(--accent) hover:opacity-80 transition-opacity uppercase tracking-wider cursor-pointer"
             >
               Annuler

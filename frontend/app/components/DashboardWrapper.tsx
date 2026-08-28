@@ -7,6 +7,7 @@ import { parseJwt } from "../lib/auth";
 import { userService } from "../services/userService";
 import Image from "next/image";
 import { ThemeProvider, useTheme } from "../contexts/ThemeContext";
+import { ToastProvider } from "../contexts/ToastContext";
 
 function NavLink({
   href,
@@ -83,7 +84,7 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem("token");
-    localStorage.removeItem("isKioskMode");
+    localStorage.removeItem("isSalonMode");
     router.push("/login");
   }, [router]);
 
@@ -99,14 +100,14 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const isKioskMode = localStorage.getItem("isKioskMode") === "true";
-    if (isKioskMode && !isSalonsPage) {
+    const isSalonMode = localStorage.getItem("isSalonMode") === "true";
+    if (isSalonMode && !isSalonsPage) {
       router.push("/salons");
       return;
     }
 
     if (isSalonsPage) {
-      localStorage.setItem("isKioskMode", "true");
+      localStorage.setItem("isSalonMode", "true");
     }
 
     const decoded = parseJwt(token);
@@ -132,7 +133,7 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
     setIsExiting(true);
     try {
       await userService.reauthenticate(exitPassword);
-      localStorage.removeItem("isKioskMode");
+      localStorage.removeItem("isSalonMode");
       setShowExitModal(false);
       setExitPassword("");
       router.push("/");
@@ -468,7 +469,9 @@ export default function DashboardWrapper({
 }) {
   return (
     <ThemeProvider>
-      <DashboardInner>{children}</DashboardInner>
+      <ToastProvider>
+        <DashboardInner>{children}</DashboardInner>
+      </ToastProvider>
     </ThemeProvider>
   );
 }

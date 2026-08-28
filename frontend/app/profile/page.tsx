@@ -1,13 +1,15 @@
 "use client";
 
-import Toast from "../components/Toast";
 import Skeleton from "../components/Skeleton";
 import { useProfile } from "../hooks/useProfile";
 import PageHeader from "../components/PageHeader";
 import { useTheme } from "../contexts/ThemeContext";
+import { useToast } from "../contexts/ToastContext";
+import { useEffect } from "react";
 
 export default function ProfilePage() {
   const { t, themeName, setThemeName } = useTheme();
+  const { showToast } = useToast();
   const {
     user,
     formData,
@@ -20,11 +22,22 @@ export default function ProfilePage() {
     handleUpdate,
   } = useProfile();
 
+  useEffect(() => {
+    if (error) {
+      showToast(error, "error");
+      setError("");
+    }
+  }, [error, showToast, setError]);
+
+  useEffect(() => {
+    if (success) {
+      showToast(success, "success");
+      setSuccess("");
+    }
+  }, [success, showToast, setSuccess]);
+
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-4">
-      <Toast message={error} type="error" onClose={() => setError("")} />
-      <Toast message={success} type="success" onClose={() => setSuccess("")} />
-
       <PageHeader
         title="Mon profil"
         description="Gérez vos paramètres et préférences d'affichage"
@@ -151,7 +164,7 @@ export default function ProfilePage() {
             <h3 className="text-lg font-bold mb-3 text-(--text-main)">
               Apparence
             </h3>
-            <label className="label-text">Thème de l'application</label>
+            <label className="label-text">Thème de l&apos;application</label>
             <select
               value={themeName}
               onChange={(e) => setThemeName(e.target.value as any)}
@@ -171,7 +184,7 @@ export default function ProfilePage() {
               </option>
             </select>
             <p className={`text-xs mt-2 ${t.textMuted}`}>
-              Modifie l'apparence globale instantanément.
+              Modifie l&apos;apparence globale instantanément.
             </p>
           </div>
         </div>

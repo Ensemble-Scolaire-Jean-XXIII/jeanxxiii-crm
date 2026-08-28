@@ -164,12 +164,47 @@ export interface SortHeaderProps {
   onSort: (field: string) => void;
 }
 
+export type ToastType = "success" | "error" | "undo" | "info";
+
 export interface ToastProps {
   message: string;
-  type: "success" | "error" | "undo";
+  type: ToastType;
   duration?: number;
   onClose: () => void;
   onUndo?: () => void;
+}
+
+export interface Column<T> {
+  field: string;
+  label: string;
+  sortable?: boolean;
+  className?: string;
+  render: (item: T) => React.ReactNode;
+  renderEdit?: (
+    editForm: Partial<T>,
+    updateForm: (val: Partial<T>) => void,
+  ) => React.ReactNode;
+}
+
+export interface DataTableProps<T> {
+  data: T[];
+  columns: Column<T>[];
+  keyExtractor: (item: T) => string | number;
+  editingId: string | number | null;
+  editForm: Partial<T>;
+  setEditForm: (val: React.SetStateAction<Partial<T>>) => void;
+  onEdit: (item: T) => void;
+  onSave: (id: string | number, payload: Partial<T>) => void;
+  onCancel: () => void;
+  onDelete: (id: string | number) => void;
+  sortField?: string;
+  sortDirection?: "asc" | "desc";
+  onSort?: (field: string) => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
+  searchPlaceholder?: string;
+  isLoading?: boolean;
+  hideActions?: boolean;
 }
 
 export interface CrudService<T, CreatePayload, UpdatePayload = Partial<T>> {
@@ -211,6 +246,16 @@ export type ThemeContextType = {
     navHover: string;
   };
 };
+
+export interface ToastContextType {
+  showToast: (
+    message: string,
+    type: ToastType,
+    duration?: number,
+    onUndo?: () => void,
+  ) => void;
+  hideToast: () => void;
+}
 
 export interface FormCardProps {
   title: string;

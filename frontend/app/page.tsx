@@ -7,13 +7,14 @@ import { userService } from "./services/userService";
 import { automationService } from "./services/automationService";
 import { lexpressService } from "./services/lexpressService";
 import Image from "next/image";
-import Toast from "./components/Toast";
 import Skeleton from "./components/Skeleton";
 import PageHeader from "./components/PageHeader";
 import { useTheme } from "./contexts/ThemeContext";
+import { useToast } from "./contexts/ToastContext";
 
 export default function DashboardPage() {
   const { t } = useTheme();
+  const { showToast } = useToast();
   const [stats, setStats] = useState({
     prospects: 0,
     users: 0,
@@ -25,9 +26,6 @@ export default function DashboardPage() {
   const [isSyncingLatest, setIsSyncingLatest] = useState(false);
   const [isSyncingFull, setIsSyncingFull] = useState(false);
   const [lastSyncText, setLastSyncText] = useState<string>("Jamais");
-
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const loadSyncStatus = async () => {
     try {
@@ -78,18 +76,17 @@ export default function DashboardPage() {
 
   const handleSyncLatest = async () => {
     setIsSyncingLatest(true);
-    setError("");
-    setSuccess("");
     try {
       await lexpressService.syncLatest();
-      setSuccess("Synchronisation rapide réussie");
+      showToast("Synchronisation rapide réussie", "success");
       await loadData();
     } catch (err) {
       console.error(err);
-      setError(
+      showToast(
         err instanceof Error
           ? err.message
           : "Échec de la synchronisation rapide",
+        "error",
       );
     } finally {
       setIsSyncingLatest(false);
@@ -105,18 +102,17 @@ export default function DashboardPage() {
       return;
 
     setIsSyncingFull(true);
-    setError("");
-    setSuccess("");
     try {
       await lexpressService.syncFull();
-      setSuccess("Synchronisation complète réussie");
+      showToast("Synchronisation complète réussie", "success");
       await loadData();
     } catch (err) {
       console.error(err);
-      setError(
+      showToast(
         err instanceof Error
           ? err.message
           : "Échec de la synchronisation complète",
+        "error",
       );
     } finally {
       setIsSyncingFull(false);
@@ -125,9 +121,6 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-4">
-      <Toast message={error} type="error" onClose={() => setError("")} />
-      <Toast message={success} type="success" onClose={() => setSuccess("")} />
-
       <PageHeader
         title="Tableau de bord"
         description="Bienvenue sur votre espace de gestion des prospects"
@@ -144,7 +137,7 @@ export default function DashboardPage() {
               Prospects totaux
             </h2>
             <div className="text-3xl font-bold">
-              {isLoading ? <Skeleton className="h-8 w-24" /> : stats.prospects}
+              {isLoading ? <Skeleton className="h-9 w-24" /> : stats.prospects}
             </div>
           </div>
           <div
@@ -157,14 +150,14 @@ export default function DashboardPage() {
             </h2>
             <div className="text-3xl font-bold">
               {isLoading ? (
-                <Skeleton className="h-8 w-24" />
+                <Skeleton className="h-9 w-24" />
               ) : (
                 stats.automations
               )}
             </div>
           </div>
 
-          {isAdmin && (
+          {isLoading ? (
             <div
               className={`${t.card} border border-(--border-color) rounded-2xl p-4`}
             >
@@ -174,9 +167,22 @@ export default function DashboardPage() {
                 Utilisateurs
               </h2>
               <div className="text-3xl font-bold">
-                {isLoading ? <Skeleton className="h-8 w-24" /> : stats.users}
+                <Skeleton className="h-9 w-24" />
               </div>
             </div>
+          ) : (
+            isAdmin && (
+              <div
+                className={`${t.card} border border-(--border-color) rounded-2xl p-4`}
+              >
+                <h2
+                  className={`text-xs font-semibold uppercase tracking-wider mb-1 ${t.textMuted}`}
+                >
+                  Utilisateurs
+                </h2>
+                <div className="text-3xl font-bold">{stats.users}</div>
+              </div>
+            )
           )}
         </div>
 
@@ -241,10 +247,18 @@ export default function DashboardPage() {
               disabled={isSyncingLatest}
               className="cursor-pointer group flex items-center justify-between p-2.5 rounded-xl bg-white/5 hover:bg-white/10 transition-all border border-(--border-color) text-left disabled:opacity-50"
             >
-              <span className="font-medium text-sm">
-                {isSyncingLatest
-                  ? "Mise à jour en cours..."
-                  : `Actualiser les derniers prospects (${lastSyncText})`}
+              <span className="font-medium text-sm flex items-center gap-1.5">
+                {isSyncingLatest ? (
+                  "Mise à jour en cours..."
+                ) : isLoading ? (
+                  <>
+                    <span>Actualiser les derniers prospects -</span>
+                    <Skeleton className="inline-block h-4 w-14" />
+                    <span></span>
+                  </>
+                ) : (
+                  `Actualiser les derniers prospects - ${lastSyncText}`
+                )}
               </span>
               <Image
                 src="/icons/refresh.webp"
@@ -261,7 +275,7 @@ export default function DashboardPage() {
               className="group flex items-center justify-between p-2.5 rounded-xl bg-[#e84e1b]/20 hover:bg-[#e84e1b]/40 transition-all border border-[#e84e1b]/30"
             >
               <span className="font-medium text-sm">
-                Lancer le mode &#34;Salons&#34; (Kiosque)
+                Lancer le mode &#34;Salons&#34;
               </span>
               <Image
                 src="/icons/salons.webp"
@@ -273,26 +287,32 @@ export default function DashboardPage() {
               />
             </Link>
 
-            {isAdmin && (
-              <button
-                onClick={handleSyncFull}
-                disabled={isSyncingFull}
-                className="cursor-pointer group flex items-center justify-between p-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/40 transition-all border border-amber-400/30 text-left disabled:opacity-50"
-              >
-                <span className="font-medium text-sm">
-                  {isSyncingFull
-                    ? "Synchro complète en cours..."
-                    : "Forcer la synchronisation complète (si une longue période de coupure est survenue)"}
-                </span>
-                <Image
-                  src="/icons/dangerSync.webp"
-                  alt="Sync"
-                  width={18}
-                  height={18}
-                  className="object-contain brightness-0 invert shrink-0"
-                  unoptimized
-                />
-              </button>
+            {isLoading ? (
+              <div className="p-2.5 rounded-xl border border-(--border-color) bg-amber-500/20 hover:bg-amber-500/40">
+                <Skeleton className="h-5 w-full bg-white/10" />
+              </div>
+            ) : (
+              isAdmin && (
+                <button
+                  onClick={handleSyncFull}
+                  disabled={isSyncingFull}
+                  className="cursor-pointer group flex items-center justify-between p-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/40 transition-all border border-amber-400/30 text-left disabled:opacity-50"
+                >
+                  <span className="font-medium text-sm">
+                    {isSyncingFull
+                      ? "Synchro complète en cours..."
+                      : "Forcer la synchronisation complète (si une longue période de coupure est survenue)"}
+                  </span>
+                  <Image
+                    src="/icons/dangerSync.webp"
+                    alt="Sync"
+                    width={18}
+                    height={18}
+                    className="object-contain brightness-0 invert shrink-0"
+                    unoptimized
+                  />
+                </button>
+              )
             )}
           </div>
         </div>
