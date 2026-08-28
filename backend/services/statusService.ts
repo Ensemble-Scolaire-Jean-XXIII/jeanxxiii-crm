@@ -17,8 +17,8 @@ export const createStatus = async (
   actorId?: string,
 ): Promise<number> => {
   const [result] = await pool.query(
-    "INSERT INTO statuses (name, is_custom, created_by) VALUES (?, ?, ?)",
-    [data.name, data.is_custom, data.created_by],
+    "INSERT INTO statuses (name, is_custom) VALUES (?, ?)",
+    [data.name, data.is_custom],
   );
   const insertId = (result as any).insertId;
 

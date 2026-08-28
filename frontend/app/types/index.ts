@@ -16,7 +16,6 @@ export interface Status {
   id: number;
   name: string;
   is_custom: boolean;
-  created_by?: string;
 }
 
 export interface Prospect {
