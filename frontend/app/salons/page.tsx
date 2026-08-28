@@ -5,17 +5,16 @@ import { prospectService } from "../services/prospectService";
 import { formationService } from "../services/formationService";
 import { countryService } from "../services/countryService";
 import { Formation } from "../types";
-import Toast from "../components/Toast";
 import Skeleton from "../components/Skeleton";
 import PageHeader from "../components/PageHeader";
 import { useTheme } from "../contexts/ThemeContext";
+import { useToast } from "../contexts/ToastContext";
 
 export default function SalonsPage() {
   const { t } = useTheme();
+  const { showToast } = useToast();
   const [formations, setFormations] = useState<Formation[]>([]);
   const [franceCountryId, setFranceCountryId] = useState<number | null>(null);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [showSuccessAnim, setShowSuccessAnim] = useState(false);
 
@@ -44,18 +43,16 @@ export default function SalonsPage() {
           setFranceCountryId(france.id);
         }
       } catch {
-        setError("Erreur lors du chargement des données");
+        showToast("Erreur lors du chargement des données", "error");
       } finally {
         setIsLoading(false);
       }
     };
     loadSalonsData();
-  }, []);
+  }, [showToast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
 
     try {
       await prospectService.create({
@@ -65,12 +62,13 @@ export default function SalonsPage() {
       });
 
       setForm(initialForm);
-      setSuccess("Inscription réussie");
+      showToast("Inscription réussie", "success");
       setShowSuccessAnim(true);
       setTimeout(() => setShowSuccessAnim(false), 3000);
     } catch (err) {
-      setError(
+      showToast(
         err instanceof Error ? err.message : "Erreur lors de l'inscription.",
+        "error",
       );
     }
   };
@@ -107,9 +105,6 @@ export default function SalonsPage() {
 
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-4 max-w-3xl mx-auto w-full justify-center">
-      <Toast message={error} type="error" onClose={() => setError("")} />
-      <Toast message={success} type="success" onClose={() => setSuccess("")} />
-
       <PageHeader
         title="Rencontrons-nous !"
         description="Laissez-nous vos coordonnées pour rester en contact."
@@ -198,7 +193,7 @@ export default function SalonsPage() {
                   >
                     <option value="Masculin">Monsieur</option>
                     <option value="Féminin">Madame</option>
-                    <option value="">Ne préfère pas l'indiquer</option>
+                    <option value="">Ne préfère pas l&apos;indiquer</option>
                   </select>
                 </div>
               </div>

@@ -9,12 +9,13 @@ export default function SortHeader({
   sortField,
   sortDirection,
   onSort,
-}: SortHeaderProps) {
+  className = "",
+}: SortHeaderProps & { className?: string }) {
   const { t } = useTheme();
 
   return (
     <th
-      className={`px-3 py-3 font-semibold cursor-pointer hover:opacity-70 select-none ${t.tableHeader}`}
+      className={`sticky top-0 z-20 px-3 py-3 font-semibold cursor-pointer hover:opacity-70 select-none ${t.tableHeader} ${className}`}
       onClick={() => onSort(field)}
     >
       <div className="flex items-center gap-2">

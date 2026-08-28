@@ -1,36 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { userService } from "../services/userService";
-import Toast from "../components/Toast";
 import { ThemeProvider, useTheme } from "../contexts/ThemeContext";
+import { ToastProvider, useToast } from "../contexts/ToastContext";
 
 function LoginPageContent() {
   const [email, setEmail] = useState("");
   const [passwordHash, setPasswordHash] = useState("");
-  const [error, setError] = useState("");
   const router = useRouter();
   const { t } = useTheme();
+  const { showToast } = useToast();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
     try {
       const data = await userService.login(email, passwordHash);
       localStorage.setItem("token", data.token);
       router.push("/");
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message);
+        showToast(err.message, "error");
       }
     }
   };
 
   return (
     <div className={t.wrapper + " items-center justify-center"}>
-      <Toast message={error} type="error" onClose={() => setError("")} />
-
       <div className={`${t.card} w-full max-w-md p-8 sm:p-10 z-10 shadow-2xl`}>
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-(--text-main) mb-1">
@@ -79,7 +76,9 @@ function LoginPageContent() {
 export default function LoginPage() {
   return (
     <ThemeProvider>
-      <LoginPageContent />
+      <ToastProvider>
+        <LoginPageContent />
+      </ToastProvider>
     </ThemeProvider>
   );
 }

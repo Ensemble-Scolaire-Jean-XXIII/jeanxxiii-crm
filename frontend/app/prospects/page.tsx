@@ -12,17 +12,17 @@ import {
   Country,
   Formation,
   CreateProspectPayload,
+  Column,
 } from "../types";
-import Toast from "../components/Toast";
-import { TableSkeleton } from "../components/Skeleton";
 import { useCrud } from "../hooks/useCrud";
 import { useSearch } from "../hooks/useSearch";
 import { useSort } from "../hooks/useSort";
 import PageHeader from "../components/PageHeader";
 import FormCard from "../components/FormCard";
 import ScrollableTableCard from "../components/ScrollableTableCard";
-import SortHeader from "../components/SortHeader";
+import DataTable from "../components/DataTable";
 import { useTheme } from "../contexts/ThemeContext";
+import { useToast } from "../contexts/ToastContext";
 
 const formInputs: {
   name: keyof CreateProspectPayload;
@@ -38,6 +38,7 @@ const formInputs: {
 
 function ProspectsContent() {
   const { t } = useTheme();
+  const { showToast } = useToast();
   const searchParams = useSearchParams();
 
   const {
@@ -55,6 +56,7 @@ function ProspectsContent() {
     setEditForm,
     setCreateForm,
     setUndoAction,
+    loadData,
     startEdit,
     create,
     updateWithUndo,
@@ -76,6 +78,32 @@ function ProspectsContent() {
   const [showForm, setShowForm] = useState(
     searchParams.get("action") === "create",
   );
+
+  useEffect(() => {
+    if (error) {
+      showToast(error, "error");
+      setError("");
+    }
+  }, [error, showToast, setError]);
+
+  useEffect(() => {
+    if (success) {
+      showToast(success, "success");
+      setSuccess("");
+    }
+  }, [success, showToast, setSuccess]);
+
+  useEffect(() => {
+    if (undoAction) {
+      showToast(
+        undoAction.message,
+        "undo",
+        undoAction.duration,
+        undoAction.onUndo,
+      );
+      setUndoAction(null);
+    }
+  }, [undoAction, showToast, setUndoAction]);
 
   const { sortField, sortDirection, handleSort } = useSort("date", "desc");
 
@@ -171,27 +199,175 @@ function ProspectsContent() {
     return sortDirection === "asc" ? compareResult : -compareResult;
   });
 
+  const columns: Column<ProspectExtended>[] = [
+    {
+      field: "name",
+      label: "Nom",
+      sortable: true,
+      render: (item) => (
+        <span
+          className="block w-full truncate font-medium"
+          title={`${item.first_name || ""} ${item.last_name || ""}`}
+        >
+          {item.first_name} {item.last_name}
+        </span>
+      ),
+      renderEdit: (form, update) => (
+        <div className="flex flex-col gap-1">
+          <input
+            className={`${t.input} py-1! px-2! text-xs! truncate`}
+            value={form.first_name || ""}
+            onChange={(e) => update({ first_name: e.target.value })}
+            placeholder="Prénom"
+          />
+          <input
+            className={`${t.input} py-1! px-2! text-xs! truncate`}
+            value={form.last_name || ""}
+            onChange={(e) => update({ last_name: e.target.value })}
+            placeholder="Nom"
+          />
+        </div>
+      ),
+    },
+    {
+      field: "contact",
+      label: "Contact",
+      sortable: true,
+      render: (item) => (
+        <div className="w-full truncate">
+          <span className="block w-full truncate" title={item.email}>
+            {item.email}
+          </span>
+          <span
+            className={`block w-full truncate text-[10px] font-medium ${t.textMuted}`}
+          >
+            {item.phone ? item.phone : "Aucun téléphone"}
+          </span>
+        </div>
+      ),
+      renderEdit: (form, update) => (
+        <div className="flex flex-col gap-1">
+          <input
+            className={`${t.input} py-1! px-2! text-xs! truncate`}
+            value={form.email || ""}
+            onChange={(e) => update({ email: e.target.value })}
+            placeholder="Email"
+          />
+          <input
+            className={`${t.input} py-1! px-2! text-xs! truncate`}
+            value={form.phone || ""}
+            onChange={(e) => update({ phone: e.target.value })}
+            placeholder="Téléphone"
+          />
+        </div>
+      ),
+    },
+    {
+      field: "formation",
+      label: "Formation",
+      sortable: true,
+      className: "hidden md:table-cell",
+      render: (item) => {
+        const f = formations.find((f) => f.id === item.formation_id);
+        return <span className="block truncate">{f?.name || "Aucune"}</span>;
+      },
+      renderEdit: (form, update) => (
+        <select
+          className={`${t.input} py-1! px-2! text-xs! cursor-pointer truncate`}
+          value={form.formation_id ?? ""}
+          onChange={(e) =>
+            update({
+              formation_id: e.target.value ? Number(e.target.value) : null,
+            })
+          }
+        >
+          <option value="">-- Aucune --</option>
+          {formations.map((f) => (
+            <option key={f.id} value={f.id}>
+              {f.name}
+            </option>
+          ))}
+        </select>
+      ),
+    },
+    {
+      field: "country",
+      label: "Pays",
+      sortable: true,
+      className: "hidden lg:table-cell",
+      render: (item) => {
+        const c = countries.find((c) => c.id === item.country_id);
+        return (
+          <span className="block truncate">{c?.name || item.country_name}</span>
+        );
+      },
+      renderEdit: (form, update) => (
+        <select
+          className={`${t.input} py-1! px-2! text-xs! cursor-pointer truncate`}
+          value={form.country_id ?? ""}
+          onChange={(e) => update({ country_id: Number(e.target.value) })}
+        >
+          {countries.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+      ),
+    },
+    {
+      field: "status",
+      label: "Statut",
+      sortable: true,
+      render: (item) => {
+        const s = statuses.find((s) => s.id === item.status_id);
+        return (
+          <span className="block truncate">{s?.name || item.status_name}</span>
+        );
+      },
+      renderEdit: (form, update) => (
+        <select
+          className={`${t.input} py-1! px-2! text-xs! cursor-pointer truncate`}
+          value={form.status_id ?? ""}
+          onChange={(e) => update({ status_id: Number(e.target.value) })}
+        >
+          {statuses.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+      ),
+    },
+    {
+      field: "date",
+      label: "Dernière action",
+      sortable: true,
+      className: "hidden sm:table-cell text-xs",
+      render: (item) => (
+        <span className={t.textMuted}>
+          {item.last_action_date
+            ? new Date(item.last_action_date).toLocaleDateString()
+            : "Jamais"}
+        </span>
+      ),
+    },
+  ];
+
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-4">
-      <Toast message={error} type="error" onClose={() => setError("")} />
-      <Toast message={success} type="success" onClose={() => setSuccess("")} />
-      {undoAction && (
-        <Toast
-          message={undoAction.message}
-          type="undo"
-          duration={undoAction.duration}
-          onClose={() => setUndoAction(null)}
-          onUndo={undoAction.onUndo}
-        />
-      )}
-
       <PageHeader
         title="Prospects"
         description="Gérez vos prospects facilement"
       >
-        <button onClick={() => setShowForm(!showForm)} className={t.btnGhost}>
-          {showForm ? "Cacher le formulaire d'ajout" : "+ Nouveau prospect"}
-        </button>
+        <div className="flex gap-2">
+          <button onClick={loadData} className={t.btnGhost}>
+            Actualiser
+          </button>
+          <button onClick={() => setShowForm(!showForm)} className={t.btnGhost}>
+            {showForm ? "Cacher le formulaire d'ajout" : "+ Nouveau prospect"}
+          </button>
+        </div>
       </PageHeader>
 
       {showForm && (
@@ -300,261 +476,25 @@ function ProspectsContent() {
       )}
 
       <ScrollableTableCard>
-        <table className="w-full text-left text-sm table-fixed min-w-200">
-          <thead className={`sticky top-0 z-10 shadow-md ${t.tableHeader}`}>
-            <tr className="border-b border-(--border-color)">
-              <SortHeader
-                field="name"
-                label="Nom"
-                sortField={sortField}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-              />
-              <SortHeader
-                field="contact"
-                label="Contact"
-                sortField={sortField}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-              />
-              <SortHeader
-                field="formation"
-                label="Formation"
-                sortField={sortField}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-              />
-              <SortHeader
-                field="country"
-                label="Pays"
-                sortField={sortField}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-              />
-              <SortHeader
-                field="status"
-                label="Statut"
-                sortField={sortField}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-              />
-              <SortHeader
-                field="date"
-                label="Dernière action"
-                sortField={sortField}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-              />
-              <th className={`px-3 py-3 text-right ${t.tableHeader}`}>
-                <input
-                  type="text"
-                  className={`${t.input} w-36 ml-auto py-1! text-xs! font-normal`}
-                  placeholder="Rechercher..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <TableSkeleton columns={7} />
-            ) : sortedProspects.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={7}
-                  className={`px-3 py-6 text-center truncate ${t.textMuted}`}
-                >
-                  Aucun prospect trouvé.
-                </td>
-              </tr>
-            ) : (
-              sortedProspects.map((p) => (
-                <tr
-                  key={p.id}
-                  className={`group border-b transition-colors ${t.tableRow}`}
-                >
-                  <td className="px-3 py-3.5 truncate">
-                    {editingId === p.id ? (
-                      <div className="flex flex-col sm:flex-row gap-1">
-                        <input
-                          className={`${t.input} py-1! px-2! text-xs! truncate`}
-                          value={editForm.first_name || ""}
-                          onChange={(e) =>
-                            setEditForm({
-                              ...editForm,
-                              first_name: e.target.value,
-                            })
-                          }
-                        />
-                        <input
-                          className={`${t.input} py-1! px-2! text-xs! truncate`}
-                          value={editForm.last_name || ""}
-                          onChange={(e) =>
-                            setEditForm({
-                              ...editForm,
-                              last_name: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                    ) : (
-                      <span
-                        className="block w-full truncate font-medium"
-                        title={`${p.first_name || ""} ${p.last_name || ""}`}
-                      >
-                        {p.first_name} {p.last_name}
-                      </span>
-                    )}
-                  </td>
-
-                  <td className="px-3 py-3.5 truncate">
-                    {editingId === p.id ? (
-                      <div className="flex flex-col gap-1">
-                        <input
-                          className={`${t.input} py-1! px-2! text-xs! truncate`}
-                          value={editForm.email || ""}
-                          onChange={(e) =>
-                            setEditForm({
-                              ...editForm,
-                              email: e.target.value,
-                            })
-                          }
-                        />
-                        <input
-                          className={`${t.input} py-1! px-2! text-xs! truncate`}
-                          value={editForm.phone || ""}
-                          placeholder="Téléphone"
-                          onChange={(e) =>
-                            setEditForm({
-                              ...editForm,
-                              phone: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-full truncate">
-                        <span className="block w-full truncate" title={p.email}>
-                          {p.email}
-                        </span>
-                        <span
-                          className={`block w-full truncate text-[10px] font-medium ${t.textMuted}`}
-                        >
-                          {p.phone ? p.phone : "Aucun téléphone"}
-                        </span>
-                      </div>
-                    )}
-                  </td>
-
-                  <td className="px-3 py-3.5 truncate">
-                    <select
-                      className={`${t.input} py-1! px-2! text-xs! cursor-pointer truncate`}
-                      value={p.formation_id ?? ""}
-                      onChange={(e) =>
-                        updateWithUndo(p.id, {
-                          formation_id: e.target.value
-                            ? Number(e.target.value)
-                            : null,
-                        })
-                      }
-                    >
-                      <option value="">-- Aucune --</option>
-                      {formations.map((f) => (
-                        <option key={f.id} value={f.id}>
-                          {f.name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-
-                  <td className="px-3 py-3.5 truncate">
-                    <select
-                      className={`${t.input} py-1! px-2! text-xs! cursor-pointer truncate`}
-                      value={p.country_id ?? ""}
-                      onChange={(e) =>
-                        updateWithUndo(p.id, {
-                          country_id: Number(e.target.value),
-                        })
-                      }
-                    >
-                      {countries.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-
-                  <td className="px-3 py-3.5 truncate">
-                    <select
-                      className={`${t.input} py-1! px-2! text-xs! cursor-pointer truncate`}
-                      value={p.status_id ?? ""}
-                      onChange={(e) =>
-                        updateWithUndo(p.id, {
-                          status_id: Number(e.target.value),
-                        })
-                      }
-                    >
-                      {statuses.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-
-                  <td className={`px-3 py-3.5 text-xs truncate ${t.textMuted}`}>
-                    {p.last_action_date
-                      ? new Date(p.last_action_date).toLocaleDateString()
-                      : "Jamais"}
-                  </td>
-
-                  <td className="px-3 py-3.5 text-right">
-                    {editingId === p.id ? (
-                      <div className="flex justify-end gap-1">
-                        <button
-                          onClick={() =>
-                            updateWithUndo(p.id, {
-                              first_name: editForm.first_name,
-                              last_name: editForm.last_name,
-                              email: editForm.email,
-                              phone: editForm.phone,
-                            })
-                          }
-                          className="text-green-500 hover:bg-green-500/10 px-2 py-1 rounded text-xs font-bold cursor-pointer"
-                        >
-                          Valider
-                        </button>
-                        <button
-                          onClick={() => setEditingId(null)}
-                          className={`${t.textMuted} px-2 py-1 rounded text-xs hover:bg-black/5 cursor-pointer`}
-                        >
-                          Annuler
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex justify-end gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <button
-                          onClick={() => startEdit(p)}
-                          className="text-blue-500 hover:bg-blue-500/10 px-2 py-1 rounded text-xs cursor-pointer"
-                        >
-                          Modifier
-                        </button>
-                        <button
-                          onClick={() => deleteWithUndo(p.id)}
-                          className="text-red-500 hover:bg-red-500/10 px-2 py-1 rounded text-xs cursor-pointer"
-                        >
-                          Supprimer
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+        <DataTable
+          data={sortedProspects}
+          columns={columns}
+          keyExtractor={(item) => item.id}
+          editingId={editingId}
+          editForm={editForm}
+          setEditForm={setEditForm}
+          onEdit={startEdit}
+          onSave={updateWithUndo}
+          onCancel={() => setEditingId(null)}
+          onDelete={deleteWithUndo}
+          sortField={sortField}
+          sortDirection={sortDirection}
+          onSort={handleSort}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          isLoading={isLoading}
+          emptyMessage="Aucun prospect trouvé."
+        />
       </ScrollableTableCard>
     </div>
   );

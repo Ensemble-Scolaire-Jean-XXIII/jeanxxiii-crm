@@ -27,7 +27,7 @@ export function useAuth() {
     }
   };
 
-  const handleExitKiosk = async (e: React.FormEvent, password: string) => {
+  const handleExitSalon = async (e: React.FormEvent, password: string) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
@@ -37,7 +37,7 @@ export function useAuth() {
 
       if (res.token) {
         localStorage.setItem("token", res.token);
-        localStorage.removeItem("isKioskMode");
+        localStorage.removeItem("isSalonMode");
         router.push("/");
       }
     } catch (err) {
@@ -49,7 +49,7 @@ export function useAuth() {
 
   return {
     handleLogin,
-    handleExitKiosk,
+    handleExitSalon,
     isLoading,
     error,
     setError,
