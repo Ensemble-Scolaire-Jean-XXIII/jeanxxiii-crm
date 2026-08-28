@@ -134,7 +134,6 @@ export default function DataTable<T>({
                   >
                     {columns.map((col, i) => {
                       const isLast = i === columns.length - 1;
-                      // Si on cache les actions mais qu'on affiche le header (barre de recherche), on étend la dernière colonne
                       const spanCols =
                         isLast && hideActions && showActionHeader ? 2 : 1;
 
