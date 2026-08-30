@@ -10,6 +10,7 @@ import PageHeader from "../components/PageHeader";
 import FormCard from "../components/FormCard";
 import ScrollableTableCard from "../components/ScrollableTableCard";
 import DataTable from "../components/DataTable";
+import PageActions from "../components/PageActions";
 import { useTheme } from "../contexts/ThemeContext";
 import { useToast } from "../contexts/ToastContext";
 
@@ -36,6 +37,7 @@ function TemplatesContent() {
     create,
     updateWithUndo,
     deleteWithUndo,
+    loadData,
   } = useCrud<EmailTemplate, CreateTemplatePayload>(templateService, {
     name: "",
     subject: "",
@@ -148,9 +150,13 @@ function TemplatesContent() {
         title="Templates d'email"
         description="Rédigez les emails qui seront distribués automatiquement"
       >
-        <button onClick={() => setShowForm(!showForm)} className={t.btnGhost}>
-          {showForm ? "Cacher le formulaire d'ajout" : "+ Nouveau template"}
-        </button>
+        <PageActions
+          onRefresh={loadData}
+          showNew={true}
+          isNewOpen={showForm}
+          onToggleNew={() => setShowForm(!showForm)}
+          newLabel="Nouveau template"
+        />
       </PageHeader>
 
       {showForm && (

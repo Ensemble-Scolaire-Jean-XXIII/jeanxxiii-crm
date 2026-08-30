@@ -1,7 +1,3 @@
-// ==========================================
-// ENTITÉS DE BASE ET MODELES DE DONNÉES
-// ==========================================
-
 export interface User {
   id: string;
   email: string;
@@ -98,9 +94,10 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
-// ==========================================
-// PAYLOADS API (CRÉATION / MODIFICATION)
-// ==========================================
+export interface Setting {
+  setting_key: string;
+  setting_value: string;
+}
 
 export interface CreateFormationPayload {
   name: string;
@@ -151,9 +148,9 @@ export interface UpdateProfilePayload {
   password_hash?: string;
 }
 
-// ==========================================
-// INTERFACES FRONTEND ET UTILITAIRES UI
-// ==========================================
+export interface UpdateSettingPayload {
+  enabled: boolean;
+}
 
 export interface SortHeaderProps {
   field: string;
@@ -175,7 +172,7 @@ export interface ToastProps {
 
 export interface Column<T> {
   field: string;
-  label: string;
+  label: string | React.ReactNode;
   sortable?: boolean;
   className?: string;
   render: (item: T) => React.ReactNode;
@@ -204,6 +201,7 @@ export interface DataTableProps<T> {
   searchPlaceholder?: string;
   isLoading?: boolean;
   hideActions?: boolean;
+  emptyMessage?: string;
 }
 
 export interface CrudService<T, CreatePayload, UpdatePayload = Partial<T>> {
@@ -266,4 +264,18 @@ export interface PageHeaderProps {
   title: string;
   description: string;
   children?: React.ReactNode;
+}
+
+export interface PageActionsProps {
+  showLogs?: boolean;
+  showSettings?: boolean;
+  showForm?: boolean;
+  onRefresh?: () => Promise<void> | void;
+  onToggleForm?: () => void;
+  onToggleSettings?: (val: boolean) => void;
+  onToggleLogs?: (val: boolean) => void;
+  showNew?: boolean;
+  isNewOpen?: boolean;
+  onToggleNew?: () => void;
+  newLabel?: string;
 }

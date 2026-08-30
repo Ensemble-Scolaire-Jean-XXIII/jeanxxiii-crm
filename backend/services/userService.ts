@@ -2,7 +2,7 @@ import { pool } from "../config/db";
 import { User } from "../models/types";
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcryptjs";
-import { logAction } from "./auditLogService"; // <-- Import
+import { logAction } from "./auditLogService";
 
 export const getAllUsers = async (): Promise<User[]> => {
   const [rows] = await pool.query(
@@ -34,7 +34,7 @@ export const createUser = async (
   const hashedPassword = await bcrypt.hash(data.password_hash, salt);
 
   await pool.query(
-    `INSERT INTO users (id, email, password_hash, first_name, last_name, role) VALUES (?, ?, ?, ?, ?, ?)`,
+    "INSERT INTO users (id, email, password_hash, first_name, last_name, role) VALUES (?, ?, ?, ?, ?, ?)",
     [
       id,
       data.email,
@@ -106,4 +106,45 @@ export const deleteUser = async (
   if (actorId) {
     await logAction(actorId, "DELETE", "USER", { target_id: id });
   }
+};
+
+export const createResetToken = async (userId: string): Promise<string> => {
+  const tokenId = uuidv4();
+  const token = uuidv4();
+  const expiresAt = new Date();
+  expiresAt.setHours(expiresAt.getHours() + 1);
+
+  await pool.query(
+    "INSERT INTO tokens (id, user_id, token, type, expires_at) VALUES (?, ?, ?, 'PASSWORD_RESET', ?)",
+    [tokenId, userId, token, expiresAt],
+  );
+  return token;
+};
+
+export const validateResetToken = async (
+  token: string,
+): Promise<string | null> => {
+  const [rows] = await pool.query(
+    "SELECT user_id FROM tokens WHERE token = ? AND type = 'PASSWORD_RESET' AND expires_at > NOW()",
+    [token],
+  );
+  const tokens = rows as any[];
+  return tokens.length > 0 ? tokens[0].user_id : null;
+};
+
+export const resetPassword = async (
+  userId: string,
+  passwordHash: string,
+): Promise<void> => {
+  const salt = await bcrypt.genSalt(10);
+  const hashed = await bcrypt.hash(passwordHash, salt);
+  await pool.query("UPDATE users SET password_hash = ? WHERE id = ?", [
+    hashed,
+    userId,
+  ]);
+  await pool.query(
+    "DELETE FROM tokens WHERE user_id = ? AND type = 'PASSWORD_RESET'",
+    [userId],
+  );
+  await logAction(userId, "UPDATE", "USER", { action: "PASSWORD_RESET" });
 };

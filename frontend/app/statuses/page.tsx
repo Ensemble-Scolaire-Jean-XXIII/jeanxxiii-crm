@@ -9,6 +9,7 @@ import PageHeader from "../components/PageHeader";
 import FormCard from "../components/FormCard";
 import ScrollableTableCard from "../components/ScrollableTableCard";
 import DataTable from "../components/DataTable";
+import PageActions from "../components/PageActions";
 import { useTheme } from "../contexts/ThemeContext";
 import { useToast } from "../contexts/ToastContext";
 
@@ -34,6 +35,7 @@ export default function StatusesPage() {
     create,
     updateWithUndo,
     deleteWithUndo,
+    loadData,
   } = useCrud<Status, CreateStatusPayload>(statusService, {
     name: "",
     is_custom: true,
@@ -114,9 +116,13 @@ export default function StatusesPage() {
         title="Statuts"
         description="Gérez les status à attribuer à vos prospects"
       >
-        <button onClick={() => setShowForm(!showForm)} className={t.btnGhost}>
-          {showForm ? "Cacher le formulaire d'ajout" : "+ Nouveau statut"}
-        </button>
+        <PageActions
+          onRefresh={loadData}
+          showNew={true}
+          isNewOpen={showForm}
+          onToggleNew={() => setShowForm(!showForm)}
+          newLabel="Nouveau statut"
+        />
       </PageHeader>
 
       {showForm && (

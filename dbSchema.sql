@@ -29,7 +29,18 @@ CREATE TABLE `formations` (
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+-- statuses definition
+
+CREATE TABLE `statuses` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `is_custom` tinyint(1) DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
 -- users definition
@@ -47,33 +58,19 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
--- statuses definition
+-- audit_logs definition
 
-CREATE TABLE `statuses` (
+CREATE TABLE `audit_logs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) NOT NULL,
-  `is_custom` tinyint(1) DEFAULT 0,
-  `created_by` uuid DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`),
-  KEY `created_by` (`created_by`),
-  CONSTRAINT `statuses_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-
--- tokens definition
-
-CREATE TABLE `tokens` (
-  `id` uuid NOT NULL,
   `user_id` uuid NOT NULL,
-  `token` varchar(255) NOT NULL,
-  `type` varchar(50) NOT NULL,
-  `new_email` varchar(255) DEFAULT NULL,
-  `expires_at` datetime NOT NULL,
+  `action` varchar(50) NOT NULL,
+  `resource` varchar(50) NOT NULL,
+  `details` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`details`)),
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`),
-  CONSTRAINT `tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  KEY `fk_log_user` (`user_id`),
+  CONSTRAINT `fk_log_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
 -- email_automation_rules definition
@@ -88,9 +85,11 @@ CREATE TABLE `email_automation_rules` (
   PRIMARY KEY (`id`),
   KEY `fk_rule_template` (`email_template_id`),
   KEY `idx_status_id` (`status_id`),
+  KEY `fk_rule_formation` (`formation_id`),
+  CONSTRAINT `fk_rule_formation` FOREIGN KEY (`formation_id`) REFERENCES `formations` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_rule_status` FOREIGN KEY (`status_id`) REFERENCES `statuses` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_rule_template` FOREIGN KEY (`email_template_id`) REFERENCES `email_templates` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
 -- prospects definition
@@ -119,6 +118,20 @@ CREATE TABLE `prospects` (
   CONSTRAINT `prospects_ibfk_1` FOREIGN KEY (`status_id`) REFERENCES `statuses` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- tokens definition
+
+CREATE TABLE `tokens` (
+  `id` uuid NOT NULL,
+  `user_id` uuid NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `new_email` varchar(255) DEFAULT NULL,
+  `expires_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 -- email_automation_logs definition
 
@@ -132,18 +145,11 @@ CREATE TABLE `email_automation_logs` (
   KEY `fk_log_rule` (`rule_id`),
   CONSTRAINT `fk_log_prospect` FOREIGN KEY (`prospect_id`) REFERENCES `prospects` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_log_rule` FOREIGN KEY (`rule_id`) REFERENCES `email_automation_rules` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- audit_logs definition
-
-CREATE TABLE `audit_logs` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` uuid NOT NULL,
-  `action` varchar(50) NOT NULL,
-  `resource` varchar(50) NOT NULL,
-  `details` json DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `fk_log_user` (`user_id`),
-  CONSTRAINT `fk_log_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+CREATE TABLE `settings` (
+  `setting_key` varchar(50) NOT NULL,
+  `setting_value` varchar(255) NOT NULL,
+  PRIMARY KEY (`setting_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+INSERT INTO `settings` (`setting_key`, `setting_value`) VALUES ('password_reset_enabled', 'false');

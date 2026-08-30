@@ -38,6 +38,7 @@ services:
       LEXPRESS_API_KEY: ${LEXPRESS_API_KEY}
       TZ: Europe/Paris
       WEBHOOK_SECRET: ${WEBHOOK_SECRET}
+      FRONTEND_URL: ${FRONTEND_URL}
     depends_on:
       - db-jeanxxiii-crm
     networks:
