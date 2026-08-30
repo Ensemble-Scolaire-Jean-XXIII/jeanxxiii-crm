@@ -8,6 +8,7 @@ export function useProfile() {
     first_name: "",
     last_name: "",
     email: "",
+    old_password: "",
     password_hash: "",
     confirmPassword: "",
   });
@@ -24,6 +25,7 @@ export function useProfile() {
           first_name: data.first_name,
           last_name: data.last_name,
           email: data.email,
+          old_password: "",
           password_hash: "",
           confirmPassword: "",
         });
@@ -54,6 +56,10 @@ export function useProfile() {
     }
 
     if (formData.password_hash) {
+      if (!formData.old_password) {
+        setError("Veuillez saisir votre ancien mot de passe");
+        return;
+      }
       if (!passwordRegex.test(formData.password_hash)) {
         setError(
           "Le mot de passe doit contenir au moins 16 caractères, une lettre, un chiffre et un caractère spécial",
@@ -67,7 +73,7 @@ export function useProfile() {
     }
 
     try {
-      const updateData: UpdateProfilePayload = {
+      const updateData: UpdateProfilePayload & { old_password?: string } = {
         first_name: formData.first_name,
         last_name: formData.last_name,
         email: formData.email,
@@ -75,12 +81,14 @@ export function useProfile() {
 
       if (formData.password_hash) {
         updateData.password_hash = formData.password_hash;
+        updateData.old_password = formData.old_password;
       }
 
       await userService.updateMe(updateData);
       setSuccess("Profil mis à jour avec succès");
       setFormData((prev) => ({
         ...prev,
+        old_password: "",
         password_hash: "",
         confirmPassword: "",
       }));

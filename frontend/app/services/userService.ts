@@ -40,4 +40,31 @@ export const userService = {
     }
     return res.json();
   },
+  requestPasswordReset: async (email: string): Promise<{ message: string }> => {
+    const res = await fetch(`${BASE_URL}/users/forgot-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Une erreur est survenue");
+    }
+    return res.json();
+  },
+  resetPassword: async (
+    token: string,
+    password_hash: string,
+  ): Promise<{ message: string }> => {
+    const res = await fetch(`${BASE_URL}/users/reset-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, password_hash }),
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Une erreur est survenue");
+    }
+    return res.json();
+  },
 };

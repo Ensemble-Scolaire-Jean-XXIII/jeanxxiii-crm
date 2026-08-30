@@ -21,6 +21,7 @@ import PageHeader from "../components/PageHeader";
 import FormCard from "../components/FormCard";
 import ScrollableTableCard from "../components/ScrollableTableCard";
 import DataTable from "../components/DataTable";
+import PageActions from "../components/PageActions";
 import { useTheme } from "../contexts/ThemeContext";
 import { useToast } from "../contexts/ToastContext";
 
@@ -360,14 +361,13 @@ function ProspectsContent() {
         title="Prospects"
         description="Gérez vos prospects facilement"
       >
-        <div className="flex gap-2">
-          <button onClick={loadData} className={t.btnGhost}>
-            Actualiser
-          </button>
-          <button onClick={() => setShowForm(!showForm)} className={t.btnGhost}>
-            {showForm ? "Cacher le formulaire d'ajout" : "+ Nouveau prospect"}
-          </button>
-        </div>
+        <PageActions
+          onRefresh={loadData}
+          showNew={true}
+          isNewOpen={showForm}
+          onToggleNew={() => setShowForm(!showForm)}
+          newLabel="Nouveau prospect"
+        />
       </PageHeader>
 
       {showForm && (

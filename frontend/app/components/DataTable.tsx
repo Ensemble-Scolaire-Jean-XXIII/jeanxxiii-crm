@@ -2,6 +2,7 @@ import SortHeader from "./SortHeader";
 import { useTheme } from "../contexts/ThemeContext";
 import { TableSkeleton } from "./Skeleton";
 import { DataTableProps } from "../types";
+import Image from "next/image";
 
 export default function DataTable<T>({
   data,
@@ -23,7 +24,9 @@ export default function DataTable<T>({
   isLoading = false,
   hideActions = false,
   emptyMessage = "Aucun résultat trouvé.",
-}: DataTableProps<T> & { emptyMessage?: string }) {
+}: DataTableProps<T> & {
+  emptyMessage?: string;
+}) {
   const { t } = useTheme();
 
   const Actions = ({ id, item }: { id: string | number; item?: T }) => {
@@ -32,15 +35,31 @@ export default function DataTable<T>({
         <div className="flex gap-1.5 justify-end">
           <button
             onClick={() => onSave(id, editForm)}
-            className="bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/30 px-2.5 py-1 rounded-[calc(var(--radius-box)/2)] text-xs font-semibold cursor-pointer transition-all h-7.5 flex items-center justify-center"
+            className="bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/30 px-2.5 py-1 rounded-[calc(var(--radius-box)/2)] text-xs font-semibold cursor-pointer transition-all h-7.5 flex items-center justify-center gap-1.5"
+            title="Valider"
           >
-            Valider
+            <Image
+              src="/icons/approved.webp"
+              alt="Valider"
+              width={14}
+              height={14}
+              className="object-contain brightness-0 invert shrink-0"
+              unoptimized
+            />
           </button>
           <button
             onClick={onCancel}
-            className="bg-white/5 border border-(--border-color) text-(--text-main) hover:bg-white/10 px-2.5 py-1 rounded-[calc(var(--radius-box)/2)] text-xs font-semibold cursor-pointer transition-all h-7.5 flex items-center justify-center"
+            className="bg-white/5 border border-(--border-color) text-(--text-main) hover:bg-white/10 px-2.5 py-1 rounded-[calc(var(--radius-box)/2)] text-xs font-semibold cursor-pointer transition-all h-7.5 flex items-center justify-center gap-1.5"
+            title="Annuler"
           >
-            Annuler
+            <Image
+              src="/icons/cancel.webp"
+              alt="Annuler"
+              width={14}
+              height={14}
+              className="object-contain brightness-0 invert shrink-0"
+              unoptimized
+            />
           </button>
         </div>
       );
@@ -49,15 +68,31 @@ export default function DataTable<T>({
       <div className="flex justify-end gap-1.5 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <button
           onClick={() => item && onEdit(item)}
-          className="bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:bg-blue-500/30 px-2.5 py-1 rounded-[calc(var(--radius-box)/2)] text-xs font-semibold cursor-pointer transition-all h-7.5 flex items-center justify-center"
+          className="bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:bg-blue-500/30 px-2 py-1 rounded-[calc(var(--radius-box)/2)] text-xs font-semibold cursor-pointer transition-all h-7.5 w-7.5 flex items-center justify-center"
+          title="Modifier"
         >
-          Modifier
+          <Image
+            src="/icons/edit.webp"
+            alt="Modifier"
+            width={14}
+            height={14}
+            className="object-contain brightness-0 invert shrink-0"
+            unoptimized
+          />
         </button>
         <button
           onClick={() => onDelete(id)}
-          className="bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500/30 px-2.5 py-1 rounded-[calc(var(--radius-box)/2)] text-xs font-semibold cursor-pointer transition-all h-7.5 flex items-center justify-center"
+          className="bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500/30 px-2 py-1 rounded-[calc(var(--radius-box)/2)] text-xs font-semibold cursor-pointer transition-all h-7.5 w-7.5 flex items-center justify-center"
+          title="Supprimer"
         >
-          Supprimer
+          <Image
+            src="/icons/trash.webp"
+            alt="Supprimer"
+            width={14}
+            height={14}
+            className="object-contain brightness-0 invert shrink-0"
+            unoptimized
+          />
         </button>
       </div>
     );
@@ -94,19 +129,20 @@ export default function DataTable<T>({
               )}
               {showActionHeader && (
                 <th
-                  className={`sticky top-0 z-30 px-3 py-3 font-semibold text-right w-52 ${t.tableHeader}`}
+                  className={`sticky top-0 z-30 px-3 py-3 font-semibold text-right ${t.tableHeader}`}
                 >
-                  {onSearchChange ? (
-                    <input
-                      type="text"
-                      className={`${t.input} w-36 ml-auto py-1! text-xs! font-normal`}
-                      placeholder={searchPlaceholder}
-                      value={searchQuery || ""}
-                      onChange={(e) => onSearchChange(e.target.value)}
-                    />
-                  ) : (
-                    <span>Actions</span>
-                  )}
+                  <div className="flex items-center justify-end gap-2">
+                    {onSearchChange && (
+                      <input
+                        type="text"
+                        className={`${t.input} w-36 py-1! text-xs! font-normal`}
+                        placeholder={searchPlaceholder}
+                        value={searchQuery || ""}
+                        onChange={(e) => onSearchChange(e.target.value)}
+                      />
+                    )}
+                    {!onSearchChange && hideActions && <span>Actions</span>}
+                  </div>
                 </th>
               )}
             </tr>

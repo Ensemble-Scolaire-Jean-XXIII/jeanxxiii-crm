@@ -20,6 +20,7 @@ import PageHeader from "../components/PageHeader";
 import FormCard from "../components/FormCard";
 import ScrollableTableCard from "../components/ScrollableTableCard";
 import DataTable from "../components/DataTable";
+import PageActions from "../components/PageActions";
 import { useTheme } from "../contexts/ThemeContext";
 import { useToast } from "../contexts/ToastContext";
 
@@ -47,6 +48,7 @@ function AutomationsContent() {
     create,
     updateWithUndo,
     deleteWithUndo,
+    loadData,
   } = useCrud<EmailAutomationRule, CreateAutomationPayload>(automationService, {
     status_id: "",
     formation_id: null,
@@ -283,9 +285,13 @@ function AutomationsContent() {
         title="Automatisation des Emails"
         description="Gérez les règles d'envois automatiques d'emails"
       >
-        <button onClick={() => setShowForm(!showForm)} className={t.btnGhost}>
-          {showForm ? "Cacher le formulaire d'ajout" : "+ Nouvelle règle"}
-        </button>
+        <PageActions
+          onRefresh={loadData}
+          showNew={true}
+          isNewOpen={showForm}
+          onToggleNew={() => setShowForm(!showForm)}
+          newLabel="Nouvelle règle"
+        />
       </PageHeader>
 
       {showForm && (

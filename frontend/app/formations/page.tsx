@@ -9,6 +9,7 @@ import PageHeader from "../components/PageHeader";
 import FormCard from "../components/FormCard";
 import ScrollableTableCard from "../components/ScrollableTableCard";
 import DataTable from "../components/DataTable";
+import PageActions from "../components/PageActions";
 import { useTheme } from "../contexts/ThemeContext";
 import { useToast } from "../contexts/ToastContext";
 
@@ -34,6 +35,7 @@ export default function FormationsPage() {
     create,
     updateWithUndo,
     deleteWithUndo,
+    loadData,
   } = useCrud<Formation, CreateFormationPayload>(formationService, {
     name: "",
   });
@@ -100,9 +102,13 @@ export default function FormationsPage() {
         title="Formations"
         description="Gérez les formations proposées par l'établissement"
       >
-        <button onClick={() => setShowForm(!showForm)} className={t.btnGhost}>
-          {showForm ? "Cacher le formulaire d'ajout" : "+ Nouvelle formation"}
-        </button>
+        <PageActions
+          onRefresh={loadData}
+          showNew={true}
+          isNewOpen={showForm}
+          onToggleNew={() => setShowForm(!showForm)}
+          newLabel="Nouvelle formation"
+        />
       </PageHeader>
 
       {showForm && (
