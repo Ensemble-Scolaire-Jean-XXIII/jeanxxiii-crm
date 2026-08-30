@@ -12,6 +12,7 @@ import lexpressRoutes from "./routes/lexpressRoutes";
 import formationRoutes from "./routes/formationRoutes";
 import auditLogRoutes from "./routes/auditLogRoutes";
 import webhookRoutes from "./routes/webhookRoutes";
+import settingRoutes from "./routes/settingRoutes";
 
 import { authenticate } from "./middleware/auth";
 import { processAutomations } from "./services/automationService";
@@ -23,6 +24,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+app.use("/api/settings", settingRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/prospects", authenticate, prospectRoutes);
 app.use("/api/statuses", authenticate, statusRoutes);

@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Image from "next/image";
 import { userService } from "../services/userService";
 import { auditLogService } from "../services/auditLogService";
+import { settingService } from "../services/settingService";
 import { CreateUserPayload, User, AuditLog, Column } from "../types/index";
 import { useCrud } from "../hooks/useCrud";
 import { usePagination } from "../hooks/usePagination";
@@ -13,6 +15,7 @@ import ScrollableTableCard from "../components/ScrollableTableCard";
 import DataTable from "../components/DataTable";
 import { useTheme } from "../contexts/ThemeContext";
 import { useToast } from "../contexts/ToastContext";
+import PageActions from "../components/PageActions";
 
 export default function UsersPage() {
   const { t } = useTheme();
@@ -36,6 +39,7 @@ export default function UsersPage() {
     create,
     updateWithUndo,
     deleteWithUndo,
+    loadData: fetchUsers,
   } = useCrud<User, CreateUserPayload>(userService, {
     email: "",
     password_hash: "",
@@ -53,6 +57,37 @@ export default function UsersPage() {
   } = usePagination(1, 1);
   const [showLogs, setShowLogs] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [isResetEnabled, setIsResetEnabled] = useState(false);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await settingService.get("password_reset_enabled");
+        setIsResetEnabled(res.enabled);
+      } catch (err) {
+        setIsResetEnabled(false);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const handleToggleReset = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setIsResetEnabled(checked);
+    try {
+      await settingService.update("password_reset_enabled", {
+        enabled: checked,
+      });
+      showToast(
+        checked ? "Réinitialisation activée" : "Réinitialisation désactivée",
+        "success",
+      );
+    } catch (err) {
+      setIsResetEnabled(!checked);
+      showToast("Erreur lors de la modification", "error");
+    }
+  };
 
   useEffect(() => {
     if (error) {
@@ -116,13 +151,15 @@ export default function UsersPage() {
       setLogs(res.data);
       setLogTotalPages(res.totalPages);
     } catch (err) {
-      console.error(err);
+      setLogs([]);
     }
   }, [logPage, setLogTotalPages]);
 
   useEffect(() => {
-    fetchLogs();
-  }, [fetchLogs]);
+    if (showLogs) {
+      fetchLogs();
+    }
+  }, [showLogs, fetchLogs]);
 
   const formatAction = (action: string) => {
     switch (action) {
@@ -271,35 +308,103 @@ export default function UsersPage() {
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-4">
       <PageHeader
-        title={showLogs ? "Historique des actions" : "Utilisateurs"}
+        title={
+          showLogs
+            ? "Historique des actions"
+            : showSettings
+              ? "Configuration Système"
+              : "Utilisateurs"
+        }
         description={
           showLogs
             ? "Consulter toutes les modifications effectuées sur le CRM"
-            : "Administrez les accès à l'application et consultez les actions utilisateurs"
+            : showSettings
+              ? "Paramétrez les options globales de l'application"
+              : "Administrez les accès à l'application et parametrez les actions utilisateurs"
         }
       >
-        <div className="flex gap-2">
-          {showLogs ? (
-            <button onClick={fetchLogs} className={t.btnGhost}>
-              Actualiser
-            </button>
-          ) : (
-            <button
-              onClick={() => setShowForm(!showForm)}
-              className={t.btnGhost}
-            >
-              {showForm
-                ? "Cacher le formulaire d'ajout"
-                : "+ Nouvel utilisateur"}
-            </button>
-          )}
-          <button onClick={() => setShowLogs(!showLogs)} className={t.btnGhost}>
-            {showLogs ? "← Retour aux utilisateurs" : "Voir l'historique →"}
-          </button>
-        </div>
+        <PageActions
+          showLogs={showLogs}
+          showSettings={showSettings}
+          showForm={showForm}
+          onRefresh={showLogs ? fetchLogs : fetchUsers}
+          onToggleForm={() => {
+            setShowForm(!showForm);
+            setShowSettings(false);
+          }}
+          onToggleSettings={setShowSettings}
+          onToggleLogs={setShowLogs}
+          newLabel="Nouvel utilisateur"
+        />
       </PageHeader>
 
-      {!showLogs ? (
+      {showSettings ? (
+        <FormCard title="Configuration Système">
+          <div className="flex items-center gap-3">
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={isResetEnabled}
+                onChange={handleToggleReset}
+              />
+              <div className="w-11 h-6 bg-slate-600 rounded-full peer peer-checked:bg-emerald-500 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+            </label>
+            <span className={`text-sm font-medium ${t.textMuted}`}>
+              Autoriser les utilisateurs à demander une réinitialisation de mot
+              de passe depuis la page de connexion
+            </span>
+          </div>
+        </FormCard>
+      ) : showLogs ? (
+        <ScrollableTableCard
+          footer={
+            logTotalPages > 1 && (
+              <>
+                <button
+                  onClick={() => setLogPage(Math.max(1, logPage - 1))}
+                  disabled={logPage === 1}
+                  className={t.btnGhost + " text-xs py-1!"}
+                >
+                  &larr; Précédent
+                </button>
+                <span
+                  className={`text-[10px] font-medium truncate ${t.textMuted}`}
+                >
+                  Page {logPage} sur {logTotalPages}
+                </span>
+                <button
+                  onClick={() =>
+                    setLogPage(Math.min(logTotalPages, logPage + 1))
+                  }
+                  disabled={logPage === logTotalPages}
+                  className={t.btnGhost + " text-xs py-1!"}
+                >
+                  Suivant &rarr;
+                </button>
+              </>
+            )
+          }
+        >
+          <DataTable
+            data={filteredLogs}
+            columns={logColumns}
+            keyExtractor={(item) => item.id}
+            editingId={null}
+            editForm={{}}
+            setEditForm={() => {}}
+            onEdit={() => {}}
+            onSave={() => {}}
+            onCancel={() => {}}
+            onDelete={() => {}}
+            searchQuery={logSearchQuery}
+            onSearchChange={setLogSearchQuery}
+            searchPlaceholder="Rechercher..."
+            hideActions={true}
+            emptyMessage="Aucun log ne correspond à votre recherche."
+          />
+        </ScrollableTableCard>
+      ) : (
         <>
           {showForm && (
             <FormCard title="Nouvel utilisateur">
@@ -415,54 +520,6 @@ export default function UsersPage() {
             />
           </ScrollableTableCard>
         </>
-      ) : (
-        <ScrollableTableCard
-          footer={
-            logTotalPages > 1 && (
-              <>
-                <button
-                  onClick={() => setLogPage(Math.max(1, logPage - 1))}
-                  disabled={logPage === 1}
-                  className={t.btnGhost + " text-xs py-1!"}
-                >
-                  &larr; Précédent
-                </button>
-                <span
-                  className={`text-[10px] font-medium truncate ${t.textMuted}`}
-                >
-                  Page {logPage} sur {logTotalPages}
-                </span>
-                <button
-                  onClick={() =>
-                    setLogPage(Math.min(logTotalPages, logPage + 1))
-                  }
-                  disabled={logPage === logTotalPages}
-                  className={t.btnGhost + " text-xs py-1!"}
-                >
-                  Suivant &rarr;
-                </button>
-              </>
-            )
-          }
-        >
-          <DataTable
-            data={filteredLogs}
-            columns={logColumns}
-            keyExtractor={(item) => item.id}
-            editingId={null}
-            editForm={{}}
-            setEditForm={() => {}}
-            onEdit={() => {}}
-            onSave={() => {}}
-            onCancel={() => {}}
-            onDelete={() => {}}
-            searchQuery={logSearchQuery}
-            onSearchChange={setLogSearchQuery}
-            searchPlaceholder="Rechercher..."
-            hideActions={true}
-            emptyMessage="Aucun log ne correspond à votre recherche."
-          />
-        </ScrollableTableCard>
       )}
     </div>
   );

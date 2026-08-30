@@ -2,9 +2,11 @@ import { Router } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import * as userService from "../services/userService";
+import * as settingService from "../services/settingService";
 import { authenticate } from "../middleware/auth";
 import { sendMail } from "../services/mailService";
 import { emailRegex, passwordRegex } from "../utils/validators";
+import { FRONTEND_URL } from "../config/appConfig";
 
 const router = Router();
 
@@ -16,7 +18,6 @@ router.get("/", authenticate, async (req: any, res) => {
     const users = await userService.getAllUsers();
     res.json(users);
   } catch (error) {
-    console.error("ERREUR GET USERS:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -46,13 +47,12 @@ router.post("/", authenticate, async (req: any, res) => {
     await sendMail(
       req.body.email,
       "Création de votre compte CRM Jean XXIII",
-      `Votre compte a été créé. Accédez au CRM ici : https://crm.jean23.com. Votre identifiant est ${req.body.email} et votre mot de passe : ${req.body.password_hash}`,
-      `<div style="font-family: sans-serif; color: #333; line-height: 1.4;">Bonjour <strong>${req.body.first_name} ${req.body.last_name}</strong>,<br><br>Un administrateur vient de vous créer un compte sur le CRM Jean XXIII.<br>Vous pouvez vous connecter dès maintenant en cliquant sur ce lien : <a href="https://crm.jean23.com">Accéder au CRM</a>.<br><br>Voici vos identifiants de connexion :<ul style="margin-top: 5px;"><li><strong>Email :</strong> ${req.body.email}</li><li><strong>Mot de passe temporaire :</strong> ${req.body.password_hash}</li></ul></div>`,
+      `Votre compte a été créé. Accédez au CRM ici : ${FRONTEND_URL}. Votre identifiant est ${req.body.email} et votre mot de passe : ${req.body.password_hash}`,
+      `<div style="font-family: sans-serif; color: #333; line-height: 1.4;">Bonjour <strong>${req.body.first_name} ${req.body.last_name}</strong>,<br><br>Un administrateur vient de vous créer un compte sur le CRM Jean XXIII.<br>Vous pouvez vous connecter dès maintenant en cliquant sur ce lien : <a href="${FRONTEND_URL}">Accéder au CRM</a>.<br><br>Voici vos identifiants de connexion :<ul style="margin-top: 5px;"><li><strong>Email :</strong> ${req.body.email}</li><li><strong>Mot de passe temporaire :</strong> ${req.body.password_hash}</li></ul></div>`,
     );
 
     res.status(201).json({ id });
   } catch (error) {
-    console.error("ERREUR CREATE USER:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -79,7 +79,6 @@ router.post("/login", async (req, res) => {
     );
     res.json({ token });
   } catch (error) {
-    console.error("ERREUR LOGIN:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -99,12 +98,11 @@ router.post("/reauthenticate", authenticate, async (req: any, res) => {
     const token = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET as string,
-      { expiresIn: "12h" },
+      { expiresIn: "6h" },
     );
 
     res.json({ token });
   } catch (error) {
-    console.error("ERREUR REAUTHENTICATE:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -115,14 +113,14 @@ router.get("/me", authenticate, async (req: any, res) => {
     if (!user) return res.status(404).json({ error: "Not found" });
     res.json(user);
   } catch (error) {
-    console.error("ERREUR GET ME:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 router.put("/me", authenticate, async (req: any, res) => {
   try {
-    const { first_name, last_name, email, password_hash } = req.body;
+    const { first_name, last_name, email, password_hash, old_password } =
+      req.body;
     const currentUser = await userService.getUserById(req.user.id);
 
     if (!currentUser) {
@@ -140,6 +138,19 @@ router.put("/me", authenticate, async (req: any, res) => {
     }
 
     if (password_hash) {
+      if (!old_password) {
+        return res
+          .status(400)
+          .json({ error: "L'ancien mot de passe est requis" });
+      }
+      const isOldMatch = await bcrypt.compare(
+        old_password,
+        currentUser.password_hash,
+      );
+      if (!isOldMatch) {
+        return res.status(400).json({ error: "Ancien mot de passe incorrect" });
+      }
+
       if (!passwordRegex.test(password_hash)) {
         return res.status(400).json({ error: "Mot de passe trop faible" });
       }
@@ -161,7 +172,6 @@ router.put("/me", authenticate, async (req: any, res) => {
 
     res.status(204).send();
   } catch (error) {
-    console.error("ERREUR PUT ME:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -192,7 +202,6 @@ router.put("/:id", authenticate, async (req: any, res) => {
     await userService.updateUser(req.params.id, req.body, req.user.id);
     res.status(204).send();
   } catch (error) {
-    console.error("ERREUR PUT USER ID:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -205,7 +214,67 @@ router.delete("/:id", authenticate, async (req: any, res) => {
     await userService.deleteUser(req.params.id, req.user.id);
     res.status(204).send();
   } catch (error) {
-    console.error("ERREUR DELETE USER:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const isEnabled = await settingService.getSetting("password_reset_enabled");
+    if (isEnabled !== "true")
+      return res.status(403).json({ error: "Fonctionnalité désactivée" });
+
+    const user = await userService.getUserByEmail(req.body.email);
+    if (!user) {
+      return res
+        .status(200)
+        .json({ message: "Si l'email existe, un lien a été envoyé." });
+    }
+
+    const token = await userService.createResetToken(user.id);
+    const resetLink = `${FRONTEND_URL}/reset-password?token=${token}`;
+
+    await sendMail(
+      user.email,
+      "Réinitialisation de votre mot de passe",
+      `Cliquez sur ce lien pour réinitialiser votre mot de passe : ${resetLink}`,
+      `<p>Bonjour,</p><p>Vous avez demandé la réinitialisation de votre mot de passe.</p><p><a href="${resetLink}">Cliquez ici pour choisir un nouveau mot de passe</a></p><p>Ce lien expirera dans 1 heure.</p>`,
+    );
+
+    res
+      .status(200)
+      .json({ message: "Si l'email existe, un lien a été envoyé." });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { token, password_hash } = req.body;
+
+    if (!passwordRegex.test(password_hash)) {
+      return res.status(400).json({ error: "Mot de passe trop faible" });
+    }
+
+    const userId = await userService.validateResetToken(token);
+    if (!userId) {
+      return res.status(400).json({ error: "Lien invalide ou expiré" });
+    }
+
+    const user = await userService.getUserById(userId);
+    if (user) {
+      const isSame = await bcrypt.compare(password_hash, user.password_hash);
+      if (isSame) {
+        return res.status(400).json({
+          error: "Le nouveau mot de passe doit être différent de l'ancien",
+        });
+      }
+    }
+
+    await userService.resetPassword(userId, password_hash);
+    res.status(200).json({ message: "Mot de passe modifié avec succès" });
+  } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });

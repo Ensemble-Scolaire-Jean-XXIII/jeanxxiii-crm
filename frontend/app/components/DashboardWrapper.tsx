@@ -68,10 +68,13 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const isLoginPage = pathname === "/login";
+  const isResetPasswordPage = pathname === "/reset-password";
   const isSalonsPage = pathname === "/salons";
 
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoading, setIsLoading] = useState(!isLoginPage);
+  const [isLoading, setIsLoading] = useState(
+    !(isLoginPage || isResetPasswordPage),
+  );
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -89,7 +92,7 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   useEffect(() => {
-    if (isLoginPage) {
+    if (isLoginPage || isResetPasswordPage) {
       setTimeout(() => setIsLoading(false), 0);
       return;
     }
@@ -119,7 +122,7 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
         setIsLoading(false);
       }, 0);
     }
-  }, [isLoginPage, isSalonsPage, router, handleLogout]);
+  }, [isLoginPage, isResetPasswordPage, isSalonsPage, router, handleLogout]);
 
   if (!isSalonsPage && showExitModal) {
     setShowExitModal(false);
@@ -146,7 +149,7 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
     }
   };
 
-  if (isLoginPage) return <>{children}</>;
+  if (isLoginPage || isResetPasswordPage) return <>{children}</>;
 
   if (isLoading)
     return (
@@ -157,12 +160,12 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={t.wrapper}>
-      <header className={t.header}>
-        <div className="flex items-center gap-2 md:gap-4">
+      <header className={`${t.header} gap-4`}>
+        <div className="flex items-center gap-2 md:gap-4 min-w-0">
           {!isSalonsPage && (
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="lg:hidden p-2 text-white hover:bg-white/10 rounded-xl transition-colors cursor-pointer"
+              className="lg:hidden p-2 text-white hover:bg-white/10 rounded-xl transition-colors cursor-pointer shrink-0"
             >
               <svg
                 className="w-6 h-6"
@@ -189,21 +192,20 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
               priority
             />
           </div>
-          <div className="flex items-center gap-2">
-            <span className="font-black text-lg tracking-wider text-white hidden sm:block">
+          <div className="flex items-center gap-2 min-w-0 shrink">
+            <span className="font-black text-lg tracking-wider text-white hidden md:block">
               ENSEMBLE SCOLAIRE JEAN XXIII
             </span>
-            <span className="font-black text-sm tracking-wider text-white sm:hidden">
-              JEAN XXIII
+            <span className="font-black text-sm tracking-wider text-white hidden sm:block md:hidden">
+              ENSEMBLE SCOLAIRE JEAN XXIII
             </span>
             <span className="bg-[#e84e1b]/20 text-[#e84e1b] text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 rounded-md border border-[#e84e1b]/30 uppercase tracking-widest shrink-0">
-              {" "}
               {isSalonsPage ? "SALON" : "CRM"}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex items-center gap-2 md:gap-3 shrink-0">
           {!isSalonsPage ? (
             <>
               <Link
@@ -270,7 +272,7 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
         )}
         <aside
           className={`fixed lg:relative inset-y-0 left-0 z-50 flex ${t.sidebar} text-white border-r lg:border border-(--border-color) shadow-2xl flex-col shrink-0 overflow-y-auto transition-all duration-300 ease-in-out ${
-            isSidebarOpen ? "w-64" : "w-20"
+            isMobileMenuOpen ? "w-64" : isSidebarOpen ? "w-64" : "w-20"
           } ${
             isMobileMenuOpen
               ? "translate-x-0"
@@ -280,7 +282,9 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
           <div className="p-4 flex items-center justify-between border-b border-white/10 min-h-16">
             <span
               className={`font-bold tracking-wider text-xs text-slate-400 transition-opacity duration-300 ${
-                isSidebarOpen ? "opacity-100" : "opacity-0 hidden"
+                isSidebarOpen || isMobileMenuOpen
+                  ? "opacity-100"
+                  : "opacity-0 hidden"
               }`}
             >
               NAVIGATION

@@ -74,3 +74,8 @@ export interface AuditLog {
   user_email?: string;
   user_name?: string;
 }
+
+export interface Setting {
+  setting_key: string;
+  setting_value: string;
+}
