@@ -36,6 +36,7 @@ export interface Prospect {
   gender: string;
   country_id: number;
   status_id: number;
+  previous_status_id?: number | null;
   last_action_date: Date | null;
   created_at?: Date;
   lexpress_id?: string | null;

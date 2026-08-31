@@ -23,6 +23,7 @@ export interface Prospect {
   gender: string;
   country_id: number | null;
   status_id: number | null;
+  previous_status_id?: number | null;
   formation_id: number | null;
   last_action_date: string | null;
   created_at?: string;
@@ -37,6 +38,7 @@ export interface Prospect {
 
 export interface ProspectExtended extends Prospect {
   status_name?: string;
+  previous_status_name?: string;
   country_name?: string;
 }
 
