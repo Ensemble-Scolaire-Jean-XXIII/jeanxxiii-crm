@@ -159,7 +159,7 @@ export const processAutomations = async () => {
 
           if (rule.trigger_type !== "SCHEDULED_DATE" && pendingStatusId) {
             await pool.query(
-              "UPDATE prospects SET status_id = ?, last_action_date = NOW() WHERE id = ?",
+              "UPDATE prospects SET previous_status_id = status_id, status_id = ?, last_action_date = NOW() WHERE id = ?",
               [pendingStatusId, prospect.id],
             );
           } else {
@@ -169,11 +169,11 @@ export const processAutomations = async () => {
             );
           }
         } catch (error) {
-          console.error(`Erreur d'envoi pour ${prospect.email}:`, error);
+          console.error(error);
         }
       }
     }
   } catch (error) {
-    console.error("Erreur processAutomations:", error);
+    console.error(error);
   }
 };

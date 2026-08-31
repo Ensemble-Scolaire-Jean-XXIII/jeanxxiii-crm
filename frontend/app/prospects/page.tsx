@@ -322,8 +322,21 @@ function ProspectsContent() {
       sortable: true,
       render: (item) => {
         const s = statuses.find((s) => s.id === item.status_id);
+        const ps = statuses.find((s) => s.id === item.previous_status_id);
         return (
-          <span className="block truncate">{s?.name || item.status_name}</span>
+          <div className="w-full truncate">
+            <span className="block truncate">
+              {s?.name || item.status_name}
+            </span>
+            {(ps?.name || item.previous_status_name) && (
+              <span
+                className={`block w-full truncate text-[10px] font-medium ${t.textMuted}`}
+                title={`Ancien statut : ${ps?.name || item.previous_status_name}`}
+              >
+                Ancien: {ps?.name || item.previous_status_name}
+              </span>
+            )}
+          </div>
         );
       },
       renderEdit: (form, update) => (
