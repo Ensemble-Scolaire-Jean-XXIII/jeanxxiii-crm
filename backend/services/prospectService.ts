@@ -8,9 +8,10 @@ import { logAction } from "./auditLogService";
 
 export const getAllProspects = async (): Promise<any> => {
   const [rows] = await pool.query(`
-    SELECT p.*, s.name as status_name, c.name as country_name
+    SELECT p.*, s.name as status_name, ps.name as previous_status_name, c.name as country_name
     FROM prospects p
     LEFT JOIN statuses s ON p.status_id = s.id
+    LEFT JOIN statuses ps ON p.previous_status_id = ps.id
     LEFT JOIN countries c ON p.country_id = c.id
   `);
   return rows as any;
@@ -73,6 +74,7 @@ export const updateProspect = async (
     "phone",
     "gender",
     "status_id",
+    "previous_status_id",
     "country_id",
     "formation_id",
   ];
@@ -92,6 +94,10 @@ export const updateProspect = async (
   }
 
   if (updateData.status_id) {
+    const currentProspect = await getProspectById(id);
+    if (currentProspect && currentProspect.status_id !== updateData.status_id) {
+      updateData.previous_status_id = currentProspect.status_id;
+    }
     updateData.last_action_date = new Date();
   }
 
