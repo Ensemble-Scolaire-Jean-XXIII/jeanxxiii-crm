@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Pull latest code and rebuild production
         run: |
-          cd /home/jeanxxiii-crm/jeanxxiii-crm
+          cd /home/jeanxxiii-apps/jeanxxiii-crm
 
           git pull origin main
 

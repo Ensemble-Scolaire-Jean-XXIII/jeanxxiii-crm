@@ -29,7 +29,16 @@ CREATE TABLE `formations` (
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+-- settings definition
+
+CREATE TABLE `settings` (
+  `setting_key` varchar(50) NOT NULL,
+  `setting_value` varchar(255) NOT NULL,
+  PRIMARY KEY (`setting_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
 -- statuses definition
@@ -40,7 +49,7 @@ CREATE TABLE `statuses` (
   `is_custom` tinyint(1) DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
 -- users definition
@@ -70,7 +79,7 @@ CREATE TABLE `audit_logs` (
   PRIMARY KEY (`id`),
   KEY `fk_log_user` (`user_id`),
   CONSTRAINT `fk_log_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=433 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
 -- email_automation_rules definition
@@ -89,7 +98,7 @@ CREATE TABLE `email_automation_rules` (
   CONSTRAINT `fk_rule_formation` FOREIGN KEY (`formation_id`) REFERENCES `formations` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_rule_status` FOREIGN KEY (`status_id`) REFERENCES `statuses` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_rule_template` FOREIGN KEY (`email_template_id`) REFERENCES `email_templates` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
 -- prospects definition
@@ -107,16 +116,34 @@ CREATE TABLE `prospects` (
   `country_id` int(11) DEFAULT NULL,
   `lexpress_id` varchar(50) DEFAULT NULL,
   `formation_id` int(11) DEFAULT NULL,
+  `previous_status_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `lexpress_id` (`lexpress_id`),
   KEY `fk_prospect_country` (`country_id`),
   KEY `prospects_ibfk_1` (`status_id`),
   KEY `fk_prospect_formation` (`formation_id`),
+  KEY `fk_prospect_prev_status` (`previous_status_id`),
   CONSTRAINT `fk_prospect_country` FOREIGN KEY (`country_id`) REFERENCES `countries` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_prospect_formation` FOREIGN KEY (`formation_id`) REFERENCES `formations` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_prospect_prev_status` FOREIGN KEY (`previous_status_id`) REFERENCES `statuses` (`id`) ON DELETE SET NULL,
   CONSTRAINT `prospects_ibfk_1` FOREIGN KEY (`status_id`) REFERENCES `statuses` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- tokens definition
+
+CREATE TABLE `tokens` (
+  `id` uuid NOT NULL,
+  `user_id` uuid NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `new_email` varchar(255) DEFAULT NULL,
+  `expires_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 -- tokens definition
 
@@ -145,11 +172,4 @@ CREATE TABLE `email_automation_logs` (
   KEY `fk_log_rule` (`rule_id`),
   CONSTRAINT `fk_log_prospect` FOREIGN KEY (`prospect_id`) REFERENCES `prospects` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_log_rule` FOREIGN KEY (`rule_id`) REFERENCES `email_automation_rules` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `settings` (
-  `setting_key` varchar(50) NOT NULL,
-  `setting_value` varchar(255) NOT NULL,
-  PRIMARY KEY (`setting_key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-INSERT INTO `settings` (`setting_key`, `setting_value`) VALUES ('password_reset_enabled', 'false');
+) ENGINE=InnoDB AUTO_INCREMENT=264 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
