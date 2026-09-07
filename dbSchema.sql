@@ -130,6 +130,20 @@ CREATE TABLE `prospects` (
   CONSTRAINT `prospects_ibfk_1` FOREIGN KEY (`status_id`) REFERENCES `statuses` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- tokens definition
+
+CREATE TABLE `tokens` (
+  `id` uuid NOT NULL,
+  `user_id` uuid NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `new_email` varchar(255) DEFAULT NULL,
+  `expires_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 -- tokens definition
 
