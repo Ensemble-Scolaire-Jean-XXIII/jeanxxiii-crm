@@ -133,6 +133,7 @@ function TemplatesContent() {
             value={form.name || ""}
             onChange={(e) => update({ name: e.target.value })}
             placeholder="Nom du template"
+            maxLength={100}
           />
           <input
             type="text"
@@ -200,6 +201,7 @@ function TemplatesContent() {
                     setCreateForm({ ...createForm, name: e.target.value })
                   }
                   required
+                  maxLength={100}
                 />
               </div>
               <div>

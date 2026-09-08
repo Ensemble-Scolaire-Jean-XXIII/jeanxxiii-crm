@@ -38,6 +38,11 @@ router.post("/", authenticate, async (req: any, res) => {
         .status(400)
         .json({ error: "Un template avec ce nom existe déjà." });
     }
+    if (error.message === "NAME_TOO_LONG") {
+      return res
+        .status(400)
+        .json({ error: "Le nom ne doit pas dépasser 100 caractères." });
+    }
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -55,6 +60,11 @@ router.put("/:id", authenticate, async (req: any, res) => {
       return res
         .status(400)
         .json({ error: "Un template avec ce nom existe déjà." });
+    }
+    if (error.message === "NAME_TOO_LONG") {
+      return res
+        .status(400)
+        .json({ error: "Le nom ne doit pas dépasser 100 caractères." });
     }
     res.status(500).json({ error: "Internal Server Error" });
   }
