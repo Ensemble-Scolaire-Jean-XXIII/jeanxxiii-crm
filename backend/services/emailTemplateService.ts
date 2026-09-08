@@ -21,10 +21,16 @@ export const getEmailTemplateById = async (
   return templates.length > 0 ? templates[0] : null;
 };
 
+const MAX_NAME_LENGTH = 100;
+
 export const createEmailTemplate = async (
   data: Omit<EmailTemplate, "id" | "created_at">,
   actorId?: string,
 ): Promise<string> => {
+  if (data.name.trim().length > MAX_NAME_LENGTH) {
+    throw new Error("NAME_TOO_LONG");
+  }
+
   const [existing] = (await pool.query(
     "SELECT 1 FROM email_templates WHERE name = ? LIMIT 1",
     [data.name.trim()],
@@ -56,6 +62,10 @@ export const updateEmailTemplate = async (
   if (Object.keys(updateData).length === 0) return;
 
   if (updateData.name) {
+    if (updateData.name.trim().length > MAX_NAME_LENGTH) {
+      throw new Error("NAME_TOO_LONG");
+    }
+
     const [existing] = (await pool.query(
       "SELECT 1 FROM email_templates WHERE name = ? AND id != ? LIMIT 1",
       [updateData.name.trim(), id],
