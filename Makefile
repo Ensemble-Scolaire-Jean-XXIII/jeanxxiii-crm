@@ -1,8 +1,10 @@
 COMPOSE_DEV=docker compose -f docker-compose.yml
 COMPOSE_PROD=docker compose -f docker-compose.prod.yml
 
-.PHONY: dev-up dev-down dev-build dev-logs prod-up prod-down prod-build prod-logs
+.PHONY: dev-up dev-down dev-build dev-logs
+.PHONY: prod-up prod-down prod-build prod-logs prod-restart
 
+# --- Dev ---
 dev-up:
 	$(COMPOSE_DEV) up -d
 
@@ -15,6 +17,7 @@ dev-build:
 dev-logs:
 	$(COMPOSE_DEV) logs -f
 
+# --- Prod (app only, no proxy) ---
 prod-up:
 	$(COMPOSE_PROD) up -d
 
@@ -26,3 +29,6 @@ prod-build:
 
 prod-logs:
 	$(COMPOSE_PROD) logs -f
+
+prod-restart:
+	$(COMPOSE_PROD) restart
