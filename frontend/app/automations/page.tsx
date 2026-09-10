@@ -16,6 +16,7 @@ import {
 } from "../types";
 import { useCrud } from "../hooks/useCrud";
 import { useSearch } from "../hooks/useSearch";
+import { useSort } from "../hooks/useSort";
 import PageHeader from "../components/PageHeader";
 import FormCard from "../components/FormCard";
 import ScrollableTableCard from "../components/ScrollableTableCard";
@@ -89,6 +90,8 @@ function AutomationsContent() {
       setUndoAction(null);
     }
   }, [undoAction, showToast, setUndoAction]);
+
+  const { sortField, sortDirection, handleSort } = useSort("trigger", "asc");
 
   const {
     searchQuery,
@@ -170,10 +173,40 @@ function AutomationsContent() {
     create(e, payload);
   };
 
+  const sortedAutomations = [...filteredAutomations].sort((a, b) => {
+    let compareResult = 0;
+    switch (sortField) {
+      case "trigger":
+        compareResult = (a.trigger_type || "").localeCompare(b.trigger_type || "");
+        if (compareResult === 0) {
+          if (a.trigger_type === "STATUS_CHANGE") {
+            const sA = statuses.find((s) => s.id === a.status_id)?.name || "";
+            const sB = statuses.find((s) => s.id === b.status_id)?.name || "";
+            compareResult = sA.localeCompare(sB);
+          } else {
+            compareResult =
+              new Date(a.scheduled_date || 0).getTime() -
+              new Date(b.scheduled_date || 0).getTime();
+          }
+        }
+        break;
+      case "formation":
+        const fA = formations.find((f) => f.id === a.formation_id)?.name || "";
+        const fB = formations.find((f) => f.id === b.formation_id)?.name || "";
+        compareResult = fA.localeCompare(fB);
+        break;
+      default:
+        compareResult = (a.trigger_type || "").localeCompare(b.trigger_type || "");
+        break;
+    }
+    return sortDirection === "asc" ? compareResult : -compareResult;
+  });
+
   const columns: Column<EmailAutomationRule>[] = [
     {
       field: "trigger",
       label: "Déclencheur (Statut / Date)",
+      sortable: true,
       render: (item) => {
         if (item.trigger_type === "STATUS_CHANGE") {
           const status = statuses.find((s) => s.id === item.status_id);
@@ -233,6 +266,7 @@ function AutomationsContent() {
     {
       field: "formation",
       label: "Formation Cible",
+      sortable: true,
       render: (item) => {
         const formation = formations.find((f) => f.id === item.formation_id);
         return <span>{formation?.name || "Toutes les formations"}</span>;
@@ -428,7 +462,7 @@ function AutomationsContent() {
 
       <ScrollableTableCard>
         <DataTable
-          data={filteredAutomations}
+          data={sortedAutomations}
           columns={columns}
           keyExtractor={(item) => item.id}
           editingId={editingId}
@@ -438,6 +472,9 @@ function AutomationsContent() {
           onSave={updateWithUndo}
           onCancel={() => setEditingId(null)}
           onDelete={deleteWithUndo}
+          sortField={sortField}
+          sortDirection={sortDirection}
+          onSort={handleSort}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           isLoading={isLoading}

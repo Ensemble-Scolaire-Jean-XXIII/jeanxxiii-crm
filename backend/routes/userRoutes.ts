@@ -1,6 +1,7 @@
 import { Router } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import rateLimit from "express-rate-limit";
 import * as userService from "../services/userService";
 import * as settingService from "../services/settingService";
 import { authenticate } from "../middleware/auth";
@@ -9,6 +10,24 @@ import { emailRegex, passwordRegex } from "../utils/validators";
 import { FRONTEND_URL } from "../config/appConfig";
 
 const router = Router();
+
+const loginLimiter = rateLimit({
+  windowMs: 30 * 60 * 1000,
+  max: 10,
+  keyGenerator: (req) => req.body.email || "anonymous",
+  message: { error: "Trop de tentatives. Réessayez dans 30 minutes." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const passwordResetLimiter = rateLimit({
+  windowMs: 30 * 60 * 1000,
+  max: 10,
+  keyGenerator: (req) => req.body.email || "anonymous",
+  message: { error: "Trop de tentatives. Réessayez dans 30 minutes." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 router.get("/", authenticate, async (req: any, res) => {
   try {
@@ -57,11 +76,15 @@ router.post("/", authenticate, async (req: any, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   try {
     const user = await userService.getUserByEmail(req.body.email);
+
     if (!user) {
-      return res.status(404).json({ error: "Email introuvable" });
+      await bcrypt.hash("dummy", 10);
+      return res
+        .status(401)
+        .json({ error: "Identifiant ou mot de passe incorrect" });
     }
 
     const isMatch = await bcrypt.compare(
@@ -69,7 +92,9 @@ router.post("/login", async (req, res) => {
       user.password_hash,
     );
     if (!isMatch) {
-      return res.status(401).json({ error: "Mot de passe invalide" });
+      return res
+        .status(401)
+        .json({ error: "Identifiant ou mot de passe incorrect" });
     }
 
     const token = jwt.sign(
@@ -218,7 +243,7 @@ router.delete("/:id", authenticate, async (req: any, res) => {
   }
 });
 
-router.post("/forgot-password", async (req, res) => {
+router.post("/forgot-password", passwordResetLimiter, async (req, res) => {
   try {
     const isEnabled = await settingService.getSetting("password_reset_enabled");
     if (isEnabled !== "true")
@@ -249,7 +274,7 @@ router.post("/forgot-password", async (req, res) => {
   }
 });
 
-router.post("/reset-password", async (req, res) => {
+router.post("/reset-password", passwordResetLimiter, async (req, res) => {
   try {
     const { token, password_hash } = req.body;
 

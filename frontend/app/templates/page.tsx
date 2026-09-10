@@ -6,6 +6,7 @@ import { templateService } from "../services/templateService";
 import { Column, CreateTemplatePayload, EmailTemplate } from "../types/index";
 import { useCrud } from "../hooks/useCrud";
 import { useSearch } from "../hooks/useSearch";
+import { useSort } from "../hooks/useSort";
 import PageHeader from "../components/PageHeader";
 import FormCard from "../components/FormCard";
 import ScrollableTableCard from "../components/ScrollableTableCard";
@@ -74,6 +75,8 @@ function TemplatesContent() {
     }
   }, [undoAction, showToast, setUndoAction]);
 
+  const { sortField, sortDirection, handleSort } = useSort("name", "asc");
+
   const {
     searchQuery,
     setSearchQuery,
@@ -87,10 +90,27 @@ function TemplatesContent() {
     );
   });
 
+  const sortedTemplates = [...filteredTemplates].sort((a, b) => {
+    let compareResult = 0;
+    switch (sortField) {
+      case "name":
+        compareResult = (a.name || "").localeCompare(b.name || "");
+        break;
+      case "body":
+        compareResult = (a.body || "").localeCompare(b.body || "");
+        break;
+      default:
+        compareResult = (a.name || "").localeCompare(b.name || "");
+        break;
+    }
+    return sortDirection === "asc" ? compareResult : -compareResult;
+  });
+
   const columns: Column<EmailTemplate>[] = [
     {
       field: "name",
       label: "Template & Sujet",
+      sortable: true,
       className: "w-1/4",
       render: (item) => (
         <div className="flex flex-col truncate w-full">
@@ -113,6 +133,7 @@ function TemplatesContent() {
             value={form.name || ""}
             onChange={(e) => update({ name: e.target.value })}
             placeholder="Nom du template"
+            maxLength={100}
           />
           <input
             type="text"
@@ -127,6 +148,7 @@ function TemplatesContent() {
     {
       field: "body",
       label: "Contenu",
+      sortable: true,
       render: (item) => (
         <p
           className={`text-xs line-clamp-3 whitespace-pre-wrap ${t.textMuted}`}
@@ -179,6 +201,7 @@ function TemplatesContent() {
                     setCreateForm({ ...createForm, name: e.target.value })
                   }
                   required
+                  maxLength={100}
                 />
               </div>
               <div>
@@ -222,7 +245,7 @@ function TemplatesContent() {
 
       <ScrollableTableCard>
         <DataTable
-          data={filteredTemplates}
+          data={sortedTemplates}
           columns={columns}
           keyExtractor={(item) => item.id}
           editingId={editingId}
@@ -232,6 +255,9 @@ function TemplatesContent() {
           onSave={updateWithUndo}
           onCancel={() => setEditingId(null)}
           onDelete={deleteWithUndo}
+          sortField={sortField}
+          sortDirection={sortDirection}
+          onSort={handleSort}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           isLoading={isLoading}
