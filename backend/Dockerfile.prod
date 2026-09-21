@@ -1,7 +1,8 @@
 # ============================================================
 # BACKEND — PROD (multistage TS -> JS compilé, runner léger)
 # Le code tourne via `node dist/index.js` (plus nodemon/tsx).
-# Image finale ~190 MB au lieu de 366 MB.
+# Image virtuelle ~265 MB (au lieu de ~368 MB), contenu réel
+# ~155 MB. `public/` est copié (signature.png pour les emails).
 # ============================================================
 FROM node:20-alpine AS deps
 WORKDIR /app
@@ -21,6 +22,7 @@ COPY --from=deps /app/package*.json ./
 COPY --from=deps /app/node_modules ./node_modules
 RUN npm prune --omit=dev
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/public ./public
 
 USER node
 EXPOSE 5000

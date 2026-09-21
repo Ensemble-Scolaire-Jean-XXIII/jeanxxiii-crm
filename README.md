@@ -84,8 +84,8 @@ The production setup relies on optimized, multistage Docker builds and a secure 
 
 Each service ships its own production `Dockerfile.prod` together with a `.dockerignore` that keeps the build context small. Both images are built in separate stages so the runtime only contains what is strictly needed:
 
-- **Backend** — TypeScript is compiled ahead of time (`npx tsc -p . --outDir dist --rootDir .`) and the runner executes `node dist/index.js`. Dev-only dependencies are pruned (`npm prune --omit=dev`) and the app runs as the unprivileged `node` user. Final image: ~190 MB instead of ~366 MB.
-- **Frontend** — built with Next.js standalone output (`output: "standalone"` in `frontend/next.config.ts`). Only the standalone runtime, static assets and `public/` are copied into the runner. Final image: ~150–200 MB instead of ~2.5 GB.
+- **Backend** — TypeScript is compiled ahead of time (`npx tsc -p . --outDir dist --rootDir .`) and the runner executes `node dist/index.js`. Dev-only dependencies are pruned (`npm prune --omit=dev`), the app runs as the unprivileged `node` user, and `public/` is copied so the email signature (`signature.png`) keeps working. Image: ~265 MB virtual (~155 MB of runtime content) instead of ~368 MB.
+- **Frontend** — built with Next.js standalone output (`output: "standalone"` in `frontend/next.config.ts`). Only the standalone runtime, static assets and `public/` are copied into the runner. Image: ~250 MB virtual (~51 MB of runtime content) instead of ~846 MB.
 
 `docker-compose.prod.yml` references the `Dockerfile.prod` files explicitly for both services.
 

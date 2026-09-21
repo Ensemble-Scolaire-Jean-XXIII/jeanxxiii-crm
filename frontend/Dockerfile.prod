@@ -1,7 +1,7 @@
 # ============================================================
 # FRONTEND — PROD (multistage, image runner stand-alone)
 # Basé sur `output: standalone` (next.config.ts).
-# Image finale ~150-200 MB au lieu de 2,5 GB.
+# Image virtuelle ~250 MB (~51 MB de contenu) au lieu de ~846 MB.
 # ============================================================
 FROM node:20-alpine AS deps
 WORKDIR /app
