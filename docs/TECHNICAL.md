@@ -56,6 +56,13 @@ flowchart LR
   au premier démarrage d'un volume vide.
 - **Orchestration** : `docker-compose.yml` (dev) et `docker-compose.prod.yml` (prod),
   pilotées par le `Makefile`.
+- **Images de production (multistage)** : chaque service déclare son `Dockerfile.prod` et
+  son `.dockerignore`. Le backend compile TypeScript (`tsc -p . --outDir dist`) et tourne
+  via `node dist/index.js`, avec purge des dépendances de dev et utilisateur `node`
+  non-privilégié (~190 MB au lieu de 366 MB). Le frontend utilise la sortie `standalone`
+  de Next.js (runner réduit ~150-200 MB au lieu de 2,5 GB). Le compose prod référence ces
+  `Dockerfile.prod` explicitement et n'expose aucun port hôte : les services rejoignent le
+  réseau externe `proxy-net` pour être servis par un reverse proxy dédié.
 
 ### Variables d'environnement
 
@@ -607,7 +614,8 @@ en-tête de colonne via le composant `SortHeader` :
 ### GitHub Actions
 
 - **`deploy.yml`** : sur push vers `main`, exécute sur runner self-hosted :
-  `git pull` → `docker compose -f docker-compose.prod.yml down` → `build --no-cache` → `up -d` → prune images
+  `git pull` → `make prod-down` → `docker compose -f docker-compose.prod.yml build --no-cache`
+  (Dockerfiles multistage `Dockerfile.prod`) → `make prod-up` → `docker image prune -f`
 - **`auto-pr.yml`** : sur push vers une branche non-main, crée automatiquement une PR vers `main`
 
 ### Dependabot

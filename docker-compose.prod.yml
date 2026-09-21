@@ -21,7 +21,9 @@ services:
 
   backend-jeanxxiii-crm:
     container_name: backend-jeanxxiii-crm-prod
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
     restart: unless-stopped
     environment:
       DB_HOST: db-jeanxxiii-crm-prod
