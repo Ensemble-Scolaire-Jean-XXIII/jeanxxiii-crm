@@ -107,7 +107,7 @@ export interface CreateFormationPayload {
 
 export interface CreateUserPayload {
   email: string;
-  password_hash: string;
+  password_hash?: string;
   first_name: string;
   last_name: string;
   role?: string;
@@ -204,6 +204,7 @@ export interface DataTableProps<T> {
   isLoading?: boolean;
   hideActions?: boolean;
   emptyMessage?: string;
+  extraActions?: (item: T) => React.ReactNode;
 }
 
 export interface CrudService<T, CreatePayload, UpdatePayload = Partial<T>> {
@@ -260,6 +261,19 @@ export interface FormCardProps {
   title: string;
   badge?: string;
   children: React.ReactNode;
+}
+
+export interface ConfirmDialogProps {
+  open: boolean;
+  title: string;
+  message: React.ReactNode;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  confirmClassName?: string;
+  confirmDisabled?: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+  children?: React.ReactNode;
 }
 
 export interface PageHeaderProps {

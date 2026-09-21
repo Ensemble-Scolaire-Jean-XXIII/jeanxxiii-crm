@@ -20,6 +20,7 @@ const generateHtmlEmail = (title: string, content: string) => {
         </div>
         <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #334155;">
           <img src="cid:signature" alt="Signature CRM Jean XXIII" style="width: 100%; height: auto; display: block;" />
+          <p style="margin-top: 12px; font-size: 11px; color: #64748b; text-align: center; font-style: italic;">Merci de ne pas répondre à cet email : cette adresse est dédiée à l'envoi automatique et n'est pas surveillée.</p>
         </div>
       </div>
     </body>

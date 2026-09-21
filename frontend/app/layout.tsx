@@ -2,7 +2,10 @@ import "./globals.css";
 import DashboardWrapper from "./components/DashboardWrapper";
 
 export const metadata = {
-  title: "CRM | Ensemble Scolaire Jean XXIII",
+  title: {
+    default: "Tableau de bord | CRM | Ensemble Scolaire Jean XXIII",
+    template: "%s | CRM | Ensemble Scolaire Jean XXIII",
+  },
 };
 
 export default function RootLayout({

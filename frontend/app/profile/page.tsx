@@ -6,6 +6,7 @@ import PageHeader from "../components/PageHeader";
 import { useTheme } from "../contexts/ThemeContext";
 import { useToast } from "../contexts/ToastContext";
 import { useEffect } from "react";
+import Seo from "../components/Seo";
 
 export default function ProfilePage() {
   const { t, themeName, setThemeName } = useTheme();
@@ -38,6 +39,7 @@ export default function ProfilePage() {
 
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-4">
+      <Seo title="Mon profil" />
       <PageHeader
         title="Mon profil"
         description="Gérez vos paramètres et préférences d'affichage"

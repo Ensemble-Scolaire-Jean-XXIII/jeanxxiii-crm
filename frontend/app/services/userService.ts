@@ -25,6 +25,8 @@ export const userService = {
     api.put(`/users/${id}`, data),
   updateMe: (data: Partial<User>): Promise<void> => api.put("/users/me", data),
   delete: (id: string | number): Promise<void> => api.delete(`/users/${id}`),
+  sendPasswordReset: (id: string | number): Promise<{ message: string }> =>
+    api.post(`/users/${id}/reset-password`, {}),
   reauthenticate: async (password: string): Promise<{ token: string }> => {
     const res = await fetch(`${BASE_URL}/users/reauthenticate`, {
       method: "POST",

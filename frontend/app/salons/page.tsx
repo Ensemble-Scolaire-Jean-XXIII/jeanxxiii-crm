@@ -7,6 +7,7 @@ import { countryService } from "../services/countryService";
 import { Formation } from "../types";
 import Skeleton from "../components/Skeleton";
 import PageHeader from "../components/PageHeader";
+import Seo from "../components/Seo";
 import { useTheme } from "../contexts/ThemeContext";
 import { useToast } from "../contexts/ToastContext";
 
@@ -105,6 +106,7 @@ export default function SalonsPage() {
 
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-4 max-w-3xl mx-auto w-full justify-center">
+      <Seo title="Salons" />
       <PageHeader
         title="Rencontrons-nous !"
         description="Laissez-nous vos coordonnées pour rester en contact."

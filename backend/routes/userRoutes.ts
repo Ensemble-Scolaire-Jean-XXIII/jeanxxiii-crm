@@ -2,6 +2,7 @@ import { Router } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import rateLimit from "express-rate-limit";
+import crypto from "crypto";
 import * as userService from "../services/userService";
 import * as settingService from "../services/settingService";
 import { authenticate } from "../middleware/auth";
@@ -29,6 +30,42 @@ const passwordResetLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+const generateTemporaryPassword = (): string => {
+  const groups = [
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "abcdefghijklmnopqrstuvwxyz",
+    "0123456789",
+    "@$!%*#?&",
+  ];
+  const required = groups.map((g) => g[Math.floor(Math.random() * g.length)]);
+  const allChars = groups.join("");
+  const length = 16 + Math.floor(Math.random() * 4);
+  const rest = Array.from(crypto.randomBytes(length - required.length)).map(
+    (b) => allChars[b % allChars.length],
+  );
+  const all = [...required, ...rest];
+  for (let i = all.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [all[i], all[j]] = [all[j], all[i]];
+  }
+  return all.join("");
+};
+
+const sendPasswordResetEmail = async (user: {
+  id: string;
+  email: string;
+}): Promise<void> => {
+  const token = await userService.createResetToken(user.id);
+  const resetLink = `${FRONTEND_URL}/reset-password?token=${token}`;
+
+  await sendMail(
+    user.email,
+    "Réinitialisation de votre mot de passe",
+    `Cliquez sur ce lien pour réinitialiser votre mot de passe : ${resetLink}`,
+    `<p>Bonjour,</p><p>Vous avez demandé la réinitialisation de votre mot de passe.</p><p><a href="${resetLink}">Cliquez ici pour choisir un nouveau mot de passe</a></p><p>Ce lien expirera dans 1 heure.</p>`,
+  );
+};
+
 router.get("/", authenticate, async (req: any, res) => {
   try {
     if (req.user.role !== "admin") {
@@ -50,7 +87,11 @@ router.post("/", authenticate, async (req: any, res) => {
     if (!emailRegex.test(req.body.email)) {
       return res.status(400).json({ error: "Format d'email invalide" });
     }
-    if (!passwordRegex.test(req.body.password_hash)) {
+
+    const temporaryPassword = req.body.password_hash
+      ? req.body.password_hash
+      : generateTemporaryPassword();
+    if (!passwordRegex.test(temporaryPassword)) {
       return res.status(400).json({
         error: "Mot de passe trop faible",
       });
@@ -61,13 +102,22 @@ router.post("/", authenticate, async (req: any, res) => {
       return res.status(400).json({ error: "Email déjà utilisé" });
     }
 
-    const id = await userService.createUser(req.body, req.user.id);
+    const id = await userService.createUser(
+      {
+        email: req.body.email,
+        first_name: req.body.first_name,
+        last_name: req.body.last_name,
+        role: req.body.role || "user",
+        password_hash: temporaryPassword,
+      },
+      req.user.id,
+    );
 
     await sendMail(
       req.body.email,
       "Création de votre compte CRM Jean XXIII",
-      `Votre compte a été créé. Accédez au CRM ici : ${FRONTEND_URL}. Votre identifiant est ${req.body.email} et votre mot de passe : ${req.body.password_hash}`,
-      `<div style="font-family: sans-serif; color: #333; line-height: 1.4;">Bonjour <strong>${req.body.first_name} ${req.body.last_name}</strong>,<br><br>Un administrateur vient de vous créer un compte sur le CRM Jean XXIII.<br>Vous pouvez vous connecter dès maintenant en cliquant sur ce lien : <a href="${FRONTEND_URL}">Accéder au CRM</a>.<br><br>Voici vos identifiants de connexion :<ul style="margin-top: 5px;"><li><strong>Email :</strong> ${req.body.email}</li><li><strong>Mot de passe temporaire :</strong> ${req.body.password_hash}</li></ul></div>`,
+      `Votre compte a été créé. Accédez au CRM ici : ${FRONTEND_URL}. Votre identifiant est ${req.body.email} et votre mot de passe temporaire : ${temporaryPassword}`,
+      `<div style="font-family: sans-serif; color: #333; line-height: 1.4;">Bonjour <strong>${req.body.first_name} ${req.body.last_name}</strong>,<br><br>Un administrateur vient de vous créer un compte sur le CRM Jean XXIII.<br>Vous pouvez vous connecter dès maintenant en cliquant sur ce lien : <a href="${FRONTEND_URL}">Accéder au CRM</a>.<br><br>Voici vos identifiants de connexion temporaires :<ul style="margin-top: 5px;"><li><strong>Email :</strong> ${req.body.email}</li><li><strong>Mot de passe temporaire :</strong> ${temporaryPassword}</li></ul><p style="color: #b45309; font-weight: 600;">Nous vous recommandons fortement de changer ce mot de passe dès votre première connexion.</p></div>`,
     );
 
     res.status(201).json({ id });
@@ -256,15 +306,7 @@ router.post("/forgot-password", passwordResetLimiter, async (req, res) => {
         .json({ message: "Si l'email existe, un lien a été envoyé." });
     }
 
-    const token = await userService.createResetToken(user.id);
-    const resetLink = `${FRONTEND_URL}/reset-password?token=${token}`;
-
-    await sendMail(
-      user.email,
-      "Réinitialisation de votre mot de passe",
-      `Cliquez sur ce lien pour réinitialiser votre mot de passe : ${resetLink}`,
-      `<p>Bonjour,</p><p>Vous avez demandé la réinitialisation de votre mot de passe.</p><p><a href="${resetLink}">Cliquez ici pour choisir un nouveau mot de passe</a></p><p>Ce lien expirera dans 1 heure.</p>`,
-    );
+    await sendPasswordResetEmail(user);
 
     res
       .status(200)
@@ -299,6 +341,27 @@ router.post("/reset-password", passwordResetLimiter, async (req, res) => {
 
     await userService.resetPassword(userId, password_hash);
     res.status(200).json({ message: "Mot de passe modifié avec succès" });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.post("/:id/reset-password", authenticate, async (req: any, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    const user = await userService.getUserById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ error: "Utilisateur introuvable" });
+    }
+
+    await sendPasswordResetEmail(user);
+
+    res.status(200).json({
+      message: `Lien de réinitialisation envoyé à ${user.email}`,
+    });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }

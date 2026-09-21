@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { userService } from "../services/userService";
 import { ThemeProvider, useTheme } from "../contexts/ThemeContext";
 import { ToastProvider, useToast } from "../contexts/ToastContext";
+import Seo from "../components/Seo";
 
 function ResetPasswordContent() {
   const router = useRouter();
@@ -53,6 +54,7 @@ function ResetPasswordContent() {
 
   return (
     <div className={t.wrapper + " items-center justify-center"}>
+      <Seo title="Réinitialisation du mot de passe" />
       <div className={`${t.card} w-full max-w-md p-8 sm:p-10 z-10 shadow-2xl`}>
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-(--text-main) mb-1">

@@ -16,6 +16,8 @@ import DataTable from "../components/DataTable";
 import { useTheme } from "../contexts/ThemeContext";
 import { useToast } from "../contexts/ToastContext";
 import PageActions from "../components/PageActions";
+import ConfirmDialog from "../components/ConfirmDialog";
+import Seo from "../components/Seo";
 
 export default function UsersPage() {
   const { t } = useTheme();
@@ -42,7 +44,6 @@ export default function UsersPage() {
     loadData: fetchUsers,
   } = useCrud<User, CreateUserPayload>(userService, {
     email: "",
-    password_hash: "",
     first_name: "",
     last_name: "",
     role: "user",
@@ -59,6 +60,24 @@ export default function UsersPage() {
   const [showForm, setShowForm] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [isResetEnabled, setIsResetEnabled] = useState(false);
+  const [resettingId, setResettingId] = useState<string | number | null>(null);
+  const [resetTarget, setResetTarget] = useState<User | null>(null);
+
+  const handleResetPassword = async (user: User) => {
+    setResettingId(user.id);
+    setResetTarget(null);
+    try {
+      const res = await userService.sendPasswordReset(user.id);
+      showToast(res.message || "Lien de réinitialisation envoyé", "success");
+    } catch (err) {
+      showToast(
+        err instanceof Error ? err.message : "Erreur lors de l'envoi",
+        "error",
+      );
+    } finally {
+      setResettingId(null);
+    }
+  };
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -307,6 +326,15 @@ export default function UsersPage() {
 
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-4">
+      <Seo
+        title={
+          showLogs
+            ? "Historique des actions"
+            : showSettings
+              ? "Configuration Système"
+              : "Utilisateurs"
+        }
+      />
       <PageHeader
         title={
           showLogs
@@ -320,7 +348,7 @@ export default function UsersPage() {
             ? "Consulter toutes les modifications effectuées sur le CRM"
             : showSettings
               ? "Paramétrez les options globales de l'application"
-              : "Administrez les accès à l'application et parametrez les actions utilisateurs"
+              : "Administrez les accès à l'application"
         }
       >
         <PageActions
@@ -410,7 +438,7 @@ export default function UsersPage() {
             <FormCard title="Nouvel utilisateur">
               <form
                 onSubmit={(e) => create(e, createForm)}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3"
               >
                 <div>
                   <label className={`block text-xs mb-1 ${t.textMuted}`}>
@@ -462,23 +490,6 @@ export default function UsersPage() {
                 </div>
                 <div>
                   <label className={`block text-xs mb-1 ${t.textMuted}`}>
-                    Mot de passe
-                  </label>
-                  <input
-                    type="password"
-                    className={`${t.input} py-1.5 w-full`}
-                    value={createForm.password_hash}
-                    onChange={(e) =>
-                      setCreateForm({
-                        ...createForm,
-                        password_hash: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-                <div>
-                  <label className={`block text-xs mb-1 ${t.textMuted}`}>
                     Rôle
                   </label>
                   <select
@@ -492,7 +503,11 @@ export default function UsersPage() {
                     <option value="admin">Administrateur</option>
                   </select>
                 </div>
-                <div className="lg:col-span-5 flex justify-end">
+                <div className="flex flex-wrap items-center justify-between gap-3 md:col-span-2 lg:col-span-4">
+                  <p className={`text-xs ${t.textMuted}`}>
+                    Un mot de passe temporaire sera généré et envoyé par email à
+                    l&apos;utilisateur.
+                  </p>
                   <button type="submit" className={t.btnPrimary}>
                     Ajouter l&apos;utilisateur
                   </button>
@@ -517,10 +532,48 @@ export default function UsersPage() {
               onSearchChange={setUserSearchQuery}
               isLoading={isLoading}
               emptyMessage="Aucun utilisateur trouvé."
+              extraActions={(item) =>
+                resettingId === item.id ? (
+                  <span
+                    className="px-2 py-1 text-[10px] font-semibold text-amber-400/70 animate-pulse"
+                    title="Envoi en cours..."
+                  >
+                    Envoi...
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => setResetTarget(item)}
+                    className="bg-amber-500/20 border border-amber-500/30 text-amber-400 hover:bg-amber-500/30 px-2 py-1 rounded-[calc(var(--radius-box)/2)] text-xs font-semibold cursor-pointer transition-all h-7.5 w-7.5 flex items-center justify-center"
+                    title="Envoyer un email de réinitialisation de mot de passe"
+                  >
+                    <Image
+                      src="/icons/passwordReset.webp"
+                      alt="Réinitialiser le mot de passe"
+                      width={14}
+                      height={14}
+                      className="object-contain brightness-0 invert shrink-0"
+                      unoptimized
+                    />
+                  </button>
+                )
+              }
             />
           </ScrollableTableCard>
         </>
       )}
+
+      <ConfirmDialog
+        open={!!resetTarget}
+        title="Réinitialiser le mot de passe"
+        message={
+          resetTarget
+            ? `Envoyer un lien de réinitialisation de mot de passe à ${resetTarget.email} ?`
+            : ""
+        }
+        confirmLabel="Envoyer"
+        onConfirm={() => resetTarget && handleResetPassword(resetTarget)}
+        onCancel={() => setResetTarget(null)}
+      />
     </div>
   );
 }
