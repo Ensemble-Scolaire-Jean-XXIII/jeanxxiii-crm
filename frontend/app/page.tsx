@@ -11,10 +11,13 @@ import Skeleton from "./components/Skeleton";
 import PageHeader from "./components/PageHeader";
 import { useTheme } from "./contexts/ThemeContext";
 import { useToast } from "./contexts/ToastContext";
+import ConfirmDialog from "./components/ConfirmDialog";
+import Seo from "./components/Seo";
 
 export default function DashboardPage() {
   const { t } = useTheme();
   const { showToast } = useToast();
+  const [showSyncConfirm, setShowSyncConfirm] = useState(false);
   const [stats, setStats] = useState({
     prospects: 0,
     users: 0,
@@ -94,12 +97,7 @@ export default function DashboardPage() {
   };
 
   const handleSyncFull = async () => {
-    if (
-      !confirm(
-        "Attention, la synchronisation complète est plus longue. Continuer ?",
-      )
-    )
-      return;
+    setShowSyncConfirm(false);
 
     setIsSyncingFull(true);
     try {
@@ -121,6 +119,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-4">
+      <Seo title="Tableau de bord" />
       <PageHeader
         title="Tableau de bord"
         description="Bienvenue sur votre espace de gestion des prospects"
@@ -294,7 +293,7 @@ export default function DashboardPage() {
             ) : (
               isAdmin && (
                 <button
-                  onClick={handleSyncFull}
+                  onClick={() => setShowSyncConfirm(true)}
                   disabled={isSyncingFull}
                   className="cursor-pointer group flex items-center justify-between p-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/40 transition-all border border-amber-400/30 text-left disabled:opacity-50"
                 >
@@ -317,6 +316,16 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={showSyncConfirm}
+        title="Synchronisation complète"
+        message="Attention, la synchronisation complète est plus longue et peut prendre du temps. Continuer ?"
+        confirmLabel="Continuer"
+        confirmClassName="bg-amber-500 border border-amber-400/50 text-white hover:bg-amber-600 px-4 py-2 rounded-[calc(var(--radius-box)/2)] font-semibold cursor-pointer"
+        onConfirm={handleSyncFull}
+        onCancel={() => setShowSyncConfirm(false)}
+      />
     </div>
   );
 }

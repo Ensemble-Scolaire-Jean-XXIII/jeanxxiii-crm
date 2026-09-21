@@ -10,6 +10,7 @@ import FormCard from "../components/FormCard";
 import ScrollableTableCard from "../components/ScrollableTableCard";
 import DataTable from "../components/DataTable";
 import PageActions from "../components/PageActions";
+import Seo from "../components/Seo";
 import { useTheme } from "../contexts/ThemeContext";
 import { useToast } from "../contexts/ToastContext";
 
@@ -98,6 +99,7 @@ export default function FormationsPage() {
 
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-4">
+      <Seo title="Formations" />
       <PageHeader
         title="Formations"
         description="Gérez les formations proposées par l'établissement"

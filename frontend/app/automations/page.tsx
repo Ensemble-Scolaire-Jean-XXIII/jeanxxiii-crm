@@ -22,6 +22,7 @@ import FormCard from "../components/FormCard";
 import ScrollableTableCard from "../components/ScrollableTableCard";
 import DataTable from "../components/DataTable";
 import PageActions from "../components/PageActions";
+import Seo from "../components/Seo";
 import { useTheme } from "../contexts/ThemeContext";
 import { useToast } from "../contexts/ToastContext";
 
@@ -315,6 +316,7 @@ function AutomationsContent() {
 
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-4">
+      <Seo title="Automatisations" />
       <PageHeader
         title="Automatisation des Emails"
         description="Gérez les règles d'envois automatiques d'emails"

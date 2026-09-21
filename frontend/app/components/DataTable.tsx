@@ -24,6 +24,7 @@ export default function DataTable<T>({
   isLoading = false,
   hideActions = false,
   emptyMessage = "Aucun résultat trouvé.",
+  extraActions,
 }: DataTableProps<T> & {
   emptyMessage?: string;
 }) {
@@ -65,7 +66,8 @@ export default function DataTable<T>({
       );
     }
     return (
-      <div className="flex justify-end gap-1.5 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+      <div className="flex justify-end gap-1.5 row-actions transition-opacity duration-200">
+        {extraActions && item && extraActions(item)}
         <button
           onClick={() => item && onEdit(item)}
           className="bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:bg-blue-500/30 px-2 py-1 rounded-[calc(var(--radius-box)/2)] text-xs font-semibold cursor-pointer transition-all h-7.5 w-7.5 flex items-center justify-center"

@@ -6,6 +6,7 @@ import { userService } from "../services/userService";
 import { settingService } from "../services/settingService";
 import { ThemeProvider, useTheme } from "../contexts/ThemeContext";
 import { ToastProvider, useToast } from "../contexts/ToastContext";
+import Seo from "../components/Seo";
 
 function LoginPageContent() {
   const router = useRouter();
@@ -54,6 +55,7 @@ function LoginPageContent() {
 
   return (
     <div className={t.wrapper + " items-center justify-center"}>
+      <Seo title="Connexion" />
       <div className={`${t.card} w-full max-w-md p-8 sm:p-10 z-10 shadow-2xl`}>
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-(--text-main) mb-1">
@@ -122,7 +124,7 @@ function LoginPageContent() {
               type="submit"
               className={`${t.btnPrimary} w-full text-base py-3`}
             >
-              Demander un nouveau mot de passe
+              Envoyer le mail
             </button>
             <div className="text-center mt-4">
               <button

@@ -141,6 +141,43 @@ body {
   }
 }
 
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.row-actions {
+  opacity: 1;
+}
+
+.btn-label {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .row-actions {
+    opacity: 0;
+  }
+
+  .group:hover .row-actions {
+    opacity: 1;
+  }
+
+  .btn-label {
+    display: inline;
+  }
+}
+
 .slideshow-container {
   position: fixed;
   inset: 0;

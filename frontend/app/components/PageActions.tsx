@@ -37,7 +37,7 @@ export default function PageActions({
               className="object-contain brightness-0 invert shrink-0"
               unoptimized
             />
-            <span className="hidden sm:inline">
+            <span className="btn-label">
               {isNewOpen ? "Cacher" : newLabel}
             </span>
           </button>
@@ -65,7 +65,7 @@ export default function PageActions({
               className="object-contain brightness-0 invert shrink-0"
               unoptimized
             />
-            <span className="hidden sm:inline">Retour</span>
+            <span className="btn-label">Retour</span>
           </button>
           <button
             onClick={() => {
@@ -82,7 +82,7 @@ export default function PageActions({
               className="object-contain brightness-0 invert shrink-0"
               unoptimized
             />
-            <span className="hidden sm:inline">Historique</span>
+            <span className="btn-label">Historique</span>
           </button>
         </>
       ) : showLogs ? (
@@ -103,7 +103,7 @@ export default function PageActions({
               className="object-contain brightness-0 invert shrink-0"
               unoptimized
             />
-            <span className="hidden sm:inline">Configuration</span>
+            <span className="btn-label">Configuration</span>
           </button>
           <button
             onClick={() => {
@@ -119,7 +119,7 @@ export default function PageActions({
               className="object-contain brightness-0 invert shrink-0"
               unoptimized
             />
-            <span className="hidden sm:inline">Retour</span>
+            <span className="btn-label">Retour</span>
           </button>
         </>
       ) : (
@@ -138,7 +138,7 @@ export default function PageActions({
                 className="object-contain brightness-0 invert shrink-0"
                 unoptimized
               />
-              <span className="hidden sm:inline">
+              <span className="btn-label">
                 {showForm ? "Cacher" : "Nouvel utilisateur"}
               </span>
             </button>
@@ -158,7 +158,7 @@ export default function PageActions({
               className="object-contain brightness-0 invert shrink-0"
               unoptimized
             />
-            <span className="hidden sm:inline">Configuration</span>
+            <span className="btn-label">Configuration</span>
           </button>
           <button
             onClick={() => {
@@ -175,7 +175,7 @@ export default function PageActions({
               className="object-contain brightness-0 invert shrink-0"
               unoptimized
             />
-            <span className="hidden sm:inline">Historique</span>
+            <span className="btn-label">Historique</span>
           </button>
         </>
       )}

@@ -8,6 +8,7 @@ import { userService } from "../services/userService";
 import Image from "next/image";
 import { ThemeProvider, useTheme } from "../contexts/ThemeContext";
 import { ToastProvider } from "../contexts/ToastContext";
+import ConfirmDialog from "./ConfirmDialog";
 
 function NavLink({
   href,
@@ -130,8 +131,7 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
     setExitError("");
   }
 
-  const handleExitSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleExitSubmit = async () => {
     setExitError("");
     setIsExiting(true);
     try {
@@ -147,6 +147,12 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
     } finally {
       setIsExiting(false);
     }
+  };
+
+  const handleExitCancel = () => {
+    setShowExitModal(false);
+    setExitPassword("");
+    setExitError("");
   };
 
   if (isLoginPage || isResetPasswordPage) return <>{children}</>;
@@ -182,27 +188,34 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
               </svg>
             </button>
           )}
-          <div className="h-8 md:h-9 w-auto relative flex items-center shrink-0">
-            <Image
-              src="/j23.webp"
-              alt="Logo"
-              width={36}
-              height={36}
-              className="h-full w-auto object-contain rounded-lg"
-              priority
-            />
-          </div>
-          <div className="flex items-center gap-2 min-w-0 shrink">
-            <span className="font-black text-lg tracking-wider text-white hidden md:block">
-              ENSEMBLE SCOLAIRE JEAN XXIII
-            </span>
-            <span className="font-black text-sm tracking-wider text-white hidden sm:block md:hidden">
-              ENSEMBLE SCOLAIRE JEAN XXIII
-            </span>
-            <span className="bg-[#e84e1b]/20 text-[#e84e1b] text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 rounded-md border border-[#e84e1b]/30 uppercase tracking-widest shrink-0">
-              {isSalonsPage ? "SALON" : "CRM"}
-            </span>
-          </div>
+          <Link
+            href="/"
+            onClick={() => isMobileMenuOpen && setIsMobileMenuOpen(false)}
+            className="flex items-center gap-2 min-w-0 shrink cursor-pointer"
+            title="Accueil"
+          >
+            <div className="h-8 md:h-9 w-auto relative flex items-center shrink-0">
+              <Image
+                src="/j23.webp"
+                alt="Logo"
+                width={36}
+                height={36}
+                className="h-full w-auto object-contain rounded-lg"
+                priority
+              />
+            </div>
+            <div className="flex items-center gap-2 min-w-0 shrink">
+              <span className="font-black text-lg tracking-wider text-white hidden md:block whitespace-nowrap">
+                ENSEMBLE SCOLAIRE JEAN XXIII
+              </span>
+              <span className="font-black text-sm tracking-wider text-white hidden sm:block md:hidden whitespace-nowrap">
+                ENSEMBLE SCOLAIRE JEAN XXIII
+              </span>
+              <span className="bg-[#e84e1b]/20 text-[#e84e1b] text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 rounded-md border border-[#e84e1b]/30 uppercase tracking-widest shrink-0">
+                {isSalonsPage ? "SALON" : "CRM"}
+              </span>
+            </div>
+          </Link>
         </div>
 
         <div className="flex items-center gap-2 md:gap-3 shrink-0">
@@ -415,52 +428,34 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
       </div>
 
       {showExitModal && (
-        <div className="fixed inset-0 z-100 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <form
-            onSubmit={handleExitSubmit}
-            className={`${t.card} w-full max-w-md shadow-2xl relative space-y-4`}
-          >
-            <h3 className="text-xl font-bold text-(--text-main)">
-              Quitter le Mode Salon
-            </h3>
-            <p className="text-sm text-(--text-muted)">
-              Saisis ton mot de passe pour retourner au CRM.
-            </p>
-            {exitError && (
-              <p className="text-red-400 text-xs font-medium">{exitError}</p>
-            )}
-            <input
-              type="password"
-              required
-              autoFocus
-              autoComplete="new-password"
-              placeholder="Mot de passe..."
-              className={t.input}
-              value={exitPassword}
-              onChange={(e) => setExitPassword(e.target.value)}
-            />
-            <div className="flex justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowExitModal(false);
-                  setExitError("");
-                  setExitPassword("");
-                }}
-                className={t.btnGhost}
-              >
-                Annuler
-              </button>
-              <button
-                type="submit"
-                disabled={isExiting}
-                className={t.btnPrimary}
-              >
-                {isExiting ? "Vérification..." : "Déverrouiller"}
-              </button>
-            </div>
-          </form>
-        </div>
+        <ConfirmDialog
+          open={showExitModal}
+          title="Quitter le Mode Salon"
+          message="Saisis ton mot de passe pour retourner au CRM."
+          confirmLabel={isExiting ? "Vérification..." : "Déverrouiller"}
+          confirmDisabled={isExiting}
+          onConfirm={handleExitSubmit}
+          onCancel={handleExitCancel}
+        >
+          {exitError && (
+            <p className="text-red-400 text-xs font-medium mb-3">{exitError}</p>
+          )}
+          <input
+            type="password"
+            required
+            autoFocus
+            autoComplete="new-password"
+            placeholder="Mot de passe..."
+            className={t.input}
+            value={exitPassword}
+            onChange={(e) => setExitPassword(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !isExiting && exitPassword) {
+                handleExitSubmit();
+              }
+            }}
+          />
+        </ConfirmDialog>
       )}
     </div>
   );
